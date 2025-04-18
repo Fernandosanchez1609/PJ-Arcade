@@ -2,6 +2,7 @@
 ## Build results
 bin/
 obj/
+.vs/
 
 ## User-specific files
 *.user
@@ -50,7 +51,7 @@ node_modules/
 # Build output
 .next/
 out/
-
+.vs/
 # Logs
 npm-debug.log*
 yarn-debug.log*
