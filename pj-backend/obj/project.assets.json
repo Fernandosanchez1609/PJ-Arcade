@@ -2123,23 +2123,23 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\Pablo\\.nuget\\packages\\": {},
+    "C:\\Users\\Fernando Sanchez\\.nuget\\packages\\": {},
     "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\User\\Escritorio\\TFG\\PJ-Arcade\\pj-backend\\pj-backend.csproj",
+      "projectUniqueName": "C:\\Users\\Fernando Sanchez\\Desktop\\proyecto 3\\PJ-Arcade\\pj-backend\\pj-backend.csproj",
       "projectName": "pj-backend",
-      "projectPath": "D:\\User\\Escritorio\\TFG\\PJ-Arcade\\pj-backend\\pj-backend.csproj",
-      "packagesPath": "C:\\Users\\Pablo\\.nuget\\packages\\",
-      "outputPath": "D:\\User\\Escritorio\\TFG\\PJ-Arcade\\pj-backend\\obj\\",
+      "projectPath": "C:\\Users\\Fernando Sanchez\\Desktop\\proyecto 3\\PJ-Arcade\\pj-backend\\pj-backend.csproj",
+      "packagesPath": "C:\\Users\\Fernando Sanchez\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\Fernando Sanchez\\Desktop\\proyecto 3\\PJ-Arcade\\pj-backend\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
       ],
       "configFilePaths": [
-        "C:\\Users\\Pablo\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\Fernando Sanchez\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
@@ -2166,7 +2166,7 @@
         "auditLevel": "low",
         "auditMode": "direct"
       },
-      "SdkAnalysisLevel": "9.0.200"
+      "SdkAnalysisLevel": "9.0.100"
     },
     "frameworks": {
       "net8.0": {
@@ -2232,7 +2232,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.203/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.102/PortableRuntimeIdentifierGraph.json"
       }
     }
   }
