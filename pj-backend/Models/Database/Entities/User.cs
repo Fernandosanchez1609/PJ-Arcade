@@ -4,7 +4,7 @@ public class User
   public int UserId { get; set; }
   public string Name { get; set; }
   public string Email { get; set; }
-  public string Password { get; set; }
+  public string HashPassword { get; set; }
   public string Rol { get; set; }
   public ICollection<GameMatch> HostedMatches { get; set; }
   public ICollection<GameMatch> JoinedMatches { get; set; }
