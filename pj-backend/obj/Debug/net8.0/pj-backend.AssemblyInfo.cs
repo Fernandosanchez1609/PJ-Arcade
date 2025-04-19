@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("pj-backend")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+fbf3137092f3aab80451ebae6ab9ef5b552fcf5a")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+c19543bed441e5dc5294699e1c9ba5b128e3faa3")]
 [assembly: System.Reflection.AssemblyProductAttribute("pj-backend")]
 [assembly: System.Reflection.AssemblyTitleAttribute("pj-backend")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
