@@ -11,26 +11,16 @@ namespace pj_backend
         {
             var builder = WebApplication.CreateBuilder(args);
 
-
-            builder.Services.AddControllers();
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-            builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
-
-            // Configuración de base de datos y repositorios
-            builder.Services.AddScoped<AppDbContext>();
-            builder.Services.AddScoped<UnitOfWork>();
-
-            //inyeccion de servicios
-            builder.Services.AddScoped<UserService>();
-
             var app = builder.Build();
+
+            // Configuración de servicios
+            ConfigureServices(builder);
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
-                app.UseSwagger();
-                app.UseSwaggerUI();
+               app.UseSwagger();
+               app.UseSwaggerUI();
             }
 
             //Creacion de la base de datos y el seeder
@@ -46,6 +36,21 @@ namespace pj_backend
             app.MapControllers();
 
             app.Run();
+        }
+
+        private static void ConfigureServices(WebApplicationBuilder builder)
+        {
+          builder.Services.AddControllers();
+          // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+          builder.Services.AddEndpointsApiExplorer();
+          builder.Services.AddSwaggerGen();
+
+          // Configuración de base de datos y repositorios
+          builder.Services.AddScoped<AppDbContext>();
+          builder.Services.AddScoped<UnitOfWork>();
+
+          //inyeccion de servicios
+          builder.Services.AddScoped<UserService>();
         }
 
         private static void SeedDatabase(IServiceProvider serviceProvider)
