@@ -22,7 +22,7 @@ public class UserController : ControllerBase
     try
     {
       var newUser = await _userService.RegisterAsync(request);
-      return Ok(newUser); // Devuelve 200 OK con el usuario creado
+      return Ok("Usuario creado"); // Devuelve 200 OK con el usuario creado
     }
     catch (Exception ex)
     {

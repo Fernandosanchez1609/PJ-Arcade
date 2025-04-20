@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using pj_backend.Models.Database.Repositories;
 using pj_backend.Services;
+using pj_backend.Models.Seeders;
 
 namespace pj_backend
 {
@@ -9,10 +10,6 @@ namespace pj_backend
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-
-            // Add services to the container.
-            builder.Services.AddDbContext<AppDbContext>(options =>
-            options.UseSqlite("Data Source=gamehub.db"));
 
 
             builder.Services.AddControllers();
@@ -36,7 +33,9 @@ namespace pj_backend
                 app.UseSwaggerUI();
             }
 
-            
+            //Creacion de la base de datos y el seeder
+            SeedDatabase(app.Services);
+
 
 
             app.UseHttpsRedirection();
@@ -48,5 +47,17 @@ namespace pj_backend
 
             app.Run();
         }
-    }
+
+        private static void SeedDatabase(IServiceProvider serviceProvider)
+        {
+          using var scope = serviceProvider.CreateScope();
+          var dbContext = scope.ServiceProvider.GetService<AppDbContext>();
+
+          if (dbContext.Database.EnsureCreated())
+          {
+            var seeder = new SeedManager(dbContext);
+            seeder.SeedAll();
+          }
+        }
+  }
 }

@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity.Data;
+﻿using pj_backend.Utilities;
 using pj_backend.Models.Database.Entities;
 using pj_backend.Models.Database.Repositories;
 using RegisterRequest = pj_backend.Models.Database.Dtos.RegisterRequest;
@@ -50,7 +50,7 @@ public class UserService
     {
       Name = request.Name,
       Email = request.Email,
-      HashPassword = request.Password,
+      HashPassword = PasswordHelper.Hash(request.Password),
       Rol = "User",
     };
 
