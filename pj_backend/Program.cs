@@ -1,4 +1,6 @@
 using Microsoft.EntityFrameworkCore;
+using pj_backend.Models.Database.Repositories;
+using pj_backend.Services;
 
 namespace pj_backend
 {
@@ -18,6 +20,13 @@ namespace pj_backend
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
+            // Configuración de base de datos y repositorios
+            builder.Services.AddScoped<AppDbContext>();
+            builder.Services.AddScoped<UnitOfWork>();
+
+            //inyeccion de servicios
+            builder.Services.AddScoped<UserService>();
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -26,6 +35,9 @@ namespace pj_backend
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
+
+            
+
 
             app.UseHttpsRedirection();
 

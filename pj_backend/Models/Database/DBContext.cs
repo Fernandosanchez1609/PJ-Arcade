@@ -9,7 +9,12 @@ public class AppDbContext : DbContext
 
     private const string DATABASE_PATH = "pj-arcade.db";
 
-    public DbSet<User> Users { get; set; }
+  public AppDbContext(DbContextOptions<AppDbContext> options)
+           : base(options)
+  {
+  }
+
+  public DbSet<User> Users { get; set; }
     public DbSet<Game> Games { get; set; }
     public DbSet<GameMatch> GameMatches { get; set; }
     public DbSet<Ranking> Rankings { get; set; }

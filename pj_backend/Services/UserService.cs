@@ -1,5 +1,7 @@
-﻿using pj_backend.Models.Database.Entities;
+﻿using Microsoft.AspNetCore.Identity.Data;
+using pj_backend.Models.Database.Entities;
 using pj_backend.Models.Database.Repositories;
+using RegisterRequest = pj_backend.Models.Database.Dtos.RegisterRequest;
 
 
 namespace pj_backend.Services;
@@ -40,6 +42,23 @@ public class UserService
         }
     }
 
+  public async Task<User> RegisterAsync(RegisterRequest request)
+  {
 
-}
+    // Crear el nuevo usuario
+    var newUser = new User
+    {
+      Name = request.Name,
+      Email = request.Email,
+      HashPassword = request.Password,
+      Rol = "User",
+    };
+
+    // Insertar el usuario en la base de datos
+    await _unitOfWork.UserRepository.InsertAsync(newUser);
+    await _unitOfWork.SaveAsync();
+
+    return newUser;
+  }
+  }
 
