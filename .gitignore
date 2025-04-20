@@ -1,7 +1,7 @@
 
 ## Build results
-bin/
-obj/
+pj-backend/bin/
+pj-backend/obj/
 .vs/
 
 ## User-specific files
