@@ -43,11 +43,11 @@ public class UserController : ControllerBase
       {
 
         Claims = new Dictionary<string, object>
-                {
-                    { "id", newUser.UserId.ToString() },
-                    { "name", newUser.Name.ToString() },
-                    { ClaimTypes.Role, newUser.Rol }
-                },
+        {
+            { "id", newUser.UserId.ToString() },
+            { "name", newUser.Name.ToString() },
+            { ClaimTypes.Role, newUser.Rol }
+        },
 
         // Aquí indicamos cuándo caduca el token
         Expires = DateTime.UtcNow.AddSeconds(3000),

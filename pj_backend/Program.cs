@@ -2,10 +2,13 @@ using Microsoft.EntityFrameworkCore;
 using pj_backend.Models.Database.Repositories;
 using pj_backend.Services;
 using pj_backend.Models.Seeders;
+using pj_backend.Middleware;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
+using Microsoft.AspNetCore.Builder;
+using pj_backend.WS;
 
 namespace pj_backend
 {
@@ -38,6 +41,9 @@ namespace pj_backend
 
             app.UseAuthorization();
 
+            //Inyeccion del websocket
+            app.UseWebSockets();
+            app.UseMiddleware<WSMiddleware>();
 
             app.MapControllers();
 
@@ -58,55 +64,59 @@ namespace pj_backend
           //inyeccion de servicios
           builder.Services.AddScoped<UserService>();
 
+          //inyeccion de websocket
+          builder.Services.AddSingleton<WSConnectionManager>();
+
+
           // Configuración de autenticación JWT
           string key = Environment.GetEnvironmentVariable("JWT_KEY");
-          if (string.IsNullOrEmpty(key))
-          {
-            throw new InvalidOperationException("JWT_KEY is not configured in environment variables.");
-          }
-          builder.Services.AddAuthentication()
-          .AddJwtBearer(options =>
-          {
-            options.SaveToken = true;
-            options.TokenValidationParameters = new TokenValidationParameters
-            {
-              ValidateIssuer = false,
-              ValidateAudience = false,
-              ValidateIssuerSigningKey = true,
-              IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key)),
-              ValidateLifetime = true,
-              ClockSkew = TimeSpan.Zero
-            };
-          });
-
-          builder.Services.AddSwaggerGen(options =>
-          {
-            options.AddSecurityDefinition(JwtBearerDefaults.AuthenticationScheme, new OpenApiSecurityScheme
-            {
-              BearerFormat = "JWT",
-              Name = "Authorization",
-              Description = "Escribe SOLO tu token JWT",
-              In = ParameterLocation.Header,
-              Type = SecuritySchemeType.Http,
-              Scheme = JwtBearerDefaults.AuthenticationScheme
-            });
-
-            // Establecer los requisitos de seguridad para las operaciones de la API
-            options.AddSecurityRequirement(new OpenApiSecurityRequirement
-            {
+              if (string.IsNullOrEmpty(key))
+              {
+                throw new InvalidOperationException("JWT_KEY is not configured in environment variables.");
+              }
+              builder.Services.AddAuthentication()
+              .AddJwtBearer(options =>
+              {
+                options.SaveToken = true;
+                options.TokenValidationParameters = new TokenValidationParameters
                 {
-                    new OpenApiSecurityScheme
+                  ValidateIssuer = false,
+                  ValidateAudience = false,
+                  ValidateIssuerSigningKey = true,
+                  IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key)),
+                  ValidateLifetime = true,
+                  ClockSkew = TimeSpan.Zero
+                };
+              });
+
+              builder.Services.AddSwaggerGen(options =>
+              {
+                options.AddSecurityDefinition(JwtBearerDefaults.AuthenticationScheme, new OpenApiSecurityScheme
+                {
+                  BearerFormat = "JWT",
+                  Name = "Authorization",
+                  Description = "Escribe SOLO tu token JWT",
+                  In = ParameterLocation.Header,
+                  Type = SecuritySchemeType.Http,
+                  Scheme = JwtBearerDefaults.AuthenticationScheme
+                });
+
+                // Establecer los requisitos de seguridad para las operaciones de la API
+                options.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
                     {
-                        Reference = new OpenApiReference
+                        new OpenApiSecurityScheme
                         {
-                            Type = ReferenceType.SecurityScheme,
-                            Id = JwtBearerDefaults.AuthenticationScheme
-                        }
-                    },
-                    new string[] { }
-                }
-            });
-          });
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = JwtBearerDefaults.AuthenticationScheme
+                            }
+                        },
+                        new string[] { }
+                    }
+                });
+              });
         }
 
         private static void SeedDatabase(IServiceProvider serviceProvider)
