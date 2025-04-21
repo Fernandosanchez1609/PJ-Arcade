@@ -64,20 +64,20 @@ namespace pj_backend
           {
             throw new InvalidOperationException("JWT_KEY is not configured in environment variables.");
           }
-      builder.Services.AddAuthentication()
-        .AddJwtBearer(options =>
-        {
-          options.SaveToken = true;
-          options.TokenValidationParameters = new TokenValidationParameters
+          builder.Services.AddAuthentication()
+          .AddJwtBearer(options =>
           {
-            ValidateIssuer = false,
-            ValidateAudience = false,
-            ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key)),
-            ValidateLifetime = true,
-            ClockSkew = TimeSpan.Zero
-          };
-        });
+            options.SaveToken = true;
+            options.TokenValidationParameters = new TokenValidationParameters
+            {
+              ValidateIssuer = false,
+              ValidateAudience = false,
+              ValidateIssuerSigningKey = true,
+              IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key)),
+              ValidateLifetime = true,
+              ClockSkew = TimeSpan.Zero
+            };
+          });
 
           builder.Services.AddSwaggerGen(options =>
           {

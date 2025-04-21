@@ -68,4 +68,42 @@ public class UserController : ControllerBase
       return BadRequest(ex.Message);
     }
   }
+
+  [HttpPost("login")]
+  public async Task<ActionResult<AccessTokenJws>> Login([FromBody] LoginRequest request)
+  {
+    try
+    {
+      var user = await _userService.AuthenticateAsync(request.Email, request.Password);
+      if (user == null)
+      {
+        return Unauthorized("Correo o contraseña incorrectos. user null");
+      }
+
+      var tokenDescriptor = new SecurityTokenDescriptor
+      {
+        Claims = new Dictionary<string, object>
+      {
+        { "id", user.UserId.ToString() },
+        { "name", user.Name.ToString() },
+        { ClaimTypes.Role, user.Rol }
+      },
+        Expires = DateTime.UtcNow.AddSeconds(3000),
+        SigningCredentials = new SigningCredentials(
+          _tokenParameters.IssuerSigningKey,
+          SecurityAlgorithms.HmacSha256Signature)
+      };
+
+      var tokenHandler = new JwtSecurityTokenHandler();
+      var token = tokenHandler.CreateToken(tokenDescriptor);
+      var accessToken = tokenHandler.WriteToken(token);
+
+      return Ok(new AccessTokenJws { AccessToken = accessToken });
+    }
+    catch (Exception ex)
+    {
+      return BadRequest(ex.Message);
+    }
+  }
+
 }
