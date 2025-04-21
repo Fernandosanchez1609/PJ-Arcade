@@ -7,36 +7,34 @@ using pj_backend.Models.Database.Entities;
 public class AppDbContext : DbContext
 {
 
-    private const string DATABASE_PATH = "pj-arcade.db";
+    private const string DATABASE_PATH = "pj_arcade.db";
 
-  public AppDbContext(DbContextOptions<AppDbContext> options)
-           : base(options)
-  {
-  }
-
-  public DbSet<User> Users { get; set; }
+    public DbSet<User> Users { get; set; }
     public DbSet<Game> Games { get; set; }
     public DbSet<GameMatch> GameMatches { get; set; }
     public DbSet<Ranking> Rankings { get; set; }
     public DbSet<Achievement> Achievements { get; set; }
     public DbSet<UserAchievement> UserAchievements { get; set; }
+    public AppDbContext() { }
+    public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
-    //Configurar el proveedor de base de datos Sqlite
 
-    protected override void OnConfiguring(DbContextOptionsBuilder options)
-    {
-        //AppDomain obtiene el directorio donde se ejecuta la aplicación
-        string baseDir = AppDomain.CurrentDomain.BaseDirectory;
+  //Configurar el proveedor de base de datos Sqlite
 
-        // Se configura Sqlite como proveedor de BD pasando la ruta de archivo ("vhypergames.db) en el directorio base de la aplicacion
-        #if DEBUG
-        options.UseSqlite($"DataSource={baseDir}{DATABASE_PATH}");
-        #elif RELEASE
+  protected override void OnConfiguring(DbContextOptionsBuilder options)
+  {
+    //AppDomain obtiene el directorio donde se ejecuta la aplicación
+    string baseDir = AppDomain.CurrentDomain.BaseDirectory;
+
+    // Se configura Sqlite como proveedor de BD pasando la ruta de archivo ("vhypergames.db) en el directorio base de la aplicacion
+#if DEBUG
+    options.UseSqlite($"DataSource={baseDir}{DATABASE_PATH}");
+#elif RELEASE
         options.UseMySql(Environment.GetEnvironmentVariable("DB_CONFIG"), ServerVersion.AutoDetect(Environment.GetEnvironmentVariable("DB_CONFIG")));
-        #endif
-    }
+#endif
+  }
 
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
+  protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
 
         // Configuración de la tabla users
