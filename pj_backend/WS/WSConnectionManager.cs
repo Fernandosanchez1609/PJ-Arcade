@@ -1,12 +1,15 @@
 ﻿using System.Collections.Concurrent;
 using System.Net.WebSockets;
 using System.Text;
+using System.Text.Json;
 
 namespace pj_backend.WS
 {
   public class WSConnectionManager
   {
     private readonly ConcurrentDictionary<string, WebSocket> _sockets = new();
+    public int OnlineCount => _sockets.Count;
+
 
     public string AddSocket(WebSocket socket)
     {
@@ -23,13 +26,29 @@ namespace pj_backend.WS
       }
     }
 
-    public async Task SendMessageAsync(string socketId, string message)
+    public async Task SendMessageAsync(string socketId, WSMessage message)
     {
       if (_sockets.TryGetValue(socketId, out var socket))
       {
-        var buffer = Encoding.UTF8.GetBytes(message);
+        var json = JsonSerializer.Serialize(message);
+        var buffer = Encoding.UTF8.GetBytes(json);
         await socket.SendAsync(buffer, WebSocketMessageType.Text, true, CancellationToken.None);
       }
     }
+
+    public async Task BroadcastAsync(WSMessage message)
+    {
+      var json = JsonSerializer.Serialize(message);
+      var buffer = Encoding.UTF8.GetBytes(json);
+      foreach (var socket in _sockets.Values)
+      {
+        if (socket.State == WebSocketState.Open)
+        {
+          await socket.SendAsync(buffer, WebSocketMessageType.Text, true, CancellationToken.None);
+        }
+      }
+    }
+
+    
   }
 }
