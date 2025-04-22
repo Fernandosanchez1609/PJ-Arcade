@@ -18,15 +18,19 @@ public class UserSeeder
     }
 
     var users = new List<User>
+    {
+        new User
         {
-            new User
-            {
-                UserId = 1,
-                Name = "Admin",
-                Email = "project4rcade@gmail.com",
-                HashPassword = PasswordHelper.Hash("PJarcade"),
-                Rol = "Admin",
-            },
-        };
-    }
+           UserId = 1,
+           Name = "Admin",
+           Email = "project4rcade@gmail.com",
+           HashPassword = PasswordHelper.Hash("PJarcade"),
+           Rol = "Admin",
+        },
+    };
+
+    _context.Users.AddRange(users);
+    _context.SaveChanges();
   }
+
+}

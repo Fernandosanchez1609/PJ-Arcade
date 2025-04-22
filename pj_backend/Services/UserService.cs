@@ -1,4 +1,5 @@
 ﻿using pj_backend.Utilities;
+using BCrypt.Net;
 using pj_backend.Models.Database.Entities;
 using pj_backend.Models.Database.Repositories;
 using RegisterRequest = pj_backend.Models.Database.Dtos.RegisterRequest;
@@ -42,23 +43,38 @@ public class UserService
         }
     }
 
-  public async Task<User> RegisterAsync(RegisterRequest request)
-  {
-
-    // Crear el nuevo usuario
-    var newUser = new User
+    public async Task<User> RegisterAsync(RegisterRequest request)
     {
-      Name = request.Name,
-      Email = request.Email,
-      HashPassword = PasswordHelper.Hash(request.Password),
-      Rol = "User",
-    };
 
-    // Insertar el usuario en la base de datos
-    await _unitOfWork.UserRepository.InsertAsync(newUser);
-    await _unitOfWork.SaveAsync();
+      // Crear el nuevo usuario
+      var newUser = new User
+      {
+        Name = request.Name,
+        Email = request.Email,
+        HashPassword = PasswordHelper.Hash(request.Password),
+        Rol = "User",
+      };
 
-    return newUser;
+      // Insertar el usuario en la base de datos
+      await _unitOfWork.UserRepository.InsertAsync(newUser);
+      await _unitOfWork.SaveAsync();
+
+      return newUser;
+    }
+
+  public async Task<User> AuthenticateAsync(string email, string password)
+  {
+    var user = await _unitOfWork.UserRepository.GetByEmailAsync(email);
+
+    if (user == null)
+      return null;
+
+    // Compara la contraseña con hash
+    var hashedInput = PasswordHelper.Hash(password);
+    if (user.HashPassword != hashedInput)
+      return null;
+
+    return user;
   }
-  }
+}
 

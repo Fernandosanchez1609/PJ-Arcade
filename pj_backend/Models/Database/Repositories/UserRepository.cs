@@ -15,4 +15,15 @@ public class UserRepository : Repository<User, int>
   {
     return await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
   }
+
+  public async Task<bool> ExistEmail(string email)
+  {
+    email = email.ToLower();
+    User user = await GetQueryable().FirstOrDefaultAsync(user => user.Email == email);
+    if (user == null)
+    {
+      return false;
+    }
+    return true;
+  }
 }
