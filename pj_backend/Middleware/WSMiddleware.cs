@@ -21,17 +21,32 @@ public class WSMiddleware
       var socket = await context.WebSockets.AcceptWebSocketAsync();
       var socketId = _manager.AddSocket(socket);
 
+      await _manager.BroadcastAsync(new WSMessage
+      {
+        Type = "onlineCount",
+        Data = _manager.OnlineCount
+      });
+
       await Receive(socket, async (result, buffer) =>
       {
         if (result.MessageType == WebSocketMessageType.Text)
         {
           var message = Encoding.UTF8.GetString(buffer, 0, result.Count);
           Console.WriteLine($"Mensaje recibido de {socketId}: {message}");
-          await _manager.SendMessageAsync(socketId, $"Eco: {message}");
+          await _manager.SendMessageAsync(socketId, new WSMessage
+          {
+            Type = "echo",
+            Data = message
+          });
         }
         else if (result.MessageType == WebSocketMessageType.Close)
         {
           await _manager.RemoveSocketAsync(socketId);
+          await _manager.BroadcastAsync(new WSMessage
+          {
+            Type = "onlineCount",
+            Data = _manager.OnlineCount
+          });
         }
       });
       return;
