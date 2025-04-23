@@ -18,7 +18,7 @@ namespace pj_backend.Services
             switch (msgType)
             {
                 case "GlobalMessage":
-                    await _manager.BroadcastAsync(socketId, message);
+                  await _manager.ExcludeBroadcastAsync(socketId, message);
                     break;
                 case "Error":
                   await _manager.SendMessageAsync(socketId, message); 

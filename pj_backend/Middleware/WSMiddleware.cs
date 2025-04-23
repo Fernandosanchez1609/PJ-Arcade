@@ -26,7 +26,7 @@ public class WSMiddleware
             var socket = await context.WebSockets.AcceptWebSocketAsync();
             var socketId = _manager.AddSocket(socket);
 
-            await _manager.BroadcastAsync(socketId, new WSMessage
+            await _manager.BroadcastAsync(new WSMessage
             {
                 Type = "onlineCount",
                 Data = _manager.OnlineCount
@@ -58,7 +58,7 @@ public class WSMiddleware
                 else if (result.MessageType == WebSocketMessageType.Close)
                 {
                     await _manager.RemoveSocketAsync(socketId);
-                    await _manager.BroadcastAsync(socketId, new WSMessage
+                    await _manager.BroadcastAsync(new WSMessage
                     {
                         Type = "onlineCount",
                         Data = _manager.OnlineCount

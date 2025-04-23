@@ -36,7 +36,7 @@ namespace pj_backend.WS
       }
     }
 
-    public async Task BroadcastAsync(string excludeId, WSMessage message)
+    public async Task ExcludeBroadcastAsync(string excludeId, WSMessage message)
     {
       var json = JsonSerializer.Serialize(message);
       var buffer = Encoding.UTF8.GetBytes(json);
@@ -51,6 +51,22 @@ namespace pj_backend.WS
         {
           continue;
         }
+
+        if (socket.State == WebSocketState.Open)
+        {
+          await socket.SendAsync(buffer, WebSocketMessageType.Text, true, CancellationToken.None);
+        }
+      }
+    }
+
+    public async Task BroadcastAsync( WSMessage message)
+    {
+      var json = JsonSerializer.Serialize(message);
+      var buffer = Encoding.UTF8.GetBytes(json);
+
+
+      foreach (var socket in _sockets.Values)
+      {
 
         if (socket.State == WebSocketState.Open)
         {
