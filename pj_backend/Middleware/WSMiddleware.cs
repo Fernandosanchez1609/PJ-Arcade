@@ -2,6 +2,7 @@
 using System.Text;
 using pj_backend.WS;
 using pj_backend.Services;
+using System.Text.Json;
 namespace pj_backend.Middleware;
 
 public class WSMiddleware
@@ -25,7 +26,7 @@ public class WSMiddleware
             var socket = await context.WebSockets.AcceptWebSocketAsync();
             var socketId = _manager.AddSocket(socket);
 
-            await _manager.BroadcastAsync(new WSMessage
+            await _manager.BroadcastAsync(socketId, new WSMessage
             {
                 Type = "onlineCount",
                 Data = _manager.OnlineCount
@@ -36,19 +37,28 @@ public class WSMiddleware
                 if (result.MessageType == WebSocketMessageType.Text)
                 {
                     var message = Encoding.UTF8.GetString(buffer, 0, result.Count);
-                    WSMessage msg = new WSMessage
-                    {
-                        Type = "GlobalMessage",
-                        Data = message
-                    };
+                    WSMessage msg = new WSMessage();
 
-                    await _service.MessageSwitch(msg);
+
+                    try
+                    {
+                        msg = JsonSerializer.Deserialize<WSMessage>(message);
+                        
+                    }
+                    catch
+                    {
+                        msg.Type = "Error";
+                        msg.Data = "Error: el formato del mensaje es incorrecto";
+   
+                    }
+
+                    await _service.MessageSwitch(socketId, msg);
 
                 }
                 else if (result.MessageType == WebSocketMessageType.Close)
                 {
                     await _manager.RemoveSocketAsync(socketId);
-                    await _manager.BroadcastAsync(new WSMessage
+                    await _manager.BroadcastAsync(socketId, new WSMessage
                     {
                         Type = "onlineCount",
                         Data = _manager.OnlineCount

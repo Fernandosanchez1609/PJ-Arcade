@@ -36,12 +36,22 @@ namespace pj_backend.WS
       }
     }
 
-    public async Task BroadcastAsync(WSMessage message)
+    public async Task BroadcastAsync(string excludeId, WSMessage message)
     {
       var json = JsonSerializer.Serialize(message);
       var buffer = Encoding.UTF8.GetBytes(json);
-      foreach (var socket in _sockets.Values)
+
+
+      foreach (var sockets in _sockets)
       {
+        var socketId = sockets.Key;
+        var socket = sockets.Value;
+
+        if (socketId == excludeId)
+        {
+          continue;
+        }
+
         if (socket.State == WebSocketState.Open)
         {
           await socket.SendAsync(buffer, WebSocketMessageType.Text, true, CancellationToken.None);

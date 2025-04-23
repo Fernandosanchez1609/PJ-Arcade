@@ -12,15 +12,17 @@ namespace pj_backend.Services
         }
 
         private readonly WSConnectionManager _manager;
-        public async Task MessageSwitch(WSMessage message)
+        public async Task MessageSwitch(string socketId, WSMessage message)
         {
             var msgType = message.Type;
             switch (msgType)
             {
                 case "GlobalMessage":
-                    await _manager.BroadcastAsync(message);
+                    await _manager.BroadcastAsync(socketId, message);
                     break;
-
+                case "Error":
+                  await _manager.SendMessageAsync(socketId, message); 
+                  break;
                 default:
 
                     break;
