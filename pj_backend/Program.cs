@@ -36,7 +36,7 @@ namespace pj_backend
             SeedDatabase(app.Services);
 
 
-
+            app.UseCors("AllowFrontend");
             app.UseHttpsRedirection();
 
             app.UseAuthorization();
@@ -117,6 +117,17 @@ namespace pj_backend
                         },
                         new string[] { }
                     }
+              });
+            });
+
+            // Agregar configuración CORS
+            builder.Services.AddCors(options =>
+            {
+              options.AddPolicy("AllowFrontend", policy =>
+              {
+                policy.WithOrigins("http://localhost:3000")  // Aquí agregas el origen de tu frontend
+                      .AllowAnyHeader()
+                      .AllowAnyMethod();
               });
             });
         }
