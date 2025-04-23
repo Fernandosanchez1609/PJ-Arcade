@@ -1,0 +1,34 @@
+/* app/Home.module.css */
+
+/* Incluir la fuente Jersey 10 desde los archivos locales */
+@font-face {
+  font-family: 'Jersey 10';
+  src: url('/fonts/Jersey10-Regular.ttf') format('truetype'),
+       url('/fonts/Jersey10-Bold.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+/* Aplicar la fuente Jersey 10 */
+.titles {
+  font-size: 32px;
+  font-family: 'Jersey 10', sans-serif;
+}
+
+.header {
+  display: flex;
+  justify-content: space-around;
+  background-color: var(--header_footer);
+}
+
+.header_left {
+  display: flex;
+  justify-content: space-between;
+  width: 50%;
+}
+
+.header_right {
+  display: flex;
+  justify-content: space-between;
+  width: 30%;
+}
