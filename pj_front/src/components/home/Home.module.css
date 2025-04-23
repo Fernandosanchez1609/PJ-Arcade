@@ -1,0 +1,69 @@
+
+@font-face {
+  font-family: 'Jersey 10';
+  src: url('/fonts/Jersey10-Regular.ttf') format('truetype'),
+       url('/fonts/Jersey10-Bold.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+.titles {
+  font-size: 64px;
+  font-family: 'Jersey 10', sans-serif;
+  color: var(--principal_orange);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  
+  padding-left: 4%;
+  padding-right: 4%;
+  background-color: var(--header_footer);
+
+}
+
+.header_left {
+  display: flex;
+  justify-content: space-between;
+  width: 20%;
+}
+
+.header_right {
+  display: flex;
+  justify-content: space-between;
+  width: 30%;
+  align-items: center;
+}
+
+.footer {
+  display: flex;
+  justify-content: space-between;
+  padding-left: 4%;
+  padding-right: 4%;
+  background-color: var(--header_footer);
+  
+}
+
+.footer_right {
+  display: flex;
+  flex-wrap: wrap-reverse;
+  justify-content: space-between;
+  width: 20%;
+}
+
+.icon{
+  width: 80px;
+  height: 80px;
+  margin-left: 10px;
+  color: var(--principal_orange);
+}
+
+.content{
+  height: 73vh;
+  font-size: 100px;
+  font-family: 'Jersey 10', sans-serif;
+  align-items: center;
+  justify-content: center;
+  text-align: center  ;
+}
