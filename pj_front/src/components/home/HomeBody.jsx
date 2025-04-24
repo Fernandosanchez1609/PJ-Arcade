@@ -4,6 +4,7 @@ import { useSelector } from "react-redux";
 import { useAuth } from "@/hooks/useAuth";
 import { getAllGames } from "@/lib/GameService";
 import styles from "./Home.module.css";
+import {API_BASE} from "@/lib/Endpoints";
 
 export default function HomeBody() {
     const { token } = useAuth();
@@ -40,7 +41,7 @@ export default function HomeBody() {
                     {games.map((game) => (
                         <div key={game.gameId} className={styles.gameCard}>
                             <img
-                                src={game.imgURL}
+                                src={API_BASE + game.imgURL}
                                 alt={game.name}
                                 className={styles.gameImage}
                             />
