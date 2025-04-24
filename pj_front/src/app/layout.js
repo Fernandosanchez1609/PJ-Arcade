@@ -27,8 +27,9 @@ export default function RootLayout({ children }) {
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <ReduxProvider>
           <Header />
+          <WsConnector />
           <AuthInitializer>
-            <WsConnector />
+            
             {children}
           </AuthInitializer>
           <Footer />

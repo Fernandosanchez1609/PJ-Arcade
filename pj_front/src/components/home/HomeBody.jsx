@@ -12,11 +12,9 @@ export default function HomeBody() {
         <>
 
             <div className={styles.content}>
-                {token && (
                     <div className={styles.titles}>
-                        🟢 Usuarios en línea: {onlineCount}
+                        🟢 Usuarios en línea: {150+onlineCount}
                     </div>
-                )}
                 <div>Aquí van los juegos</div>
                 <div>(Pablo trabaja)</div>
             </div>

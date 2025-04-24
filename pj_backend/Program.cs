@@ -9,6 +9,7 @@ using Microsoft.OpenApi.Models;
 using System.Text;
 using Microsoft.AspNetCore.Builder;
 using pj_backend.WS;
+using Microsoft.Extensions.FileProviders;
 
 namespace pj_backend
 {
@@ -22,8 +23,15 @@ namespace pj_backend
             ConfigureServices(builder);
 
 
+
             // Crear la aplicaci�n web utilizando la configuraci�n del builder
             var app = builder.Build();
+
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                FileProvider = new PhysicalFileProvider(
+                   Path.Combine(Directory.GetCurrentDirectory(), "wwwroot"))
+            });
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
@@ -127,10 +135,10 @@ namespace pj_backend
             {
                 options.AddPolicy("AllowFrontend", policy =>
                 {
-                    policy.WithOrigins("http://localhost:3000")  // Aqu� agregas el origen de tu frontend
-                        .AllowAnyHeader()
-                        .AllowAnyMethod();
-                });
+                        policy.WithOrigins("http://localhost:3000")  // Aqu� agregas el origen de tu frontend
+                            .AllowAnyHeader()
+                            .AllowAnyMethod();
+                    });
             });
         }
 

@@ -46,7 +46,7 @@ const Header = () => {
             </div>
             <div className={styles.header_right}>
                 {token && user?.role=="Admin" && <img src="/setings.svg" alt="Settings" className={styles.icon}/>}
-                <span className={styles.titles}>{playerName} </span>
+                 <span className={styles.titles}>{playerName} </span>
                 <img src="/userIcon.svg" alt="Bot" className={styles.icon} onClick={handleOpenModal}/>
                 {token && <img src="/logout.svg" alt="logout" className={styles.icon} onClick={handleLogout}/>}
             </div>
