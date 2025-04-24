@@ -1,5 +1,7 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { ReduxProvider } from "@/components/ReduxProvider";
+import { AuthInitializer } from "@/lib/AuthInitializer";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -19,10 +21,14 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        {children}
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        {/* Primero el provider de Redux (client component) */}
+        <ReduxProvider>
+          {/* Al arrancar, AuthInitializer lee de localStorage y dispara setCredentials */}
+          <AuthInitializer>
+            {children}
+          </AuthInitializer>
+        </ReduxProvider>
       </body>
     </html>
   );

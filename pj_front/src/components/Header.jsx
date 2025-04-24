@@ -1,17 +1,32 @@
-import React from 'react';
-import styles from './Home.module.css'; // Asegúrate de que la ruta sea correcta
+"use client"
+import React, { useEffect } from 'react';
+import styles from './home/Home.module.css'
 import { useState } from 'react';
-import AuthModal from './AuthModal';
+import AuthModal from './home/AuthModal';
+import { useAuth } from "@/hooks/useAuth";
+
 
 const Header = () => {
+    const { token, user } = useAuth();
     const [playerName, setPlayerName] = useState("Jugador");
-
     const [isModalOpen, setIsModalOpen] = useState(false);
+    
+    useEffect(() => {
+        if (token && user) {
+         
+          setPlayerName(user.name || user.email || "Jugador");
+        } else {
+          setPlayerName("Inicia Sesión ⇒");
+        }
+    }, [token, user]);
+    
 
     // Función para abrir el modal
     const handleOpenModal = () => {
-        setIsModalOpen(true);
-    };
+        if (!token) {
+          setIsModalOpen(true);
+        }
+      };
 
     // Función para cerrar el modal
     const handleCloseModal = () => {
@@ -31,7 +46,7 @@ const Header = () => {
                 <img src="/userIcon.svg" alt="Bot"  onClick={handleOpenModal}/>
             </div>
 
-            {isModalOpen && <AuthModal onClose={handleCloseModal} />}
+            {!token && isModalOpen && <AuthModal onClose={handleCloseModal} />}
         </header>
     );
 };

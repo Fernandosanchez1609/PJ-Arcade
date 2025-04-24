@@ -1,4 +1,4 @@
-import styles from './Home.module.css'; // Asegúrate de que la ruta sea correcta
+import styles from './home/Home.module.css'
 import { FaTwitter, FaInstagram, FaGithub, FaLinkedin, FaDiscord } from 'react-icons/fa';
 
 function Footer() {
