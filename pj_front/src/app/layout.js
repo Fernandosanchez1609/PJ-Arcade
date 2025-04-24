@@ -3,6 +3,8 @@ import "./globals.css";
 import { ReduxProvider } from "@/components/ReduxProvider";
 import { AuthInitializer } from "@/lib/AuthInitializer";
 import WsConnector from "@/components/WsConnector";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -23,13 +25,13 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        {/* Primero el provider de Redux (client component) */}
         <ReduxProvider>
-          {/* Al arrancar, AuthInitializer lee de localStorage y dispara setCredentials */}
+          <Header />
           <AuthInitializer>
             <WsConnector />
             {children}
           </AuthInitializer>
+          <Footer />
         </ReduxProvider>
       </body>
     </html>
