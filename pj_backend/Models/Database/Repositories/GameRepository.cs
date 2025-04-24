@@ -16,4 +16,4 @@ public class GameRepository : Repository<Game, int>
         return await _context.Set<Game>().ToArrayAsync();
     }
 
-}
+}  
