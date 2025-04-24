@@ -15,5 +15,8 @@ public class SeedManager
     var userSeeder = new UserSeeder(_context);
     userSeeder.Seed();
 
+    var gameSeeder = new GameSeeder(_context);
+    gameSeeder.Seed();
+
   }
 }
