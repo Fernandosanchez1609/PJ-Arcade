@@ -32,7 +32,7 @@ export default function HomeBody() {
         <>
             <div className={styles.content}>
                 <div className={styles.titles}>
-                    🟢 Usuarios en línea: {150 + onlineCount}
+                    🟢 Usuarios en línea: {onlineCount}
                 </div>
                 {loading && <p>Cargando juegos...</p>}
                 {error && <p>{error}</p>}

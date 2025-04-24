@@ -6,11 +6,13 @@ let socket = null;
  * @param {(msg: any) => void} onMessage — función que se llamará con cada mensaje recibido.
  */
 export function connectWebSocket(onMessage) {
-  // Si ya estamos conectados, no hacemos nada
-  if (socket && socket.readyState === WebSocket.OPEN) {
+  if (
+    socket &&
+    (socket.readyState === WebSocket.OPEN ||
+     socket.readyState === WebSocket.CONNECTING)
+  ) {
     return;
   }
-
   const url = process.env.NEXT_PUBLIC_WS_URL
   socket = new WebSocket(url);
 
