@@ -39,7 +39,7 @@
 .header_right,
 .footer_right {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: wrap-reverse;
   justify-content: center;
   align-items: center;
   gap: var(--gap);
@@ -48,7 +48,7 @@
 
 /* 6. Iconos fluidos */
 .icon {
-  width: clamp(1.5rem, 8vw, 3rem);
+  width: clamp(1.5rem, 8vw, 4rem);
   height: auto;
   margin: 0.5rem;
   color: var(--principal_orange);
@@ -99,7 +99,8 @@
   }
 
   .footer_right {
-    width: 20%;
+    width: 25%;
+
   }
 
   .header,
