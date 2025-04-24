@@ -30,8 +30,8 @@
   flex-direction: column;
   align-items: center;
   gap: var(--gap);
-  padding: var(--gap);
   background-color: var(--header_footer);
+  
 }
 
 /* 5. Secciones izquierda/derecha apiladas en mobile */
@@ -48,7 +48,7 @@
 
 /* 6. Iconos fluidos */
 .icon {
-  width: clamp(1.5rem, 8vw, 4rem);
+  width: clamp(1.5rem, 8vw, 3rem);
   height: auto;
   margin: 0.5rem;
   color: var(--principal_orange);
@@ -56,10 +56,9 @@
 
 /* 7. Área de contenido centrada */
 .content {
-  display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 60vh;
+  min-height: 76vh;
   font-size: clamp(2rem, 8vw, 6rem);
   font-family: 'Jersey 10', sans-serif;
   text-align: center;
@@ -94,12 +93,12 @@
   }
 
   .header_right {
-    width: 50%;
+    width: 60%;
     gap: 5rem;
   }
 
   .footer_right {
-    width: 25%;
+    width: 40%;
 
   }
 
@@ -107,5 +106,6 @@
   .footer {
     padding-left: 4%;
     padding-right: 4%;
+    max-height: fit-content;
   }
 }
