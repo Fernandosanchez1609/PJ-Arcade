@@ -22,18 +22,17 @@ const Header = () => {
     }, [token, user]);
 
     const handleLogout = () => {
-      logout();                 // 2️⃣ llamamos a logout()
+      logout();                 
     };
     
 
-    // Función para abrir el modal
+
     const handleOpenModal = () => {
         if (!token) {
           setIsModalOpen(true);
         }
-      };
-
-    // Función para cerrar el modal
+    };
+    
     const handleCloseModal = () => {
         setIsModalOpen(false);
     };
