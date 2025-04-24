@@ -23,6 +23,7 @@ public class GameSeeder
                GameId = 1,
                Name = "Worms",
                Description = "Juego guapardo de gusanitos guerrilleros con increíbles armas que causan turbo explosiones",
+               imgURL = "/images/worms.webp"
             },
         };
 
