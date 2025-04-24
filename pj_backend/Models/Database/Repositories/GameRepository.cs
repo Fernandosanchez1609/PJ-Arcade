@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using pj_backend.Models.Database.Entities;
 using pj_backend.Models.Database.Repositories;
+using pj_backend.Models.Database.Dtos;
 
 public class GameRepository : Repository<Game, int>
 {
@@ -13,7 +14,6 @@ public class GameRepository : Repository<Game, int>
 
     public async Task<ICollection<Game>> GetAllGamesAsync()
     {
-        return await _context.Set<Game>().ToArrayAsync();
+        return await _context.Set<Game>().ToListAsync();
     }
-
 }

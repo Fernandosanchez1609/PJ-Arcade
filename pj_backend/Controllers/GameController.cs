@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using pj_backend.Models.Database.Entities;
+using pj_backend.Models.Database.Dtos;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -13,7 +13,7 @@ public class GameController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<ICollection<Game>>> GetAllGames()
+    public async Task<ActionResult<ICollection<GameDTO>>> GetAllGames()
     {
         var games = await _gameService.GetAllGamesAsync();
         return Ok(games);

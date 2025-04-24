@@ -1,5 +1,5 @@
+using pj_backend.Models.Database.Dtos;
 using pj_backend.Models.Database.Entities;
-using pj_backend.Models.Database.Repositories;
 
 public class GameService
 {
@@ -10,8 +10,9 @@ public class GameService
         _gameRepository = gameRepository;
     }
 
-    public async Task<ICollection<Game>> GetAllGamesAsync()
+    public async Task<ICollection<GameDTO>> GetAllGamesAsync()
     {
-        return await _gameRepository.GetAllGamesAsync();
+        var games = await _gameRepository.GetAllGamesAsync();
+        return GameMapper.ToDTOList(games);
     }
 }
