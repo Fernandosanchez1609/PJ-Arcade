@@ -18,11 +18,11 @@ namespace pj_backend
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Configuración de servicios
+            // Configuraciï¿½n de servicios
             ConfigureServices(builder);
 
 
-            // Crear la aplicación web utilizando la configuración del builder
+            // Crear la aplicaciï¿½n web utilizando la configuraciï¿½n del builder
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -57,20 +57,22 @@ namespace pj_backend
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
-            // Configuración de base de datos y repositorios
+            // Configuraciï¿½n de base de datos y repositorios
             builder.Services.AddScoped<AppDbContext>();
             builder.Services.AddScoped<UnitOfWork>();
 
             //inyeccion de servicios
             builder.Services.AddScoped<UserService>();
             builder.Services.AddSingleton<WSService>();
+            builder.Services.AddScoped<GameRepository>();
+            builder.Services.AddScoped<GameService>();
 
 
             //inyeccion de websocket
             builder.Services.AddSingleton<WSConnectionManager>();
 
 
-            // Configuración de autenticación JWT
+            // Configuraciï¿½n de autenticaciï¿½n JWT
             string key = Environment.GetEnvironmentVariable("JWT_KEY");
             if (string.IsNullOrEmpty(key))
             {
@@ -120,15 +122,15 @@ namespace pj_backend
               });
             });
 
-            // Agregar configuración CORS
+            // Agregar configuraciï¿½n CORS
             builder.Services.AddCors(options =>
             {
-              options.AddPolicy("AllowFrontend", policy =>
-              {
-                policy.WithOrigins("http://localhost:3000")  // Aquí agregas el origen de tu frontend
-                      .AllowAnyHeader()
-                      .AllowAnyMethod();
-              });
+                options.AddPolicy("AllowFrontend", policy =>
+                {
+                    policy.WithOrigins("http://localhost:3000")  // Aquï¿½ agregas el origen de tu frontend
+                        .AllowAnyHeader()
+                        .AllowAnyMethod();
+                });
             });
         }
 
