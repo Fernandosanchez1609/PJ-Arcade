@@ -15,7 +15,6 @@ export default function WsConnector() {
       if (msg.Type === "onlineCount") {
         dispatch(setOnlineCount(msg.Data));
       }
-      // …otros tipos si los necesitas…
     });
 
     return () => {
