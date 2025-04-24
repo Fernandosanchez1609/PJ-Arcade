@@ -4,12 +4,14 @@ import styles from './home/Home.module.css'
 import { useState } from 'react';
 import AuthModal from './home/AuthModal';
 import { useAuth } from "@/hooks/useAuth";
-
+import { useRouter } from "next/navigation"; 
 
 const Header = () => {
     const { token, user, logout } = useAuth();
     const [playerName, setPlayerName] = useState("Jugador");
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const router = useRouter(); 
+    
     
     useEffect(() => {
         console.log(user)
@@ -26,9 +28,10 @@ const Header = () => {
     };
     
 
-
     const handleOpenModal = () => {
-        if (!token) {
+        if (token) {
+          router.push("/profile");
+        }else {
           setIsModalOpen(true);
         }
     };
@@ -40,7 +43,7 @@ const Header = () => {
     return (
         <header className={styles.header}>
             <div className={styles.header_left}>
-                <img src="/icon.svg" alt="Joystick" className={styles.icon}/>
+                <img src="/icon.svg" alt="Joystick" className={styles.icon} onClick={() =>router.push("/")}/>
                 {token && <img src="/crown.svg" alt="Crown" className={styles.icon}/>}
             </div>
             <div className={styles.header_right}>

@@ -52,6 +52,7 @@
   height: auto;
   margin: 0.5rem;
   color: var(--principal_orange);
+  cursor: pointer;
 }
 
 /* 7. Área de contenido centrada */
