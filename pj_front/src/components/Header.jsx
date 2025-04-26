@@ -44,10 +44,10 @@ const Header = () => {
         <header className={styles.header}>
             <div className={styles.header_left}>
                 <img src="/icon.svg" alt="Joystick" className={styles.icon} onClick={() =>router.push("/")}/>
-                {token && <img src="/crown.svg" alt="Crown" className={styles.icon}/>}
+                {token && <img src="/crown.svg" alt="Crown" className={styles.icon} onClick={() =>router.push("/achievements")}/>}
             </div>
             <div className={styles.header_right}>
-                {token && user?.role=="Admin" && <img src="/setings.svg" alt="Settings" className={styles.icon}/>}
+                {token && user?.role=="Admin" && <img src="/setings.svg" alt="Settings" className={styles.icon} onClick={() =>router.push("/admin")}/>}
                  <span className={styles.titles}>{playerName} </span>
                 <img src="/userIcon.svg" alt="Bot" className={styles.icon} onClick={handleOpenModal}/>
                 {token && <img src="/logout.svg" alt="logout" className={styles.icon} onClick={handleLogout}/>}
