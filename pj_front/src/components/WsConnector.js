@@ -4,14 +4,37 @@ import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { connectWebSocket, disconnectWebSocket } from "@/lib/WsClient";
 import { setOnlineCount } from "@/store/slices/onlineSlice";
+import { setRivalUser, setRivalSocket } from "@/store/slices/matchSlice";
+import { addChatMessage } from "@/store/slices/chatSlice";
 
 export default function WsConnector() {
   const dispatch = useDispatch();
 
   useEffect(() => {
     const handleMessage = (msg) => {
-      if (msg.Type === "onlineCount") {
-        dispatch(setOnlineCount(msg.Data));
+      switch (msg.Type) {
+        case "onlineCount":
+          dispatch(setOnlineCount(msg.Data));
+          break;
+        case "RivalFound":
+          dispatch(setRivalSocket(msg.Data));
+          
+          break;
+        case "RivalInfo":
+          dispatch(setRivalUser({
+            userId: msg.Data.userId,
+            name:   msg.Data.name
+          }));
+          break;
+          case "PrivateMessage":
+            dispatch(addChatMessage({
+              from: "rival",
+              text: msg.Data.text,
+              timestamp: Date.now(),
+            }));
+            break;
+        default:
+          console.warn("[WS] Mensaje no manejado:", msg);
       }
     };
     connectWebSocket(handleMessage);

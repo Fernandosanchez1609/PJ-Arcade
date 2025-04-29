@@ -10,7 +10,7 @@
   --header_footer: #19101B;
   --principal_orange: #FF5805;
   --dark-orange: #bf4204;
-;
+  ;
   --radius: 0.625rem;
   --background: #311857;
   --foreground: oklch(0.145 0 0);
@@ -42,7 +42,8 @@
   --sidebar-accent: oklch(0.97 0 0);
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0)}
+  --sidebar-ring: oklch(0.708 0 0)
+}
 
 @theme inline {
   --color-background: var(--background);
@@ -115,10 +116,22 @@
   --sidebar-accent: oklch(0.269 0 0);
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);}
+  --sidebar-ring: oklch(0.556 0 0);
+}
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;}
+    @apply border-border outline-ring/50;
+  }
+
   body {
-    @apply bg-background text-foreground;}}
+    @apply bg-background text-foreground;
+  }
+}
+
+h1 {
+  font-size: clamp(1.5rem, 5vw, 3rem);
+  font-family: 'Jersey 10', sans-serif;
+  color: var(--principal_orange);
+  margin: 0;
+}

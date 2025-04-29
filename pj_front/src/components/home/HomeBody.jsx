@@ -11,9 +11,9 @@ export default function HomeBody() {
     return (
         <>
             <div className={styles.content}>
-                <div className={styles.titles}>
+                <h1>
                     🟢 Usuarios en línea: {onlineCount}
-                </div>
+                </h1>
                 <GameCart/>
             </div>
         </>

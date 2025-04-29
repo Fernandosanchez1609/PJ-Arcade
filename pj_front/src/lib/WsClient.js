@@ -24,6 +24,7 @@ export function connectWebSocket(onMessage) {
     try {
       const msg = JSON.parse(event.data);
       onMessage(msg);
+      console.log("[WS] Mensaje recibido:", msg);
     } catch (err) {
       console.error("[WS] Error al parsear mensaje:", err);
     }
@@ -46,8 +47,9 @@ export function connectWebSocket(onMessage) {
  */
 export function sendMessage(type, data) {
   if (socket && socket.readyState === WebSocket.OPEN) {
-    const payload = JSON.stringify({ type, data });
+    const payload = JSON.stringify({ Type: type, Data: data });
     socket.send(payload);
+    console.log("[WS] Mensaje enviado:", payload);
   } else {
     console.warn("[WS] No hay conexión WebSocket activa. Imposible enviar mensaje");
   }

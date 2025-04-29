@@ -13,15 +13,6 @@
 :root {
   --gap: 1rem;
 }
-
-/* 3. Títulos con tamaño responsive */
-.titles {
-  font-size: clamp(1.5rem, 5vw, 3rem);
-  font-family: 'Jersey 10', sans-serif;
-  color: var(--principal_orange);
-  margin: 0;
-}
-
 /* 4. Contenedor principal de Header y Footer */
 /* Mobile: columnas apiladas */
 .header,
@@ -59,7 +50,7 @@
 .content {
   justify-content: center;
   align-items: center;
-  min-height: 76vh;
+  min-height: 84vh;
   font-size: clamp(2rem, 8vw, 6rem);
   font-family: 'Jersey 10', sans-serif;
   text-align: center;

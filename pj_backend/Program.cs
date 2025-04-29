@@ -74,6 +74,7 @@ namespace pj_backend
             builder.Services.AddSingleton<WSService>();
             builder.Services.AddScoped<GameRepository>();
             builder.Services.AddScoped<GameService>();
+            builder.Services.AddSingleton<MatchmakingService>();
 
 
             //inyeccion de websocket
