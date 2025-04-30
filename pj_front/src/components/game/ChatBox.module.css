@@ -3,11 +3,11 @@
 .chatContainer {
     display: flex;
     flex-direction: column;
-    height: 100%;
+    max-width: 40vh;
     border: 1px solid var(--border);
     border-radius: 8px;
-    background-color: var(--background);
-    overflow: hidden;
+    background-color: var(--dark-orange);
+   
 }
 
 .chatHeader {
@@ -24,6 +24,7 @@
     flex-direction: column;
     gap: 0.5rem;
     overflow-y: auto;
+    max-height: 40vh;
 }
 
 .messageMe,
@@ -53,8 +54,8 @@
 }
 
 .messageRival .bubble {
-    background-color: var(--background-muted);
-    color: var(--foreground);
+    background-color: var(--primary);
+    color: white;
 }
 
 .inputRow {
@@ -62,13 +63,16 @@
     align-items: center;
     padding: 0.75rem 1rem;
     border-top: 1px solid var(--border);
-    background-color: var(--background);
+    background-color: var(--dark-orange);
+    
 }
 
 .inputRow :global(.ui-input) {
     flex: 1;
+    
 }
 
 .inputRow :global(.ui-button) {
     margin-left: 0.5rem;
+    
 }
