@@ -7,60 +7,59 @@ import { useAuth } from "@/hooks/useAuth";
 import styles from "./GamePage.module.css";
 import RivalsCard from "@/components/game/RivalsCard";
 import ChatBox from "@/components/game/ChatBox";
+import GameScreen from "@/components/game/GameScreen";
 
 export default function GamePage({ params }) {
-  const { user } = useAuth();
-  const { game } = params;
-  const rivalSocketId = useSelector((state) => state.match.rivalSocketId);
-  const rivalName = useSelector((state) => state.match.rivalName);
+    const { user } = useAuth();
+    const { game } = params;
+    const rivalSocketId = useSelector((state) => state.match.rivalSocketId);
+    const rivalName = useSelector((state) => state.match.rivalName);
 
-  const [isSearching, setIsSearching] = useState(false);
+    const [isSearching, setIsSearching] = useState(false);
 
-  const handleFindMatch = () => {
-    setIsSearching(true);
-    sendMessage("Matchmaking", { game });
-  };
+    const handleFindMatch = () => {
+        setIsSearching(true);
+        sendMessage("Matchmaking", { game });
+    };
 
-  useEffect(() => {
-    if (rivalSocketId) {
-      setIsSearching(false);
-      sendMessage("RivalInfo", {
-        socketId: rivalSocketId,
-        userId: user.id,
-        name: user.name,
-      });
-    }
-  }, [rivalSocketId]);
+    useEffect(() => {
+        if (rivalSocketId) {
+            setIsSearching(false);
+            sendMessage("RivalInfo", {
+                socketId: rivalSocketId,
+                userId: user.id,
+                name: user.name,
+            });
+        }
+    }, [rivalSocketId]);
 
-  return (
-    <div className={styles.container}>
-      <h1> {game}</h1>
+    return (
+        <div className={styles.container}>
+            <h1> {game}</h1>
 
-      {!rivalSocketId && (
-        <Button
-          onClick={handleFindMatch}
-          disabled={isSearching}
-          className="mb-6"
-        >
-          {isSearching ? "Buscando partida…" : "Buscar partida"}
-        </Button>
-      )}
+            {!rivalSocketId && (
+                <Button
+                    onClick={handleFindMatch}
+                    disabled={isSearching}
+                    className="mb-6"
+                >
+                    {isSearching ? "Buscando partida…" : "Buscar partida"}
+                </Button>
+            )}
 
-      <div className={styles.rivalsContainer}>
-        <RivalsCard name={user.name} />
-        {rivalSocketId && (
-          <>
-            <img src="/vs.png" alt="VS" className={styles.vs}/>
-            <RivalsCard name={rivalName} />
-          </>
-        )}
-      </div>
+            <div className={styles.rivalsContainer}>
+                <RivalsCard name={user.name} />
+                {rivalSocketId && (
+                    <>
+                        <img src="/vs.png" alt="VS" className={styles.vs} />
+                        <RivalsCard name={rivalName} />
+                    </>
+                )}
+            </div>
 
-      <div>
-        {rivalSocketId && (
-            <ChatBox />
-        )}
-      </div>
-    </div>
-  );
+            <GameScreen />
+            
+            <div>{rivalSocketId && <ChatBox />}</div>
+        </div>
+    );
 }
