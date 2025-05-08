@@ -28,4 +28,20 @@
     color: var(--dark-orange);
     font-size: 0.9rem;
   }
+
+  .toggleBtn {
+    margin-top: 0.75rem;
+    padding: 0.5rem 1rem;
+    background-color: #2563eb;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+  }
+  
+  .toggleBtn:hover {
+    background-color: #1d4ed8;
+  }
+  
   

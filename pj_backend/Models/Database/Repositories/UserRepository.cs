@@ -31,6 +31,15 @@ public class UserRepository : Repository<User, int>
         return await _context.Users.ToListAsync();
     }
 
+    public async Task<bool> ToggleRoleAsync(int userId)
+    {
+        var user = await _context.Users.FindAsync(userId);
+        if (user == null) return false;
+
+        user.Rol = user.Rol == "Admin" ? "User" : "Admin";
+        return true;
+    }
+
 }
 
 

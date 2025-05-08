@@ -122,4 +122,14 @@ public class UserController : ControllerBase
         }
     }
 
+    [HttpPut("toggle-role/{id}")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> ToggleUserRole(int id)
+    {
+        var success = await _userService.ToggleUserRoleAsync(id);
+        if (!success) return NotFound("Usuario no encontrado.");
+
+        return Ok("Rol actualizado.");
+    }
+
 }

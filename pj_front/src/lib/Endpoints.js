@@ -4,5 +4,6 @@ export const ENDPOINTS = {
   LOGIN:  `${API_BASE}/api/User/login`,
   REGISTER: `${API_BASE}/api/User/register`,
   GAMES: `${API_BASE}/api/Game`,
-  USERS: `${API_BASE}/api/User/AllUsers`
+  USERS: `${API_BASE}/api/User/AllUsers`,
+  TOGGLE_ROLE: (userId) => `${API_BASE}/api/User/toggle-role/${userId}`,
 };

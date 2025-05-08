@@ -84,5 +84,16 @@ public class UserService
         return UserMapper.ToDTOList(users);
     }
 
+    public async Task<bool> ToggleUserRoleAsync(int userId)
+    {
+        var result = await _unitOfWork.UserRepository.ToggleRoleAsync(userId);
+        if (!result) return false;
+
+        await _unitOfWork.SaveAsync();
+        return true;
+    }
+
+
+
 }
 
