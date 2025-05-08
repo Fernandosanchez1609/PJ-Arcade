@@ -1,3 +1,5 @@
+import { generateTerrain } from "./MapGeneration.js";
+
 export class Game extends Phaser.Scene {
     constructor() {
         super({ key: "worms" });
@@ -6,27 +8,32 @@ export class Game extends Phaser.Scene {
     preload() {
         this.load.image("background", "/images/sky-background.png");
 
-        // Cargar las 6 imágenes de nubes
         for (let i = 1; i <= 6; i++) {
             this.load.image(`cloud${i}`, `/images/cloud${i}.png`);
         }
+
+        // Cargar imágenes necesarias para el terreno
+        this.load.image("terrainMask", "/images/masks/map1.png");
+        this.load.image("dirt", "/images/textures/dirt-texture.png");
+        this.load.image("grass", "/images/textures/grass-texture.png");
     }
 
     create() {
         this.add.image(410, 250, "background");
 
-        // Grupos para nubes por capa
-        this.cloudBackGroup = this.add.group(); // fondo
-        this.cloudFrontGroup = this.add.group(); // frente
+        // Generar terreno con hierba
+        generateTerrain(this);
 
-        // Spawnea nubes del fondo más lento
+        // Nubes
+        this.cloudBackGroup = this.add.group();
+        this.cloudFrontGroup = this.add.group();
+
         this.time.addEvent({
             delay: 8500,
             callback: () => this.spawnCloud("back"),
             loop: true,
         });
 
-        // Spawnea nubes del frente más rápido
         this.time.addEvent({
             delay: 10000,
             callback: () => this.spawnCloud("front"),
@@ -39,12 +46,10 @@ export class Game extends Phaser.Scene {
         const cloudKey = `cloud${cloudIndex}`;
         const y = Phaser.Math.Between(50, 250);
 
-        // Crear nube fuera de pantalla derecha
         const cloud = this.add.image(1200, y, cloudKey);
 
         let scale, speed, group;
 
-        // Parallax
         if (layer === "back") {
             scale = Phaser.Math.FloatBetween(0.2, 0.5);
             speed = Phaser.Math.FloatBetween(0.2, 0.3);
@@ -58,15 +63,12 @@ export class Game extends Phaser.Scene {
         cloud.setScale(scale);
         group.add(cloud);
 
-        // Animar hacia la izquierda
         this.tweens.add({
             targets: cloud,
             x: -150,
-            duration: (cloud.x + 200) / speed,
+            duration: 18000 / speed,
             ease: "Linear",
-            onComplete: () => {
-                cloud.destroy(); // La imagen se elimina al salir de pantalla
-            },
+            onComplete: () => cloud.destroy(),
         });
     }
 }
