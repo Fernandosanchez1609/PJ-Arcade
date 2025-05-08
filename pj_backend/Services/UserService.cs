@@ -3,6 +3,7 @@ using BCrypt.Net;
 using pj_backend.Models.Database.Entities;
 using pj_backend.Models.Database.Repositories;
 using RegisterRequest = pj_backend.Models.Database.Dtos.RegisterRequest;
+using pj_backend.Models.Database.Dtos;
 
 
 namespace pj_backend.Services;
@@ -46,35 +47,42 @@ public class UserService
     public async Task<User> RegisterAsync(RegisterRequest request)
     {
 
-      // Crear el nuevo usuario
-      var newUser = new User
-      {
-        Name = request.Name,
-        Email = request.Email,
-        HashPassword = PasswordHelper.Hash(request.Password),
-        Rol = "User",
-      };
+        // Crear el nuevo usuario
+        var newUser = new User
+        {
+            Name = request.Name,
+            Email = request.Email,
+            HashPassword = PasswordHelper.Hash(request.Password),
+            Rol = "User",
+        };
 
-      // Insertar el usuario en la base de datos
-      await _unitOfWork.UserRepository.InsertAsync(newUser);
-      await _unitOfWork.SaveAsync();
+        // Insertar el usuario en la base de datos
+        await _unitOfWork.UserRepository.InsertAsync(newUser);
+        await _unitOfWork.SaveAsync();
 
-      return newUser;
+        return newUser;
     }
 
-  public async Task<User> AuthenticateAsync(string email, string password)
-  {
-    var user = await _unitOfWork.UserRepository.GetByEmailAsync(email);
+    public async Task<User> AuthenticateAsync(string email, string password)
+    {
+        var user = await _unitOfWork.UserRepository.GetByEmailAsync(email);
 
-    if (user == null)
-      return null;
+        if (user == null)
+            return null;
 
-    // Compara la contraseña con hash
-    var hashedInput = PasswordHelper.Hash(password);
-    if (user.HashPassword != hashedInput)
-      return null;
+        // Compara la contraseña con hash
+        var hashedInput = PasswordHelper.Hash(password);
+        if (user.HashPassword != hashedInput)
+            return null;
 
-    return user;
-  }
+        return user;
+    }
+
+    public async Task<IEnumerable<UserDto>> GetAllUsersAsync()
+    {
+        var users = await _unitOfWork.UserRepository.GetAllAsync();
+        return UserMapper.ToDTOList(users);
+    }
+
 }
 

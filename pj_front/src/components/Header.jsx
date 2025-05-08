@@ -24,6 +24,7 @@ const Header = () => {
     }, [token, user]);
 
     const handleLogout = () => {
+      
       logout();                 
     };
     
