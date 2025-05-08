@@ -1,4 +1,3 @@
-// GameMapper.cs
 using pj_backend.Models.Database.Dtos;
 using pj_backend.Models.Database.Entities;
 

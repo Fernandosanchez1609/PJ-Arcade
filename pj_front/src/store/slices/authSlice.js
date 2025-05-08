@@ -1,7 +1,5 @@
-
 import { createSlice } from '@reduxjs/toolkit';
 
-// helper para decodificar el payload de un JWT (sin librerías externas)
 function decodeJwt(token) {
   try {
     const payload = token.split('.')[1]
@@ -14,7 +12,7 @@ function decodeJwt(token) {
 
 const initialState = {
   token: null,
-  user: null,    // aquí guardaremos el objeto decodificado
+  user: null, 
 }
 
 export const authSlice = createSlice({
@@ -27,7 +25,6 @@ export const authSlice = createSlice({
         state.user = decodeJwt(action.payload)
       },
       prepare(token) {
-        // side-effect: guardar en localStorage
         if (typeof window !== 'undefined') {
           localStorage.setItem('token', token)
         }

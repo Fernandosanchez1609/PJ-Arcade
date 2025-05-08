@@ -4,7 +4,6 @@ import React, { useEffect, useRef } from "react";
 
 const loaders = {
   worms: () => import("@/games/worms/GameConfig.js"),
-  // …otros loaders…
 };
 
 export default function GameScreen({ gameName }) {
@@ -13,10 +12,7 @@ export default function GameScreen({ gameName }) {
 
   useEffect(() => {
     (async () => {
-      // 1) Importa Phaser sólo en cliente
       const Phaser = (await import("phaser")).default;
-
-      // 2) Carga dinámicamente la config de este juego
       const loader = loaders[gameName.toLowerCase()];
       if (!loader) {
         console.error(`Juego "${gameName}" no encontrado.`);
