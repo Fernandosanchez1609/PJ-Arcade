@@ -132,4 +132,14 @@ public class UserController : ControllerBase
         return Ok("Rol actualizado.");
     }
 
+    [HttpDelete("Delete/{id}")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> DeleteUser(int id)
+    {
+        var success = await _userService.DeleteUserAsync(id);
+        if (!success)
+            return NotFound(new { message = "Usuario no encontrado." });
+
+        return NoContent();
+    }
 }
