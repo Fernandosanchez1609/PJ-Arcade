@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { useFetchUsers } from "@/hooks/useFetchUsers";
-import { ENDPOINTS } from "@/lib/Endpoints";
+import { useToggleUserRole } from "@/hooks/useToggleUserRole";
+import { useDeleteUser } from "@/hooks/useDeleteUser";
 import UserCardList from "@/components/admin/UserCardList";
 
 export default function AdminPage() {
@@ -12,46 +13,43 @@ export default function AdminPage() {
   const router = useRouter();
   const { fetchUsers } = useFetchUsers();
 
-  const [users, setUsers] = useState([]);
+  const [users, setUsers]     = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError]     = useState(null);
 
-  const toggleUserRole = async (userId) => {
+  // 1) Función para recargar usuarios
+  const loadUsers = useCallback(async () => {
+    setLoading(true);
     try {
-      const res = await fetch(ENDPOINTS.TOGGLE_ROLE(userId), {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (!res.ok) throw new Error("Error al cambiar el rol");
-
-      const updatedUsers = await fetchUsers(); // recarga los usuarios
-      setUsers(updatedUsers);
-    } catch (err) {
-      alert(err.message);
+      const data = await fetchUsers();
+      setUsers(data);
+      setError(null);
+    } catch {
+      setError("Error al cargar usuarios.");
+    } finally {
+      setLoading(false);
     }
+  }, [fetchUsers]);
+
+  // 2) Hooks de acción
+  const toggleRole = useToggleUserRole(loadUsers);
+  const deleteUser = useDeleteUser(loadUsers);
+
+  // 3) Handlers pasados a UserCardList
+  const handleToggleRole = (userId) => {
+    toggleRole(userId);
   };
 
+  const handleDeleteUser = (userId) => {
+    deleteUser(userId);
+  };
+
+  // 4) Efecto inicial
   useEffect(() => {
     if (!token || user?.role !== "Admin") {
       router.replace("/");
       return;
     }
-
-    const loadUsers = async () => {
-      try {
-        setLoading(true);
-        const data = await fetchUsers();
-        setUsers(data);
-      } catch (err) {
-        setError("Error al cargar usuarios.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
     loadUsers();
   }, [token]);
 
@@ -60,9 +58,13 @@ export default function AdminPage() {
       <h1>Panel de Administración</h1>
 
       {loading && <p>Cargando usuarios...</p>}
-      {error && <p>{error}</p>}
+      {error   && <p style={{ color: "red" }}>{error}</p>}
 
-      <UserCardList users={users} onToggleRole={toggleUserRole} />
+      <UserCardList
+        users={users}
+        onToggleRole={handleToggleRole}
+        onDeleteUser={handleDeleteUser}
+      />
     </main>
   );
 }

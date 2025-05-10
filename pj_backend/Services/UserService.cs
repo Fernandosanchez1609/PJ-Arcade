@@ -93,7 +93,14 @@ public class UserService
         return true;
     }
 
+    public async Task<bool> DeleteUserAsync(int userId)
+    {
+        var deleted = await _unitOfWork.UserRepository.DeleteAsync(userId);
+        if (!deleted) return false;
 
+        await _unitOfWork.SaveAsync();
+        return true;
+    }
 
 }
 
