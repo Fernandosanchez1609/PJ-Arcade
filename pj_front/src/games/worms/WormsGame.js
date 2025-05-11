@@ -1,4 +1,4 @@
-import { generateTerrain } from "./MapGeneration.js";
+
 
 export class Game extends Phaser.Scene {
     constructor() {
@@ -7,22 +7,41 @@ export class Game extends Phaser.Scene {
 
     preload() {
         this.load.image("background", "/images/sky-background.png");
-
         for (let i = 1; i <= 6; i++) {
             this.load.image(`cloud${i}`, `/images/cloud${i}.png`);
         }
 
-        // Cargar imágenes necesarias para el terreno
-        this.load.image("terrainMask", "/images/masks/map1.png");
-        this.load.image("dirt", "/images/textures/dirt-texture.png");
-        this.load.image("grass", "/images/textures/grass-texture.png");
+
+        this.load.image('terrain', '/images/level2.png');
+        this.load.image('explosion', '/images/explosion.png');
+
     }
 
     create() {
         this.add.image(410, 250, "background");
 
-        // Generar terreno con hierba
-        generateTerrain(this);
+
+
+        // 1) RenderTexture para el efecto “scratch”
+        this.terrain = this.add
+            .renderTexture(400, 350, 800, 600)
+            .setDepth(1);           // <-- terreno a profundidad 1
+        this.terrain.draw('terrain', 0, 0);
+
+        // 2) CanvasTexture para lectura de píxeles
+        const srcImage = this.textures.get('terrain').getSourceImage();
+        this.terrainBitmap = this.textures.createCanvas('terrainBitmap', 800, 600);
+        this.terrainBitmap.context.drawImage(srcImage, 0, 0);
+        this.terrainBitmap.refresh();
+
+        // 3) Al hacer clic, “borramos” (visual + colisión)
+        this.input.on('pointerdown', pointer => {
+            // en el RenderTexture
+            this.terrain.erase('explosion', pointer.x - 10, pointer.y - 0);
+            // en el CanvasTexture (para que getPixelAlpha refleje el cambio)
+            this.terrainBitmap.context.clearRect(pointer.x - 10, pointer.y - 0, 0, 0);
+            this.terrainBitmap.refresh();
+        });
 
         // Nubes
         this.cloudBackGroup = this.add.group();
@@ -70,5 +89,12 @@ export class Game extends Phaser.Scene {
             ease: "Linear",
             onComplete: () => cloud.destroy(),
         });
+    }
+
+    update() {
+        // Lectura de alpha usando la Texture Manager
+        const pointer = this.input.activePointer;
+        const alpha = this.textures.getPixelAlpha(pointer.x, pointer.y, 'terrainBitmap');
+        this.game.canvas.style.cursor = alpha > 0 ? 'crosshair' : 'default';
     }
 }
