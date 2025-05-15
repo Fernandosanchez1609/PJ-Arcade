@@ -1,7 +1,10 @@
 
 ## Build results
-bin/
-obj/
+
+pj_backend/bin/
+pj_backend/obj/
+.vs/
+
 
 ## User-specific files
 *.user
@@ -50,6 +53,8 @@ node_modules/
 # Build output
 .next/
 out/
+
+.vs/
 
 # Logs
 npm-debug.log*

@@ -1,0 +1,78 @@
+
+
+.chatContainer {
+    display: flex;
+    flex-direction: column;
+    max-width: 40vh;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background-color: var(--dark-orange);
+   
+}
+
+.chatHeader {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--border);
+    background-color: var(--background-muted);
+    font-weight: 500;
+}
+
+.messageList {
+    flex: 1;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    overflow-y: auto;
+    max-height: 40vh;
+}
+
+.messageMe,
+.messageRival {
+    display: flex;
+    align-items: flex-end;
+}
+
+.messageMe {
+    justify-content: flex-end;
+}
+
+.messageRival {
+    justify-content: flex-start;
+}
+
+.bubble {
+    max-width: 70%;
+    padding: 0.5rem 0.75rem;
+    border-radius: 12px;
+    word-wrap: break-word;
+}
+
+.messageMe .bubble {
+    background-color: var(--primary);
+    color: white;
+}
+
+.messageRival .bubble {
+    background-color: var(--primary);
+    color: white;
+}
+
+.inputRow {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    border-top: 1px solid var(--border);
+    background-color: var(--dark-orange);
+    
+}
+
+.inputRow :global(.ui-input) {
+    flex: 1;
+    
+}
+
+.inputRow :global(.ui-button) {
+    margin-left: 0.5rem;
+    
+}

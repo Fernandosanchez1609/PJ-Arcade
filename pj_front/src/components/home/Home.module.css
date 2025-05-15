@@ -1,0 +1,176 @@
+/* app/Home.module.css */
+
+/* 1. Font-face para Jersey 10 */
+@font-face {
+  font-family: 'Jersey 10';
+  src: url('/fonts/Jersey10-Regular.ttf') format('truetype'),
+       url('/fonts/Jersey10-Bold.ttf')    format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+/* 2. Variables CSS (opcional) */
+:root {
+  --gap: 1rem;
+}
+/* 4. Contenedor principal de Header y Footer */
+/* Mobile: columnas apiladas */
+.header,
+.footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--gap);
+  background-color: var(--header_footer);
+  
+}
+
+/* 5. Secciones izquierda/derecha apiladas en mobile */
+.header_left,
+.header_right,
+.footer_right {
+  display: flex;
+  flex-wrap: wrap-reverse;
+  justify-content: center;
+  align-items: center;
+  gap: var(--gap);
+  width: 100%;
+}
+
+/* 6. Iconos fluidos */
+.icon {
+  width: clamp(1.5rem, 8vw, 3rem);
+  height: auto;
+  margin: 0.5rem;
+  color: var(--principal_orange);
+  cursor: pointer;
+}
+
+/* 7. Área de contenido centrada */
+.content {
+  justify-content: center;
+  align-items: center;
+  min-height: 84vh;
+  font-size: clamp(2rem, 8vw, 6rem);
+  font-family: 'Jersey 10', sans-serif;
+  text-align: center;
+  padding: var(--gap);
+}
+
+/* 8. A partir de tablets (min-width: 768px) pasamos a filas */
+@media (min-width: 768px) {
+  .header,
+  .footer {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+
+  .header_left,
+  .header_right,
+  .footer_right {
+    width: auto;
+    justify-content: flex-start;
+  }
+
+  .header_right {
+    justify-content: flex-end;
+  }
+}
+
+/* 9. A partir de desktop (min-width: 1024px) ajustamos anchos */
+@media (min-width: 1024px) {
+  .header_left {
+    width: 40%;
+    gap: 5rem;
+  }
+
+  .header_right {
+    width: 60%;
+    gap: 5rem;
+  }
+
+  .footer_right {
+    width: 40%;
+
+  }
+
+  .header,
+  .footer {
+    padding-left: 4%;
+    padding-right: 4%;
+    max-height: fit-content;
+  }
+}
+
+/* src/components/game/Home.module.css */
+
+.gamesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 20px;
+  padding: 20px;
+  margin: 0 auto;
+}
+
+.gameCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--header_footer);
+  border-radius: 12px;
+  padding: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+  height: 100%;
+  max-width: 200px;
+}
+
+.gameCard:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+}
+
+.gameImage {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  object-fit: cover;
+  margin-bottom: 10px;
+}
+
+.gameCard h3 {
+  font-size: 1.2rem;
+  font-weight: 500;
+  color: var(--principal_orange);
+  text-align: center;
+  margin: 0;
+}
+
+.gameCard:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Styling for the modal */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modalContent {
+  background-color: var(--background);
+  padding: 20px;
+  border-radius: 8px;
+  max-width: 500px;
+  width: 100%;
+  text-align: center;
+}
