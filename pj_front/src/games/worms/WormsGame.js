@@ -11,11 +11,28 @@ export class Game extends Phaser.Scene {
 
         this.load.image("terrain", "/images/level2-800-600.png");
         this.load.image("explosion", "/images/explosion.png");
+        this.load.spritesheet("wormWalk", "/images/sprites/wwalk.png", {
+            frameWidth: 60,
+            frameHeight: 60,
+        });
     }
 
     create() {
         this.add.image(410, 250, "background");
 
+        // Gusanos
+        this.anims.create({
+            key: "walk",
+            frames: this.anims.generateFrameNumbers("wormWalk", {
+                frames: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
+            }),
+            frameRate: 15,
+            repeat: -1,
+        });
+        this.worm1 = this.add.sprite(450, 250, "wormWalk");
+        this.worm1.play("walk", true);
+
+        // Terreno
         // 1) RenderTexture para el efecto “scratch”
         this.terrain = this.add.renderTexture(400, 350, 800, 600).setDepth(1); // <-- terreno a profundidad 1
         this.terrain.draw("terrain", 0, 0);
