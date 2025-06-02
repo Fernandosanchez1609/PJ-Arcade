@@ -20,24 +20,26 @@ export class Game extends Phaser.Scene {
     create() {
         this.add.image(410, 250, "background");
 
-        // Gusanos
+        // Gusano animado con físicas
         this.anims.create({
             key: "walk",
             frames: this.anims.generateFrameNumbers("wormWalk", {
-                frames: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
+                frames: [...Array(16).keys()], // frames 0 al 15
             }),
             frameRate: 15,
             repeat: -1,
         });
-        this.worm1 = this.add.sprite(450, 250, "wormWalk");
-        this.worm1.play("walk", true);
+
+        this.worm1 = this.physics.add.sprite(450, 250, "wormWalk");
+        this.worm1.setCollideWorldBounds(true);
+        this.worm1.setBounce(0);
+        this.worm1.setDrag(1000, 0);
+        this.worm1.setMaxVelocity(200, 0);
 
         // Terreno
-        // 1) RenderTexture para el efecto “scratch”
-        this.terrain = this.add.renderTexture(400, 350, 800, 600).setDepth(1); // <-- terreno a profundidad 1
+        this.terrain = this.add.renderTexture(400, 350, 800, 600).setDepth(1);
         this.terrain.draw("terrain", 0, 0);
 
-        // 2) CanvasTexture para lectura de píxeles
         const srcImage = this.textures.get("terrain").getSourceImage();
         this.terrainBitmap = this.textures.createCanvas(
             "terrainBitmap",
@@ -47,18 +49,18 @@ export class Game extends Phaser.Scene {
         this.terrainBitmap.context.drawImage(srcImage, 0, 0);
         this.terrainBitmap.refresh();
 
-        // 3) Al hacer clic, “borramos” (visual + colisión)
         this.input.on("pointerdown", (pointer) => {
             const localX = pointer.x - this.terrain.x + this.terrain.width / 2;
             const localY = pointer.y - this.terrain.y + this.terrain.height / 2;
-            // en el RenderTexture
+
             this.terrain.erase("explosion", localX - 23, localY - 21.5);
-            // en el CanvasTexture (para que getPixelAlpha refleje el cambio)
+
+            // Corrige el clearRect → usa el tamaño de la explosión
             this.terrainBitmap.context.clearRect(
                 localX - 23,
                 localY - 21.5,
-                0,
-                0
+                46,
+                43
             );
             this.terrainBitmap.refresh();
         });
@@ -78,13 +80,14 @@ export class Game extends Phaser.Scene {
             callback: () => this.spawnCloud("front"),
             loop: true,
         });
+
+        this.cursors = this.input.keyboard.createCursorKeys();
     }
 
     spawnCloud(layer) {
         const cloudIndex = Phaser.Math.Between(1, 6);
         const cloudKey = `cloud${cloudIndex}`;
         const y = Phaser.Math.Between(50, 250);
-
         const cloud = this.add.image(1200, y, cloudKey);
 
         let scale, speed, group;
@@ -112,7 +115,23 @@ export class Game extends Phaser.Scene {
     }
 
     update() {
-        // Lectura de alpha usando la Texture Manager
+        const cursors = this.cursors;
+        const worm = this.worm1;
+
+        if (cursors.left.isDown) {
+            worm.setVelocityX(-100);
+            worm.play("walk", true);
+            worm.setFlipX(false);
+        } else if (cursors.right.isDown) {
+            worm.setVelocityX(100);
+            worm.play("walk", true);
+            worm.setFlipX(true);
+        } else {
+            worm.setVelocityX(0);
+            worm.anims.stop();
+        }
+
+        // Cursor dinámico según colisión con terreno
         const pointer = this.input.activePointer;
         const alpha = this.textures.getPixelAlpha(
             pointer.x,
