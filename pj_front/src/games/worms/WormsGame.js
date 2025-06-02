@@ -1,5 +1,3 @@
-
-
 export class Game extends Phaser.Scene {
     constructor() {
         super({ key: "worms" });
@@ -11,35 +9,40 @@ export class Game extends Phaser.Scene {
             this.load.image(`cloud${i}`, `/images/cloud${i}.png`);
         }
 
-
-        this.load.image('terrain', '/images/level2.png');
-        this.load.image('explosion', '/images/explosion.png');
-
+        this.load.image("terrain", "/images/level2-800-600.png");
+        this.load.image("explosion", "/images/explosion.png");
     }
 
     create() {
         this.add.image(410, 250, "background");
 
-
-
         // 1) RenderTexture para el efecto “scratch”
-        this.terrain = this.add
-            .renderTexture(400, 350, 800, 600)
-            .setDepth(1);           // <-- terreno a profundidad 1
-        this.terrain.draw('terrain', 0, 0);
+        this.terrain = this.add.renderTexture(400, 350, 800, 600).setDepth(1); // <-- terreno a profundidad 1
+        this.terrain.draw("terrain", 0, 0);
 
         // 2) CanvasTexture para lectura de píxeles
-        const srcImage = this.textures.get('terrain').getSourceImage();
-        this.terrainBitmap = this.textures.createCanvas('terrainBitmap', 800, 600);
+        const srcImage = this.textures.get("terrain").getSourceImage();
+        this.terrainBitmap = this.textures.createCanvas(
+            "terrainBitmap",
+            800,
+            600
+        );
         this.terrainBitmap.context.drawImage(srcImage, 0, 0);
         this.terrainBitmap.refresh();
 
         // 3) Al hacer clic, “borramos” (visual + colisión)
-        this.input.on('pointerdown', pointer => {
+        this.input.on("pointerdown", (pointer) => {
+            const localX = pointer.x - this.terrain.x + this.terrain.width / 2;
+            const localY = pointer.y - this.terrain.y + this.terrain.height / 2;
             // en el RenderTexture
-            this.terrain.erase('explosion', pointer.x - 10, pointer.y - 0);
+            this.terrain.erase("explosion", localX - 23, localY - 21.5);
             // en el CanvasTexture (para que getPixelAlpha refleje el cambio)
-            this.terrainBitmap.context.clearRect(pointer.x - 10, pointer.y - 0, 0, 0);
+            this.terrainBitmap.context.clearRect(
+                localX - 23,
+                localY - 21.5,
+                0,
+                0
+            );
             this.terrainBitmap.refresh();
         });
 
@@ -94,7 +97,11 @@ export class Game extends Phaser.Scene {
     update() {
         // Lectura de alpha usando la Texture Manager
         const pointer = this.input.activePointer;
-        const alpha = this.textures.getPixelAlpha(pointer.x, pointer.y, 'terrainBitmap');
-        this.game.canvas.style.cursor = alpha > 0 ? 'crosshair' : 'default';
+        const alpha = this.textures.getPixelAlpha(
+            pointer.x,
+            pointer.y,
+            "terrainBitmap"
+        );
+        this.game.canvas.style.cursor = alpha > 0 ? "crosshair" : "default";
     }
 }
