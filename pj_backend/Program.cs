@@ -136,7 +136,7 @@ namespace pj_backend
             {
                 options.AddPolicy("AllowFrontend", policy =>
                 {
-                        policy.WithOrigins("http://localhost:3000")  // Aqu� agregas el origen de tu frontend
+                        policy.WithOrigins("https://pj-arcade.duckdns.org", "http://localhost:3000")  // Aqu� agregas el origen de tu frontend
                             .AllowAnyHeader()
                             .AllowAnyMethod();
                     });
