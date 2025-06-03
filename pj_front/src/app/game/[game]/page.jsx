@@ -11,7 +11,7 @@ import GameScreen from "@/components/game/GameScreen";
 
 export default function GamePage({ params }) {
     const { user } = useAuth();
-    const { game } = params;
+    const { game } = use(params);
     const rivalSocketId = useSelector((state) => state.match.rivalSocketId);
     const rivalName = useSelector((state) => state.match.rivalName);
     const playerRole = useSelector((state) => state.match.playerRole);
@@ -54,19 +54,26 @@ export default function GamePage({ params }) {
                         {playerRole === "Player1" ? (
                             <>
                                 <RivalsCard name={user.name} />
-                                <img src="/vs.png" alt="VS" className={styles.vs} />
+                                <img
+                                    src="/vs.png"
+                                    alt="VS"
+                                    className={styles.vs}
+                                />
                                 <RivalsCard name={rivalName} />
                             </>
                         ) : (
                             <>
                                 <RivalsCard name={rivalName} />
-                                <img src="/vs.png" alt="VS" className={styles.vs} />
+                                <img
+                                    src="/vs.png"
+                                    alt="VS"
+                                    className={styles.vs}
+                                />
                                 <RivalsCard name={user.name} />
                             </>
                         )}
                     </>
                 )}
-
             </div>
             {rivalSocketId && <GameScreen gameName={game} />}
             <div>{rivalSocketId && <ChatBox />}</div>
