@@ -30,11 +30,28 @@ export class Game extends Phaser.Scene {
             repeat: -1,
         });
 
-        this.worm1 = this.physics.add.sprite(450, 250, "wormWalk");
-        this.worm1.setCollideWorldBounds(true);
-        this.worm1.setBounce(0);
-        this.worm1.setDrag(1000, 0);
-        this.worm1.setMaxVelocity(200, 0);
+        // === Crear 6 gusanos ===
+        const initialPositions = [
+            { x: 100, y: 100 },
+            { x: 200, y: 100 },
+            { x: 300, y: 100 },
+            { x: 400, y: 100 },
+            { x: 500, y: 100 },
+            { x: 600, y: 100 },
+        ];
+
+        this.worms = [];
+
+        for (let i = 0; i < 6; i++) {
+            const pos = initialPositions[i];
+            const worm = this.physics.add.sprite(pos.x, pos.y, "wormWalk");
+            worm.setCollideWorldBounds(true)
+                .setBounce(0)
+                .setDrag(1000, 0)
+                .setMaxVelocity(200, 0)
+                .body.setSize(40, 40, true);
+            this.worms.push(worm);
+        }
 
         // Terreno
         this.terrain = this.add.renderTexture(400, 350, 800, 600).setDepth(1);
@@ -82,6 +99,8 @@ export class Game extends Phaser.Scene {
         });
 
         this.cursors = this.input.keyboard.createCursorKeys();
+
+        // this.physics.add.collider(this.worm1, this.terrain)
     }
 
     spawnCloud(layer) {
@@ -116,7 +135,9 @@ export class Game extends Phaser.Scene {
 
     update() {
         const cursors = this.cursors;
-        const worm = this.worm1;
+      
+        // Controlar solo al primer gusano (o luego podrías alternar entre ellos)
+        const worm = this.worms[0];
 
         if (cursors.left.isDown) {
             worm.setVelocityX(-100);
