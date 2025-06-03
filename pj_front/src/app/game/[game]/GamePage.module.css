@@ -1,4 +1,4 @@
-.container{
+.container {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -6,14 +6,31 @@
   width: 100%;
 }
 
-.rivalsContainer{
+.rivalsContainer {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: var(--gap);
 }
 
-.vs{
-    max-height: 80px;
-    max-width: 80px;
+.gameContainer {
+  display: flex;
+  justify-content: center;
+  padding-bottom: 4rem;
+}
+
+.gameWrapper {
+  display: flex;
+  align-items: flex-end;
+  justify-items: center;
+  gap: 6rem;
+}
+
+.gameScreen{
+  max-width: fit-content;
+}
+
+.vs {
+  max-height: 80px;
+  max-width: 80px;
 }

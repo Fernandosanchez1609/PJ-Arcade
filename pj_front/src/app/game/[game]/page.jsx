@@ -48,35 +48,39 @@ export default function GamePage({ params }) {
                 </Button>
             )}
 
-            <div className={styles.rivalsContainer}>
+
+            {rivalSocketId && (
+                <div className={styles.rivalsContainer}>
+                    {playerRole === "Player1" ? (
+                        <>
+                            <RivalsCard name={user.name} />
+                            <img src="/vs.png" alt="VS" className={styles.vs} />
+                            <RivalsCard name={rivalName} />
+                        </>
+                    ) : (
+                        <>
+                            <RivalsCard name={rivalName} />
+                            <img src="/vs.png" alt="VS" className={styles.vs} />
+                            <RivalsCard name={user.name} />
+                        </>
+                    )}
+                </div>
+            )}
+
+            <div className={styles.gameContainer}>
                 {rivalSocketId && (
-                    <>
-                        {playerRole === "Player1" ? (
-                            <>
-                                <RivalsCard name={user.name} />
-                                <img
-                                    src="/vs.png"
-                                    alt="VS"
-                                    className={styles.vs}
-                                />
-                                <RivalsCard name={rivalName} />
-                            </>
-                        ) : (
-                            <>
-                                <RivalsCard name={rivalName} />
-                                <img
-                                    src="/vs.png"
-                                    alt="VS"
-                                    className={styles.vs}
-                                />
-                                <RivalsCard name={user.name} />
-                            </>
-                        )}
-                    </>
+                    <div className={styles.gameWrapper}>
+                        <div className={styles.gameScreen}>
+                            <GameScreen gameName={game} />
+                        </div>
+                        <div className={styles.chatBox}>
+                            <ChatBox />
+                        </div>
+
+                    </div>
                 )}
             </div>
-            {rivalSocketId && <GameScreen gameName={game} />}
-            <div>{rivalSocketId && <ChatBox />}</div>
+
         </div>
     );
 }
