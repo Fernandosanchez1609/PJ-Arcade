@@ -21,15 +21,12 @@ export class Game extends Phaser.Scene {
     }
 
     create() {
-        this.physics.world.gravity.y = 500;
-
         // Listener eventos de WebSocket
         window.addEventListener("rivalAttack", (event) => {
             const { x, y } = event.detail;
             this.terrain.erase("explosion", x - 23, y - 21.5);
             this.terrainBitmap.context.clearRect(x - 23, y - 21.5, 46, 43);
             this.terrainBitmap.refresh();
-            this.updateCollisionMapArea(x - 23, y - 21.5, 46, 43);
         });
 
         this.add.image(410, 250, "background");
@@ -49,7 +46,7 @@ export class Game extends Phaser.Scene {
             .setCollideWorldBounds(true)
             .setBounce(0)
             .setDrag(1000, 0)
-            .setMaxVelocity(200, 500)
+            .setMaxVelocity(200, 0)
             .body.setSize(40, 40, true);
 
         // Terreno
@@ -73,25 +70,10 @@ export class Game extends Phaser.Scene {
         this.collisionMap = new Uint8Array(
             this.terrainWidth * this.terrainHeight
         );
-        this.updateCollisionMapFromBitmap(); // <- Esto es clave
-
-        // Define la forma irregular aproximada del gusano para colisión (offsets relativos)
-        this.wormShapeOffsets = [
-            { x: -20, y: -20 },
-            { x: 0, y: -25 },
-            { x: 20, y: -20 },
-            { x: 25, y: 0 },
-            { x: 20, y: 20 },
-            { x: 0, y: 25 },
-            { x: -20, y: 20 },
-            { x: -25, y: 0 },
-        ];
 
         this.input.on("pointerdown", (pointer) => {
-            const localX =
-                pointer.x - (this.terrain.x - this.terrain.width / 2);
-            const localY =
-                pointer.y - (this.terrain.y - this.terrain.height / 2);
+            const localX = pointer.x - this.terrain.x + this.terrain.width / 2;
+            const localY = pointer.y - this.terrain.y + this.terrain.height / 2;
 
             this.terrain.erase("explosion", localX - 23, localY - 21.5);
 
@@ -116,6 +98,18 @@ export class Game extends Phaser.Scene {
                     y: localY,
                 });
             }
+
+            // Define la forma irregular aproximada del gusano para colisión (offsets relativos)
+            this.wormShapeOffsets = [
+                { x: -20, y: -20 },
+                { x: 0, y: -25 },
+                { x: 20, y: -20 },
+                { x: 25, y: 0 },
+                { x: 20, y: 20 },
+                { x: 0, y: 25 },
+                { x: -20, y: 20 },
+                { x: -25, y: 0 },
+            ];
         });
 
         // Nubes

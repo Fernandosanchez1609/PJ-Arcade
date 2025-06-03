@@ -6,9 +6,9 @@ export const wormsConfig = {
     height: 600,
     scene: [Game],
     physics: {
-        default: "matter",
+        default: "arcade",
         matter: {
-            gravity: { y: 0 },
+            gravity: { y: 500 },
             debug: true, // Activa para ver colisiones y cuerpos
         },
     },
