@@ -22,18 +22,20 @@ export const metadata = {
 };
 
 export default function RootLayout({ children }) {
-  return (
+   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+      >
         <ReduxProvider>
           <WsConnector />
-          <Header />
-
-          <AuthInitializer>
-
-            {children}
-          </AuthInitializer>
-          <Footer />
+          <div className="flex flex-col min-h-screen">
+            <Header />
+            <AuthInitializer>
+              <main className="flex-1 min-h-screen">{children}</main>
+            </AuthInitializer>
+            <Footer />
+          </div>
         </ReduxProvider>
       </body>
     </html>
