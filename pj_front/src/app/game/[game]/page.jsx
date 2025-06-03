@@ -11,7 +11,7 @@ import GameScreen from "@/components/game/GameScreen";
 
 export default function GamePage({ params }) {
     const { user } = useAuth();
-    const { game } = params;
+    const { game } = use(params);
     const rivalSocketId = useSelector((state) => state.match.rivalSocketId);
     const rivalName = useSelector((state) => state.match.rivalName);
     const playerRole = useSelector((state) => state.match.playerRole);

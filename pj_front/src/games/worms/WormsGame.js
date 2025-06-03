@@ -1,5 +1,6 @@
 import { sendMessage } from "@/lib/WsClient";
 import { store } from "@/store/store";
+import { Clouds } from "@/games/worms/WormsClouds";
 
 export class Game extends Phaser.Scene {
     constructor() {
@@ -65,8 +66,6 @@ export class Game extends Phaser.Scene {
         this.terrainBitmap.context.drawImage(srcImage, 0, 0);
         this.terrainBitmap.refresh();
 
-        ///////// Comienza gpt
-
         // Crear mapa lógico de colisión para el terreno
         this.terrainWidth = 800;
         this.terrainHeight = 600;
@@ -76,6 +75,7 @@ export class Game extends Phaser.Scene {
         this.updateCollisionMapFromBitmap(); // <- Esto es clave
 
         // Define la forma irregular aproximada del gusano para colisión (offsets relativos)
+        ///////
         this.wormShapeOffsets = [
             { x: -20, y: -20 },
             { x: 0, y: -25 },
@@ -118,55 +118,13 @@ export class Game extends Phaser.Scene {
             }
         });
 
-        // Nubes
-        this.cloudBackGroup = this.add.group();
-        this.cloudFrontGroup = this.add.group();
-
-        this.time.addEvent({
-            delay: 8500,
-            callback: () => this.spawnCloud("back"),
-            loop: true,
-        });
-
-        this.time.addEvent({
-            delay: 10000,
-            callback: () => this.spawnCloud("front"),
-            loop: true,
-        });
+        // Crear instancia de Clouds y comenzar la creación de nubes
+        this.clouds = new Clouds(this); // Pasa la escena al constructor de Clouds
+        this.clouds.startClouds(); // Comienza la creación de las nubes
 
         this.cursors = this.input.keyboard.createCursorKeys();
 
         // this.physics.add.collider(this.worm1, this.terrain)
-    }
-
-    spawnCloud(layer) {
-        const cloudIndex = Phaser.Math.Between(1, 6);
-        const cloudKey = `cloud${cloudIndex}`;
-        const y = Phaser.Math.Between(50, 250);
-        const cloud = this.add.image(1200, y, cloudKey);
-
-        let scale, speed, group;
-
-        if (layer === "back") {
-            scale = Phaser.Math.FloatBetween(0.2, 0.5);
-            speed = Phaser.Math.FloatBetween(0.2, 0.3);
-            group = this.cloudBackGroup;
-        } else {
-            scale = Phaser.Math.FloatBetween(0.5, 0.7);
-            speed = Phaser.Math.FloatBetween(0.3, 0.5);
-            group = this.cloudFrontGroup;
-        }
-
-        cloud.setScale(scale);
-        group.add(cloud);
-
-        this.tweens.add({
-            targets: cloud,
-            x: -150,
-            duration: 18000 / speed,
-            ease: "Linear",
-            onComplete: () => cloud.destroy(),
-        });
     }
 
     update() {
