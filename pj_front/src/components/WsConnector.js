@@ -18,21 +18,24 @@ export default function WsConnector() {
           break;
         case "RivalFound":
           dispatch(setRivalSocket(msg.Data));
-          
           break;
         case "RivalInfo":
           dispatch(setRivalUser({
             userId: msg.Data.userId,
-            name:   msg.Data.name
+            name: msg.Data.name
           }));
           break;
-          case "PrivateMessage":
-            dispatch(addChatMessage({
-              from: "rival",
-              text: msg.Data.text,
-              timestamp: Date.now(),
-            }));
-            break;
+        case "PrivateMessage":
+          dispatch(addChatMessage({
+            from: "rival",
+            text: msg.Data.text,
+            timestamp: Date.now(),
+          }));
+          break;
+        case "Atack":
+          const { x, y } = msg.Data;
+          window.dispatchEvent(new CustomEvent("rivalAttack", { detail: { x, y } }));
+          break;
         default:
           console.warn("[WS] Mensaje no manejado:", msg);
       }

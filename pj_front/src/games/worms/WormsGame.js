@@ -1,3 +1,6 @@
+import { sendMessage } from "@/lib/WsClient";
+import { store } from "@/store/store";
+
 export class Game extends Phaser.Scene {
     constructor() {
         super({ key: "worms" });
@@ -18,6 +21,16 @@ export class Game extends Phaser.Scene {
     }
 
     create() {
+        // Listener eventos de WebSocket
+        window.addEventListener("rivalAttack", (event) => {
+            const { x, y } = event.detail;
+            this.terrain.erase("explosion", x - 23, y - 21.5);
+            this.terrainBitmap.context.clearRect(x - 23, y - 21.5, 46, 43);
+            this.terrainBitmap.refresh();
+        });
+
+
+        // Fondo
         this.add.image(410, 250, "background");
 
         // Gusano animado con físicas
@@ -63,6 +76,16 @@ export class Game extends Phaser.Scene {
                 43
             );
             this.terrainBitmap.refresh();
+
+            const rivalSocketId = store.getState().match.rivalSocketId;
+
+            if (rivalSocketId) {
+                sendMessage("Atack", {
+                    socketId: rivalSocketId,
+                    x: localX,
+                    y: localY
+                });
+            }
         });
 
         // Nubes
