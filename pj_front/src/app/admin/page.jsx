@@ -13,10 +13,9 @@ export default function AdminPage() {
   const router = useRouter();
   const { fetchUsers } = useFetchUsers();
 
-  const [users, setUsers]     = useState([]);
+  const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError]     = useState(null);
-
+  const [error, setError] = useState(null);
   // 1) Función para recargar usuarios
   const loadUsers = useCallback(async () => {
     setLoading(true);
@@ -55,13 +54,17 @@ export default function AdminPage() {
 
   return (
     <main>
-      <h1>Panel de Administración</h1>
+        <h1 className="text-center">
+          Panel de Administración
+        </h1>
+
 
       {loading && <p>Cargando usuarios...</p>}
-      {error   && <p style={{ color: "red" }}>{error}</p>}
+      {error && <p style={{ color: "red" }}>{error}</p>}
 
       <UserCardList
         users={users}
+        currentUserId={user?.id}
         onToggleRole={handleToggleRole}
         onDeleteUser={handleDeleteUser}
       />
