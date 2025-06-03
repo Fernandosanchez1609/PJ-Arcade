@@ -56,11 +56,7 @@ export default function GamePage({ params }) {
                     </>
                 )}
             </div>
-            <div>
-                <GameScreen gameName={game} />
-            </div>
-            
-            
+            {rivalSocketId && <GameScreen gameName={game} />}
             <div>{rivalSocketId && <ChatBox />}</div>
         </div>
     );

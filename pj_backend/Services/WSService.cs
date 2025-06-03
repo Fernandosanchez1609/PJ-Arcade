@@ -36,6 +36,10 @@ namespace pj_backend.Services
                     var reciverId = jsonEl.GetProperty("socketId").GetString();
                     await _manager.SendMessageAsync(reciverId, message);
                     break;
+                case "Atack":
+                    var rival = jsonEl.GetProperty("socketId").GetString();
+                    await _manager.SendMessageAsync(rival, message);
+                    break;
                 case "Error":
                     await _manager.SendMessageAsync(socketId, message);
                     break;
