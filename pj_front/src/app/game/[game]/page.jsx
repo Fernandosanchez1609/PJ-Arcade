@@ -14,6 +14,7 @@ export default function GamePage({ params }) {
     const { game } = params;
     const rivalSocketId = useSelector((state) => state.match.rivalSocketId);
     const rivalName = useSelector((state) => state.match.rivalName);
+    const playerRole = useSelector((state) => state.match.playerRole);
 
     const [isSearching, setIsSearching] = useState(false);
 
@@ -48,13 +49,24 @@ export default function GamePage({ params }) {
             )}
 
             <div className={styles.rivalsContainer}>
-                <RivalsCard name={user.name} />
                 {rivalSocketId && (
                     <>
-                        <img src="/vs.png" alt="VS" className={styles.vs} />
-                        <RivalsCard name={rivalName} />
+                        {playerRole === "Player1" ? (
+                            <>
+                                <RivalsCard name={user.name} />
+                                <img src="/vs.png" alt="VS" className={styles.vs} />
+                                <RivalsCard name={rivalName} />
+                            </>
+                        ) : (
+                            <>
+                                <RivalsCard name={rivalName} />
+                                <img src="/vs.png" alt="VS" className={styles.vs} />
+                                <RivalsCard name={user.name} />
+                            </>
+                        )}
                     </>
                 )}
+
             </div>
             {rivalSocketId && <GameScreen gameName={game} />}
             <div>{rivalSocketId && <ChatBox />}</div>

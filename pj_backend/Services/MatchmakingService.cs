@@ -27,14 +27,25 @@ public class MatchmakingService
 
     public async Task SendRivalInfo(string ws1 ,string ws2)
     {
-        WSMessage wsMessage1 = new WSMessage();
-        WSMessage wsMessage2 = new WSMessage();
+        var wsMessage1 = new WSMessage
+        {
+            Type = "RivalFound",
+            Data = new
+            {
+                RivalId = ws2,
+                Role = "Player1"
+            }
+        };
 
-        wsMessage1.Type = "RivalFound";
-        wsMessage1.Data = ws2;
-
-        wsMessage2.Type = "RivalFound";
-        wsMessage2.Data = ws1;
+        var wsMessage2 = new WSMessage
+        {
+            Type = "RivalFound",
+            Data = new
+            {
+                RivalId = ws1,
+                Role = "Player2"
+            }
+        };
 
         await _manager.SendMessageAsync(ws1 ,wsMessage1);
         await _manager.SendMessageAsync(ws2 ,wsMessage2);

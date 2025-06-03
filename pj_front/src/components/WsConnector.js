@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { connectWebSocket, disconnectWebSocket } from "@/lib/WsClient";
 import { setOnlineCount } from "@/store/slices/onlineSlice";
-import { setRivalUser, setRivalSocket } from "@/store/slices/matchSlice";
+import { setRivalUser, setRivalSocket, setPlayerRole } from "@/store/slices/matchSlice";
 import { addChatMessage } from "@/store/slices/chatSlice";
 
 export default function WsConnector() {
@@ -17,7 +17,8 @@ export default function WsConnector() {
           dispatch(setOnlineCount(msg.Data));
           break;
         case "RivalFound":
-          dispatch(setRivalSocket(msg.Data));
+          dispatch(setRivalSocket(msg.Data.RivalId)); 
+          dispatch(setPlayerRole(msg.Data.Role));     
           break;
         case "RivalInfo":
           dispatch(setRivalUser({
