@@ -33,7 +33,7 @@ export class Game extends Phaser.Scene {
             this.updateCollisionMapArea(x - 23, y - 21.5, 46, 43);
         });
 
-        this.add.image(410, 250, "background");
+        this.add.image(410, 250, "background").setDepth(-2);
 
         // Gusano animado con físicas
         this.anims.create({
@@ -81,7 +81,7 @@ export class Game extends Phaser.Scene {
         }
 
         // Terreno
-        this.terrain = this.add.renderTexture(400, 350, 800, 600).setDepth(1);
+        this.terrain = this.add.renderTexture(400, 350, 800, 600).setDepth(0);
         this.terrain.draw("terrain", 0, 0);
 
         const srcImage = this.textures.get("terrain").getSourceImage();
@@ -180,10 +180,17 @@ export class Game extends Phaser.Scene {
                 worm.body.center.y
             );
 
-            worm.collideDown = collisions.collideDown;
+            // iguala los valores de los objetos que comparten
+            // sustituye el codigo de abajo
+            Object.assign(worm, collisions);
+
+            // worm.collideDown = collisions.collideDown;
+            // worm.collideLeft = collisions.collideLeft;
+            // worm.collideTop = collisions.collideTop;
+            // worm.collideRight = collisions.collideRight;
 
             // Si colisión abajo, parar gravedad y velocidad Y
-            if (collisions.collideDown) {
+            if (worm.collideDown) {
                 worm.setVelocityY(0);
                 worm.body.allowGravity = false;
                 worm.body.blocked.down = true; // opcional para estados Phaser
@@ -192,13 +199,13 @@ export class Game extends Phaser.Scene {
                 worm.body.blocked.down = false;
             }
 
-            if (collisions.collideTop) {
+            if (worm.collideTop) {
                 worm.setVelocityY(0);
                 worm.body.allowGravity = true;
             }
 
             // Bloquear movimiento lateral solo si se mueve hacia colisión
-            if (collisions.collideLeft && worm.body.velocity.x < 0) {
+            if (worm.collideLeft && worm.body.velocity.x < 0) {
                 const climbStep = this.canClimb(worm.x, worm.y, -1);
                 if (climbStep > 0) {
                     worm.setY(worm.y - climbStep); // sube
@@ -208,7 +215,7 @@ export class Game extends Phaser.Scene {
                 }
             }
 
-            if (collisions.collideRight && worm.body.velocity.x > 0) {
+            if (worm.collideRight && worm.body.velocity.x > 0) {
                 const climbStep = this.canClimb(worm.x, worm.y, 1);
                 if (climbStep > 0) {
                     worm.setY(worm.y - climbStep); // sube
@@ -362,7 +369,7 @@ export class Game extends Phaser.Scene {
             }
         }
 
-        return { collideDown, collideTop, collideLeft, collideRight };
+        return { collideDown, collideLeft, collideTop, collideRight };
     }
 
     canClimb(px, py, direction) {
