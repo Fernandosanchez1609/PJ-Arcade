@@ -11,5 +11,7 @@ public class User
     public ICollection<GameMatch> JoinedMatches { get; set; }
     public ICollection<Ranking> Rankings { get; set; }
     public ICollection<UserAchievement> UserAchievements { get; set; }
+    public ICollection<Friendship> RequestedFriendships { get; set; }
+    public ICollection<Friendship> ReceivedFriendships { get; set; }
 
 }

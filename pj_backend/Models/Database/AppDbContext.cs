@@ -15,6 +15,8 @@ public class AppDbContext : DbContext
     public DbSet<Ranking> Rankings { get; set; }
     public DbSet<Achievement> Achievements { get; set; }
     public DbSet<UserAchievement> UserAchievements { get; set; }
+    public DbSet<Friendship> Friendships { get; set; }
+
     public AppDbContext() { }
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
@@ -247,5 +249,42 @@ public class AppDbContext : DbContext
             .OnDelete(DeleteBehavior.Cascade);
         });
 
+        // Configuración de la tabla friendships
+        modelBuilder.Entity<Friendship>(entity =>
+        {
+            entity.ToTable("friendships");
+
+            entity.HasKey(e => e.Id);
+
+            entity.Property(e => e.Id)
+                .HasColumnName("id")
+                .IsRequired()
+                .ValueGeneratedOnAdd();
+
+            entity.Property(e => e.RequesterId)
+                .HasColumnName("requester_id")
+                .IsRequired();
+
+            entity.Property(e => e.AddresseeId)
+                .HasColumnName("addressee_id")
+                .IsRequired();
+
+            entity.Property(e => e.Status)
+                .HasColumnName("status")
+                .IsRequired();
+
+            // Relaciones
+            entity.HasOne(e => e.Requester)
+                .WithMany(u => u.RequestedFriendships)
+                .HasForeignKey(e => e.RequesterId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.Addressee)
+                .WithMany(u => u.ReceivedFriendships)
+                .HasForeignKey(e => e.AddresseeId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasIndex(e => new { e.RequesterId, e.AddresseeId }).IsUnique();
+        });
     }
 }
