@@ -41,6 +41,16 @@ public class FriendshipController : ControllerBase
         return result ? Ok("Solicitud aceptada") : NotFound("No puedes aceptar esta solicitud");
     }
 
+    [HttpPost("reject/{id}")]
+    public async Task<IActionResult> RejectFriendRequest(int id)
+    {
+        int userId = GetUserId();
+
+        var result = await _service.RejectRequestAsync(id, userId);
+        return result ? Ok("Solicitud rechazada") : NotFound("No puedes rechazar esta solicitud");
+    }
+
+
     [HttpGet("pending")]
     public async Task<IActionResult> GetPendingRequests()
     {
