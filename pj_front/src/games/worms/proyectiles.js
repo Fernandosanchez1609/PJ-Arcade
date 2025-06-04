@@ -139,7 +139,7 @@ class Game extends Phaser.Scene {
                 this.turret.angle++;
             }
 
-            if (Phaser.Input.Keyboard.JustDown(this.fireButton)) {
+            if (Phaser.Input.Keyboard.JustDown(this.fireButton)) { // Con esto calculamos potencia disparo!!!!!!!!!!!
                 this.fire();
             }
             //  Update the text
@@ -173,7 +173,7 @@ class Game extends Phaser.Scene {
         //  Re-position the bullet where the turret is
         this.bullet.enableBody(true, this.turret.x, this.turret.y, true, true);
         //  Our launch trajectory is based on the angle of the turret and the power
-        this.physics.velocityFromAngle(
+        this.physics.velocityFromAngle( // CON ESTO CALCULAMOS TRAYECTORIA DISPAROS
             this.turret.angle,
             this.power,
             this.bullet.body.velocity
