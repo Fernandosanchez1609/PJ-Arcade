@@ -124,12 +124,6 @@ export class Game extends Phaser.Scene {
             { x: 15, y: -45 }, // derecha
         ];
 
-        // this.wormShapeOffsets = [
-        //     ...this.wormBaseOffsets,
-        //     ...this.wormTopOffsets,
-        //     ...this.wormSidesOffsets,
-        // ];
-
         this.input.on("pointerdown", (pointer) => {
             const localX =
                 pointer.x - (this.terrain.x - this.terrain.width / 2);
@@ -179,25 +173,6 @@ export class Game extends Phaser.Scene {
             label.setPosition(worm.x, worm.y - 40);
         });
 
-        // Movimiento horizontal controlado
-        if (cursors.left.isDown) {
-            worm.setVelocityX(-100);
-            worm.play("walk", true);
-            worm.setFlipX(false);
-        } else if (cursors.right.isDown) {
-            worm.setVelocityX(100);
-            worm.play("walk", true);
-            worm.setFlipX(true);
-        } else {
-            worm.setVelocityX(0);
-            worm.anims.stop();
-        }
-
-        // Salto
-        if (cursors.up.isDown && worm.body.blocked.down) {
-            worm.setVelocityY(-300); // ← valor negativo para saltar hacia arriba
-        }
-
         // Comprobar colisiones con el terreno usando el mapa lógico
         const collisions = this.checkCollisionDirections(worm.x, worm.y);
 
@@ -233,6 +208,28 @@ export class Game extends Phaser.Scene {
             } else {
                 worm.setVelocityX(0);
             }
+        }
+
+        // Movimiento horizontal controlado
+        if (cursors.left.isDown) {
+            worm.setVelocityX(-100);
+            worm.play("walk", true);
+            worm.setFlipX(false);
+        } else if (cursors.right.isDown) {
+            worm.setVelocityX(100);
+            worm.play("walk", true);
+            worm.setFlipX(true);
+        } else {
+            worm.setVelocityX(0);
+            worm.anims.stop();
+        }
+
+        // Salto
+        if (
+            cursors.up.isDown 
+            // && collisions.collideDown COMENTADA PARA DEBUGGEAR GUSANO VOLADOR
+        ) {
+            worm.setVelocityY(-300); // ← valor negativo para saltar hacia arriba
         }
 
         // Cursor dinámico según colisión con terreno
@@ -309,20 +306,6 @@ export class Game extends Phaser.Scene {
             collideTop = false,
             collideLeft = false,
             collideRight = false;
-
-        // for (const offset of this.wormShapeOffsets) {
-        //     const checkX = Math.floor(px + offset.x);
-        //     const checkY = Math.floor(py + offset.y);
-        //     if (this.isSolid(checkX, checkY)) {
-        //         const offsetY = offset.y;
-        //         const offsetX = offset.x;
-
-        //         if (offsetY >= -35 && offsetY <= -30) collideDown = true; // zona baja
-        //         // if (offsetY <= -100 && offsetY >= -110) collideTop = true; // zona alta
-        //         if (offsetX < 0) collideLeft = true;
-        //         if (offsetX > 0) collideRight = true;
-        //     }
-        // }
 
         for (const offset of this.wormBaseOffsets) {
             const checkX = Math.floor(px + offset.x);
