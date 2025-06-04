@@ -114,9 +114,9 @@ export class Game extends Phaser.Scene {
         ];
 
         this.wormTopOffsets = [
-            { x: -10, y: -105 }, // arriba izquierda
-            { x: 0, y: -105 }, // arriba centro
-            { x: 10, y: -105 }, // arriba derecha
+            { x: -10, y: -70 }, // arriba izquierda
+            { x: 0, y: -70 }, // arriba centro
+            { x: 10, y: -70 }, // arriba derecha
         ];
 
         this.wormSidesOffsets = [
@@ -239,8 +239,8 @@ export class Game extends Phaser.Scene {
 
         // Salto
         if (
-            cursors.up.isDown
-            // && collisions.collideDown COMENTADA PARA DEBUGGEAR GUSANO VOLADOR
+            cursors.up.isDown &&
+            collisions.collideDown // COMENTADA PARA DEBUGGEAR GUSANO VOLADOR
         ) {
             worm.setVelocityY(-300); // ← valor negativo para saltar hacia arriba
         }
