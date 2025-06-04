@@ -32,19 +32,21 @@ export class Game extends Phaser.Scene {
         this.cameras.main.setBounds(0, 0, 800, 600);
         this.camera = this.cameras.main;
 
-        // // Animacion explosion
-        // this.emitter = this.add.particles("fuego").createEmitter({
-        //     frame: Phaser.Utils.Array.NumberArray(0, 9), // frames del 0 al 9
-        //     advanceParticleFrame: true, // esto hace que los frames avancen
-        //     frameRate: 20, // velocidad del cambio de frame
-        //     speedX: { min: -120, max: 120 },
-        //     speedY: { min: -200, max: -120 },
-        //     rotation: { min: -15, max: 15 },
-        //     lifespan: 2000,
-        //     maxParticles: 10,
-        //     quantity: 10,
-        //     on: false,
-        // });
+        // Animacion explosion
+        fire = this.add.particles("fuego");
+
+        this.emitter = fire.createEmitter({
+            frame: Phaser.Utils.Array.NumberArray(0, 9), // frames del 0 al 9
+            advanceParticleFrame: true, // esto hace que los frames avancen
+            frameRate: 20, // velocidad del cambio de frame
+            speedX: { min: -120, max: 120 },
+            speedY: { min: -200, max: -120 },
+            rotation: { min: -15, max: 15 },
+            lifespan: 2000,
+            maxParticles: 10,
+            quantity: 10,
+            on: false,
+        });
 
         // // Grenade
         this.grenade = this.physics.add.sprite(100, 10, "grenade");

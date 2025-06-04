@@ -86,10 +86,6 @@ export class Collisions {
         terrainHeight,
         px,
         py
-        // ,
-        // wormBaseOffsets,
-        // wormTopOffsets,
-        // wormSidesOffsets
     ) {
         let collideDown = false,
             collideTop = false,
@@ -154,17 +150,7 @@ export class Collisions {
         return { collideDown, collideLeft, collideTop, collideRight };
     }
 
-    canClimb(
-        collisionMap,
-        terrainWidth,
-        terrainHeight,
-        px,
-        py,
-        direction
-        // ,
-        // wormSidesOffsets,
-        // wormBaseOffsets
-    ) {
+    canClimb(collisionMap, terrainWidth, terrainHeight, px, py, direction) {
         const stepHeight = 20;
         for (let i = 1; i <= stepHeight; i++) {
             const newX = px + direction * 10;
@@ -217,10 +203,4 @@ export class Collisions {
         }
         return 0;
     }
-
-    preload() {}
-
-    create() {}
-
-    update() {}
 }
