@@ -5,6 +5,7 @@ import { AuthInitializer } from "@/lib/AuthInitializer";
 import WsConnector from "@/components/WsConnector";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import FriendSidebar from "@/components/FriendSidebar";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -33,6 +34,7 @@ export default function RootLayout({ children }) {
             <Header />
             <AuthInitializer>
               <main className="flex-1 min-h-screen">{children}</main>
+              <FriendSidebar />
             </AuthInitializer>
             <Footer />
           </div>
