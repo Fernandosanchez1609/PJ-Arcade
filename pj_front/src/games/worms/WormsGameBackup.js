@@ -19,21 +19,51 @@ export class Game extends Phaser.Scene {
             frameWidth: 60,
             frameHeight: 60,
         });
+        this.load.image("grenade", "/images/grenade-20-20.png");
+        this.load.spritesheet("fuego", "/images/sprites/shothit.png", {
+            frameWidth: 60,
+            frameHeight: 60,
+        });
     }
 
     create() {
         this.physics.world.gravity.y = 500;
+        this.cameras.main.setBounds(0, 0, 800, 600);
+        this.camera = this.cameras.main;
+
+        // // Animacion explosion
+        // this.emitter = this.add.particles("fuego").createEmitter({
+        //     frame: Phaser.Utils.Array.NumberArray(0, 9), // frames del 0 al 9
+        //     advanceParticleFrame: true, // esto hace que los frames avancen
+        //     frameRate: 20, // velocidad del cambio de frame
+        //     speedX: { min: -120, max: 120 },
+        //     speedY: { min: -200, max: -120 },
+        //     rotation: { min: -15, max: 15 },
+        //     lifespan: 2000,
+        //     maxParticles: 10,
+        //     quantity: 10,
+        //     on: false,
+        // });
+
+        // // Grenade
+        this.grenade = this.physics.add.sprite(100, 10, "grenade");
+        this.grenade.setBounce(0.7).setCollideWorldBounds(false);
+        // .disableBody(true, true)
+
+        // // Para calcular la potencia del disparo
+        this.chargeStartTime = null;
 
         // Listener eventos de WebSocket
         window.addEventListener("rivalAttack", (event) => {
             const { x, y } = event.detail;
             this.terrain.erase("explosion", x - 23, y - 21.5);
+            // this.terrain.erase.arc(x, y, 16, 0, Math.PI * 2);
             this.terrainBitmap.context.clearRect(x - 23, y - 21.5, 46, 43);
             this.terrainBitmap.refresh();
             this.updateCollisionMapArea(x - 23, y - 21.5, 46, 43);
         });
 
-        this.add.image(410, 250, "background");
+        this.add.image(410, 250, "background").setDepth(-2);
 
         // Gusano animado con físicas
         this.anims.create({
@@ -81,7 +111,7 @@ export class Game extends Phaser.Scene {
         }
 
         // Terreno
-        this.terrain = this.add.renderTexture(400, 350, 800, 600).setDepth(1);
+        this.terrain = this.add.renderTexture(400, 350, 800, 600).setDepth(0);
         this.terrain.draw("terrain", 0, 0);
 
         const srcImage = this.textures.get("terrain").getSourceImage();
@@ -110,9 +140,9 @@ export class Game extends Phaser.Scene {
         ];
 
         this.wormTopOffsets = [
-            { x: -10, y: -70 }, // arriba izquierda
-            { x: 0, y: -70 }, // arriba centro
-            { x: 10, y: -70 }, // arriba derecha
+            { x: -10, y: -60 }, // arriba izquierda
+            { x: 0, y: -60 }, // arriba centro
+            { x: 10, y: -60 }, // arriba derecha
         ];
 
         this.wormSidesOffsets = [
@@ -161,7 +191,11 @@ export class Game extends Phaser.Scene {
 
         this.cursors = this.input.keyboard.createCursorKeys();
 
-        // this.physics.add.collider(this.worm1, this.terrain)
+        this.fireButton = this.input.keyboard.addKey(
+            Phaser.Input.Keyboard.KeyCodes.SPACE
+        );
+
+        this.physics.add.overlap(this.grenade, this.worms, this.terrain);
     }
 
     update() {
@@ -180,8 +214,12 @@ export class Game extends Phaser.Scene {
                 worm.body.center.y
             );
 
+            // iguala los valores de los objetos que comparten
+            // sustituye el codigo de abajo
+            Object.assign(worm, collisions);
+
             // Si colisión abajo, parar gravedad y velocidad Y
-            if (collisions.collideDown) {
+            if (worm.collideDown) {
                 worm.setVelocityY(0);
                 worm.body.allowGravity = false;
                 worm.body.blocked.down = true; // opcional para estados Phaser
@@ -190,33 +228,29 @@ export class Game extends Phaser.Scene {
                 worm.body.blocked.down = false;
             }
 
-            if (collisions.collideTop) {
+            if (worm.collideTop) {
                 worm.setVelocityY(0);
                 worm.body.allowGravity = true;
             }
 
             // Bloquear movimiento lateral solo si se mueve hacia colisión
-            if (collisions.collideLeft && worm.body.velocity.x < 0) {
-                const climbStep = this.canClimb(
-                    worm.body.center.x,
-                    worm.body.center.y,
-                    -1
-                );
+            if (worm.collideLeft && worm.body.velocity.x < 0) {
+                const climbStep = this.canClimb(worm.x, worm.y, -1);
                 if (climbStep > 0) {
                     worm.setY(worm.y - climbStep); // sube
                 } else {
                     worm.setVelocityX(0);
-                    worm.setX(worm.x + 1); // empuja hacia fuera
+                    worm.setX(worm.x + 0.5); // empuja hacia fuera
                 }
             }
 
-            if (collisions.collideRight && worm.body.velocity.x > 0) {
+            if (worm.collideRight && worm.body.velocity.x > 0) {
                 const climbStep = this.canClimb(worm.x, worm.y, 1);
                 if (climbStep > 0) {
                     worm.setY(worm.y - climbStep); // sube
                 } else {
                     worm.setVelocityX(0);
-                    worm.setX(worm.x - 1); // empuja hacia fuera
+                    worm.setX(worm.x - 0.5); // empuja hacia fuera
                 }
             }
 
@@ -224,15 +258,15 @@ export class Game extends Phaser.Scene {
                 worm.y = this.physics.world.bounds.height; // En el futuro matará al gusano
                 worm.body.velocity.y = Math.min(0, worm.body.velocity.y);
             }
-
-            // Salto
-            if (
-                cursors.up.isDown &&
-                collisions.collideDown // COMENTADA PARA DEBUGGEAR GUSANO VOLADOR
-            ) {
-                worm1.setVelocityY(-300); // ← valor negativo para saltar hacia arriba
-            }
         });
+
+        // Salto
+        if (
+            cursors.up.isDown &&
+            worm1.collideDown // COMENTADA PARA DEBUGGEAR GUSANO VOLADOR
+        ) {
+            worm1.setVelocityY(-300); // ← valor negativo para saltar hacia arriba
+        }
 
         // Movimiento horizontal controlado
         if (cursors.left.isDown) {
@@ -321,16 +355,31 @@ export class Game extends Phaser.Scene {
         let collideDown = false,
             collideTop = false,
             collideLeft = false,
-            collideRight = false;
+            collideRight = false,
+            collisionsArray = [];
 
-        for (const offset of this.wormBaseOffsets) {
-            const checkX = Math.floor(px + offset.x);
-            const checkY = Math.floor(py + offset.y);
+        for (let i = 0; i < this.wormBaseOffsets.length - 1; i++) {
+            const checkX = Math.floor(px + this.wormBaseOffsets[i].x);
+            const checkY = Math.floor(py + this.wormBaseOffsets[i].y);
+
             if (this.isSolid(checkX, checkY)) {
-                collideDown = true;
-                // break;
+                collisionsArray[i] = true;
             }
         }
+
+        // Con esto pretendía eliminar la caída lenta
+        // Pensábamos que se debía a que unos puntos colisionaban y otros no
+        collideDown =
+            (collisionsArray[0] && collisionsArray[1]) || // izquierda y centro
+            (collisionsArray[1] && collisionsArray[2]); // centro y derecha
+
+        // for (const offset of this.wormBaseOffsets) {
+        //     const checkX = Math.floor(px + offset.x);
+        //     const checkY = Math.floor(py + offset.y);
+        //     if (this.isSolid(checkX, checkY)) {
+        //         collideDown = true;
+        //     }
+        // }
 
         for (const offset of this.wormTopOffsets) {
             const checkX = Math.floor(px + offset.x);
@@ -349,7 +398,7 @@ export class Game extends Phaser.Scene {
             }
         }
 
-        return { collideDown, collideTop, collideLeft, collideRight };
+        return { collideDown, collideLeft, collideTop, collideRight };
     }
 
     canClimb(px, py, direction) {
