@@ -63,20 +63,22 @@ public class UserService
         return newUser;
     }
 
-    public async Task<User> AuthenticateAsync(string email, string password)
+    public async Task<(User? user, string? error)> AuthenticateAsync(string email, string password)
     {
         var user = await _unitOfWork.UserRepository.GetByEmailAsync(email);
-
         if (user == null)
-            return null;
+            return (null, "Correo o contraseña incorrectos.");
 
-        // Compara la contraseña con hash
+        if (user.IsBanned)
+            return (null, "Tu cuenta ha sido baneada.");
+
         var hashedInput = PasswordHelper.Hash(password);
         if (user.HashPassword != hashedInput)
-            return null;
+            return (null, "Correo o contraseña incorrectos.");
 
-        return user;
+        return (user, null);
     }
+
 
     public async Task<IEnumerable<UserDto>> GetAllUsersAsync()
     {
@@ -101,6 +103,19 @@ public class UserService
         await _unitOfWork.SaveAsync();
         return true;
     }
+
+    public async Task<bool?> ToggleUserBanAsync(int userId)
+    {
+        var user = await _unitOfWork.UserRepository.GetByIdAsync(userId);
+        if (user == null)
+            return null;
+
+        user.IsBanned = !user.IsBanned;
+        await _unitOfWork.SaveAsync();
+
+        return user.IsBanned;
+    }
+
 
 }
 

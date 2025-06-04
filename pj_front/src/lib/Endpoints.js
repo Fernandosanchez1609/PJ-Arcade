@@ -7,4 +7,5 @@ export const ENDPOINTS = {
   USERS: `${API_BASE}/api/User/AllUsers`,
   TOGGLE_ROLE: (userId) => `${API_BASE}/api/User/toggle-role/${userId}`,
   DELETE_USER: (userId) => `${API_BASE}/api/User/Delete/${userId}`,
+  TOGGLE_BAN: (userId) => `${API_BASE}/api/User/ban/${userId}`,
 };

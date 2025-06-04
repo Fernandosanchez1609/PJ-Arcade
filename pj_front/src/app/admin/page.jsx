@@ -7,11 +7,13 @@ import { useFetchUsers } from "@/hooks/useFetchUsers";
 import { useToggleUserRole } from "@/hooks/useToggleUserRole";
 import { useDeleteUser } from "@/hooks/useDeleteUser";
 import UserCardList from "@/components/admin/UserCardList";
+import { useBanUser } from "@/hooks/useBanUser";
 
 export default function AdminPage() {
   const { token, user } = useAuth();
   const router = useRouter();
   const { fetchUsers } = useFetchUsers();
+ 
 
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -33,6 +35,7 @@ export default function AdminPage() {
   // 2) Hooks de acción
   const toggleRole = useToggleUserRole(loadUsers);
   const deleteUser = useDeleteUser(loadUsers);
+  const banUser = useBanUser(loadUsers);
 
   // 3) Handlers pasados a UserCardList
   const handleToggleRole = (userId) => {
@@ -41,6 +44,9 @@ export default function AdminPage() {
 
   const handleDeleteUser = (userId) => {
     deleteUser(userId);
+  };
+  const handleToggleBan = (userId) => {
+    banUser(userId);
   };
 
   // 4) Efecto inicial
@@ -54,9 +60,9 @@ export default function AdminPage() {
 
   return (
     <main>
-        <h1 className="text-center">
-          Panel de Administración
-        </h1>
+      <h1 className="text-center">
+        Panel de Administración
+      </h1>
 
 
       {loading && <p>Cargando usuarios...</p>}
@@ -67,7 +73,9 @@ export default function AdminPage() {
         currentUserId={user?.id}
         onToggleRole={handleToggleRole}
         onDeleteUser={handleDeleteUser}
+        onToggleBan={handleToggleBan}
       />
+
     </main>
   );
 }

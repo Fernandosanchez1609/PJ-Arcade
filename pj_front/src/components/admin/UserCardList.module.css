@@ -35,28 +35,48 @@
   margin-bottom: 0.75rem;
 }
 
+.buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  
+}
+
 .toggleBtn {
   display: block;
   width: 100%;
-  padding: 0.5rem 1rem;
+  padding: 0.2rem;
   background-color: #2563eb;
   color: white;
   border: none;
   border-radius: 8px;
   cursor: pointer;
   font-weight: bold;
-  margin-bottom: 0.5rem;
+
 }
 
 .toggleBtn:hover {
   background-color: #1d4ed8;
 }
+.banBtn {
+  background-color: #f39c12;
+  color: white;
+  border: none;
+  border-radius: 0.4rem;
+  transition: background-color 0.3s ease;
+padding: 0.2rem;
+}
+
+.banBtn:hover {
+  background-color: #e67e22;
+}
+
 
 /* Estilos para el botón de eliminar */
 .deleteBtn {
   display: block;
   width: 100%;
-  padding: 0.5rem 1rem;
+ padding: 0.2rem;
   background-color: #ef4444;
   color: white;
   border: none;
