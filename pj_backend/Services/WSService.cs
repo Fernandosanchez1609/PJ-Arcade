@@ -28,7 +28,6 @@ namespace pj_backend.Services
                     await _matchmaking.TryMatchmaking(socketId);
                     break;
                 case "RivalInfo":
-                  
                     var targetSocketId = jsonEl.GetProperty("socketId").GetString();
                     await _manager.SendMessageAsync(targetSocketId, message);
                     break;
