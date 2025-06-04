@@ -1,5 +1,6 @@
 import { sendMessage } from "@/lib/WsClient";
 import { store } from "@/store/store";
+import { Clouds } from "@/games/worms/WormsClouds";
 
 export class Game extends Phaser.Scene {
     constructor() {
@@ -44,13 +45,44 @@ export class Game extends Phaser.Scene {
             repeat: -1,
         });
 
-        this.worm1 = this.physics.add.sprite(460, 100, "wormWalk");
-        this.worm1
-            .setCollideWorldBounds(true)
-            .setBounce(0)
-            .setDrag(1000, 0)
-            .setMaxVelocity(200, 500)
-            .body.setSize(40, 40, true);
+        // this.worm1 = this.physics.add.sprite(460, 200, "wormWalk");
+        // this.worm1
+        //     .setCollideWorldBounds(true)
+        //     .setBounce(0)
+        //     .setDrag(1000, 0)
+        //     .setMaxVelocity(200, 500)
+        //     .body.setSize(30, 40, true);
+
+        this.worms = [];
+
+        for (let i = 0; i < 6; i++) {
+            const worm = this.physics.add.sprite(50 + i * 80, 20, "wormWalk");
+            worm.setCollideWorldBounds(true)
+                .setBounce(0)
+                .setDrag(1000, 0)
+                .setMaxVelocity(200, 500)
+                .body.setSize(30, 40, true);
+
+            worm.wormId = i + 1; // número del 1 al 6
+
+            this.worms.push(worm);
+        }
+
+        // para mostrar el numero del gusano
+        this.wormLabels = [];
+
+        for (let worm of this.worms) {
+            const label = this.add
+                .text(worm.x, worm.y - 40, `#${worm.wormId}`, {
+                    font: "16px Arial",
+                    fill: "#ffffff",
+                    stroke: "#000",
+                    strokeThickness: 3,
+                })
+                .setOrigin(0.5);
+
+            this.wormLabels.push(label);
+        }
 
         // Terreno
         this.terrain = this.add.renderTexture(400, 350, 800, 600).setDepth(1);
@@ -65,8 +97,6 @@ export class Game extends Phaser.Scene {
         this.terrainBitmap.context.drawImage(srcImage, 0, 0);
         this.terrainBitmap.refresh();
 
-        ///////// Comienza gpt
-
         // Crear mapa lógico de colisión para el terreno
         this.terrainWidth = 800;
         this.terrainHeight = 600;
@@ -76,15 +106,28 @@ export class Game extends Phaser.Scene {
         this.updateCollisionMapFromBitmap(); // <- Esto es clave
 
         // Define la forma irregular aproximada del gusano para colisión (offsets relativos)
+
+        this.wormBaseOffsets = [
+            { x: -10, y: -35 }, // abajo izquierda
+            { x: 0, y: -35 }, // abajo centro
+            { x: 10, y: -35 }, // abajo derecha
+        ];
+
+        this.wormTopOffsets = [
+            { x: -10, y: -105 }, // arriba izquierda
+            { x: 0, y: -105 }, // arriba centro
+            { x: 10, y: -105 }, // arriba derecha
+        ];
+
+        this.wormSidesOffsets = [
+            { x: -10, y: -45 }, // izquierda
+            { x: 10, y: -45 }, // derecha
+        ];
+
         this.wormShapeOffsets = [
-            { x: -20, y: -20 },
-            { x: 0, y: -25 },
-            { x: 20, y: -20 },
-            { x: 25, y: 0 },
-            { x: 20, y: 20 },
-            { x: 0, y: 25 },
-            { x: -20, y: 20 },
-            { x: -25, y: 0 },
+            ...this.wormBaseOffsets,
+            ...this.wormTopOffsets,
+            ...this.wormSidesOffsets,
         ];
 
         this.input.on("pointerdown", (pointer) => {
@@ -118,60 +161,23 @@ export class Game extends Phaser.Scene {
             }
         });
 
-        // Nubes
-        this.cloudBackGroup = this.add.group();
-        this.cloudFrontGroup = this.add.group();
-
-        this.time.addEvent({
-            delay: 8500,
-            callback: () => this.spawnCloud("back"),
-            loop: true,
-        });
-
-        this.time.addEvent({
-            delay: 10000,
-            callback: () => this.spawnCloud("front"),
-            loop: true,
-        });
+        // Crear instancia de Clouds y comenzar la creación de nubes
+        this.clouds = new Clouds(this); // Pasa la escena al constructor de Clouds
+        this.clouds.startClouds(); // Comienza la creación de las nubes
 
         this.cursors = this.input.keyboard.createCursorKeys();
 
         // this.physics.add.collider(this.worm1, this.terrain)
     }
 
-    spawnCloud(layer) {
-        const cloudIndex = Phaser.Math.Between(1, 6);
-        const cloudKey = `cloud${cloudIndex}`;
-        const y = Phaser.Math.Between(50, 250);
-        const cloud = this.add.image(1200, y, cloudKey);
-
-        let scale, speed, group;
-
-        if (layer === "back") {
-            scale = Phaser.Math.FloatBetween(0.2, 0.5);
-            speed = Phaser.Math.FloatBetween(0.2, 0.3);
-            group = this.cloudBackGroup;
-        } else {
-            scale = Phaser.Math.FloatBetween(0.5, 0.7);
-            speed = Phaser.Math.FloatBetween(0.3, 0.5);
-            group = this.cloudFrontGroup;
-        }
-
-        cloud.setScale(scale);
-        group.add(cloud);
-
-        this.tweens.add({
-            targets: cloud,
-            x: -150,
-            duration: 18000 / speed,
-            ease: "Linear",
-            onComplete: () => cloud.destroy(),
-        });
-    }
-
     update() {
         const cursors = this.cursors;
-        const worm = this.worm1;
+        const worm = this.worms[0]; // ← Controla solo el gusano 1 por ahora
+
+        this.wormLabels.forEach((label, index) => {
+            const worm = this.worms[index];
+            label.setPosition(worm.x, worm.y - 40);
+        });
 
         // Movimiento horizontal controlado
         if (cursors.left.isDown) {
@@ -187,6 +193,11 @@ export class Game extends Phaser.Scene {
             worm.anims.stop();
         }
 
+        // Salto
+        if (cursors.up.isDown && worm.body.blocked.down) {
+            worm.setVelocityY(-300); // ← valor negativo para saltar hacia arriba
+        }
+
         // Comprobar colisiones con el terreno usando el mapa lógico
         const collisions = this.checkCollisionDirections(worm.x, worm.y);
 
@@ -200,12 +211,28 @@ export class Game extends Phaser.Scene {
             worm.body.blocked.down = false;
         }
 
+        if (collisions.collideTop) {
+            worm.setVelocityY(0);
+            worm.body.allowGravity = true;
+        }
+
         // Bloquear movimiento lateral solo si se mueve hacia colisión
         if (collisions.collideLeft && worm.body.velocity.x < 0) {
-            worm.setVelocityX(0);
+            const climbStep = this.canClimb(worm.x, worm.y, -1);
+            if (climbStep > 0) {
+                worm.y -= climbStep; // sube
+            } else {
+                worm.setVelocityX(0);
+            }
         }
+
         if (collisions.collideRight && worm.body.velocity.x > 0) {
-            worm.setVelocityX(0);
+            const climbStep = this.canClimb(worm.x, worm.y, 1);
+            if (climbStep > 0) {
+                worm.y -= climbStep; // sube
+            } else {
+                worm.setVelocityX(0);
+            }
         }
 
         // Cursor dinámico según colisión con terreno
@@ -279,6 +306,7 @@ export class Game extends Phaser.Scene {
     checkCollisionDirections(px, py) {
         // px, py son coordenadas centrales del gusano
         let collideDown = false,
+            collideTop = false,
             collideLeft = false,
             collideRight = false;
 
@@ -286,12 +314,80 @@ export class Game extends Phaser.Scene {
             const checkX = Math.floor(px + offset.x);
             const checkY = Math.floor(py + offset.y);
             if (this.isSolid(checkX, checkY)) {
-                if (offset.y > 5) collideDown = true;
-                else if (offset.x < -5) collideLeft = true;
-                else if (offset.x > 5) collideRight = true;
+                const offsetY = offset.y;
+                const offsetX = offset.x;
+
+                if (offsetY >= -35 && offsetY <= -30) collideDown = true; // zona baja
+                if (offsetY <= -100 && offsetY >= -110) collideTop = true; // zona alta
+                if (offsetX <= -10) collideLeft = true;
+                if (offsetX >= 10) collideRight = true;
             }
         }
 
-        return { collideDown, collideLeft, collideRight };
+        // for (const offset of this.wormBaseOffsets) {
+        //     const checkX = Math.floor(px + offset.x);
+        //     const checkY = Math.floor(py + offset.y);
+        //     if (this.isSolid(checkX, checkY)) {
+        //         collideDown = true;
+        //     }
+        // }
+
+        // for (const offset of this.wormTopOffsets) {
+        //     const checkX = Math.floor(px + offset.x);
+        //     const checkY = Math.floor(py + offset.y);
+        //     if (this.isSolid(checkX, checkY)) {
+        //         collideTop = true;
+        //     }
+        // }
+
+        // for (const offset of this.wormSidesOffsets) {
+        //     const checkX = Math.floor(px + offset.x);
+        //     const checkY = Math.floor(py + offset.y);
+        //     if (this.isSolid(checkX, checkY)) {
+        //         if (offset.x < 0) collideLeft = true;
+        //         else if (offset.x > 0) collideRight = true;
+        //     }
+        // }
+
+        return { collideDown, collideTop, collideLeft, collideRight };
+    }
+
+    canClimb(px, py, direction) {
+        // direction: -1 para izquierda, +1 para derecha
+        const stepHeight = 15; // cuantos pixeles "sube" el gusano para escalar
+        for (let i = 1; i <= stepHeight; i++) {
+            // Verificamos si al subir i pixeles y movernos en dirección lateral podemos pasar
+            const newX = px + direction * 10; // offset lateral igual que wormSidesOffsets
+            const newY = py - i; // subimos
+
+            // Comprobamos si hay colisión lateral en la nueva posición (simular checkCollisionDirections para el lateral)
+            let blocked = false;
+            for (const offset of this.wormSidesOffsets) {
+                if (
+                    (direction === -1 && offset.x < 0) ||
+                    (direction === 1 && offset.x > 0)
+                ) {
+                    const checkX = Math.floor(newX + offset.x);
+                    const checkY = Math.floor(newY + offset.y);
+                    if (this.isSolid(checkX, checkY)) {
+                        blocked = true;
+                        break;
+                    }
+                }
+            }
+            // También asegurarse que el suelo debajo está sólido para "apoyarse"
+            const baseOffset = this.wormBaseOffsets[0];
+            const baseX = Math.floor(newX + baseOffset.x);
+            const baseY = Math.floor(newY + baseOffset.y + 1); // un pixel más abajo del pie
+            if (!this.isSolid(baseX, baseY)) {
+                blocked = true; // si no hay suelo, no subir (no puede flotar)
+            }
+
+            if (!blocked) {
+                // Podemos subir i pixeles sin colisionar
+                return i;
+            }
+        }
+        return 0; // no puede subir
     }
 }
