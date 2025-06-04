@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Authorization;
 using pj_backend.Services;
 using pj_backend.Models.Database.Dtos;
+using pj_backend.Models.Database.Entities.enums;
+using pj_backend.Models.Database.Mapper;
 
 namespace pj_backend.Controllers;
 
@@ -25,12 +27,10 @@ public class FriendshipController : ControllerBase
     {
         int requesterId = GetUserId();
 
-        if (dto.RequesterId != requesterId)
-            return Forbid("No puedes enviar solicitudes como otro usuario");
-
-        var result = await _service.SendFriendRequestAsync(dto.RequesterId, dto.AddresseeId);
+        var result = await _service.SendFriendRequestAsync(requesterId, dto.AddresseeId);
         return result ? Ok("Solicitud enviada") : BadRequest("No se pudo enviar la solicitud");
     }
+
 
     [HttpPost("accept/{id}")]
     public async Task<IActionResult> AcceptFriendRequest(int id)
@@ -45,16 +45,15 @@ public class FriendshipController : ControllerBase
     public async Task<IActionResult> GetPendingRequests()
     {
         int userId = GetUserId();
-
-        var requests = await _service.GetPendingRequestsAsync(userId);
-        return Ok(requests.Select(f => new {
-            f.Id,
-            Requester = new { f.Requester.UserId, f.Requester.Name },
-            f.Status
-        }));
+        var pendingRequests = await _service.GetAllAsync(
+                    f => f.AddresseeId == userId && f.Status == FriendshipStatus.Pending,
+                    new[] { "Requester", "Addressee" }
+                );
+        return Ok(FriendshipMapper.ToDTOList(pendingRequests));
     }
 
-    [HttpGet("list")]
+
+    [HttpGet("friends")]
     public async Task<IActionResult> GetFriends()
     {
         int userId = GetUserId();
@@ -73,5 +72,19 @@ public class FriendshipController : ControllerBase
 
         return Ok(result);
     }
+
+    [HttpGet("pending/sent")]
+    public async Task<IActionResult> GetPendingSentRequests()
+    {
+        int userId = GetUserId();
+
+        var pendingRequests = await _service.GetAllAsync(
+            f => f.RequesterId == userId && f.Status == FriendshipStatus.Pending,
+            new[] { "Requester", "Addressee" }
+        );
+
+        return Ok(FriendshipMapper.ToDTOList(pendingRequests));
+    }
+
 
 }

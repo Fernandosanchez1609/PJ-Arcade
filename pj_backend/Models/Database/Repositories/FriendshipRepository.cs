@@ -5,7 +5,7 @@ using System.Linq.Expressions;
 
 namespace pj_backend.Models.Database.Repositories;
 
-public class FriendshipRepository
+public class FriendshipRepository 
 {
     private readonly AppDbContext _context;
 
