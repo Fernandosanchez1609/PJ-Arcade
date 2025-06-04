@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-    swcMinify: true, // Usar SWC para minificar el código (más rápido que Terser)
+    // swcMinify: true, // Usar SWC para minificar el código (más rápido que Terser)
 
     // Controlar los source maps
     webpack(config, { dev, isServer }) {
