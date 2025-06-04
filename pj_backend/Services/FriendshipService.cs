@@ -49,6 +49,22 @@ public class FriendshipService
         return true;
     }
 
+    public async Task<bool> RejectRequestAsync(int requestId, int currentUserId)
+    {
+        var friendship = await _repository.GetByIdAsync(requestId);
+
+        if (friendship == null || friendship.Status != FriendshipStatus.Pending)
+            return false;
+
+        if (friendship.AddresseeId != currentUserId)
+            return false;
+
+        friendship.Status = FriendshipStatus.Rejected;
+        await _repository.SaveChangesAsync();
+        return true;
+    }
+
+
 
     public async Task<List<Friendship>> GetPendingRequestsAsync(int userId)
     {
