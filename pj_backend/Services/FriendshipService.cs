@@ -64,4 +64,11 @@ public class FriendshipService
         );
     }
 
+    public async Task<List<Friendship>> GetAllAsync(
+    System.Linq.Expressions.Expression<Func<Friendship, bool>> predicate,
+    string[]? include = null)
+    {
+        return await _repository.GetAllAsync(predicate, include);
+    }
+
 }

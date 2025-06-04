@@ -15,6 +15,15 @@ public static class UserMapper
         };
     }
 
+    public static ProfileDto ToProfileDto(User user)
+    {
+        return new ProfileDto
+        {
+            UserId = user.UserId,
+            Name = user.Name
+        };
+    }
+
     public static ICollection<UserDto> ToDTOList(ICollection<User> users)
     {
         return users.Select(ToDTO).ToList();
