@@ -3,6 +3,7 @@ export class Collisions {
         this.scene = scene;
     }
 
+
     wormBaseOffsets = [
         { x: -7, y: -35 }, // abajo izquierda
         { x: 0, y: -35 }, // abajo centro
@@ -14,7 +15,6 @@ export class Collisions {
         { x: 0, y: -60 }, // arriba centro
         { x: 10, y: -60 }, // arriba derecha
     ];
-
     wormSidesOffsets = [
         { x: -10, y: -35 }, // izquierda abajo
         { x: 10, y: -35 }, // derecha abajo
@@ -23,6 +23,28 @@ export class Collisions {
         { x: -10, y: -55 }, // izquierda arriba?
         { x: 10, y: -55 }, // derecha arriba?
     ];
+
+    wormOffSetts = [
+        this.wormBaseOffsets,
+        this.wormTopOffsets,
+        this.wormSidesOffsets
+    ]
+
+
+    grenadeOffSetts = [
+        [   // Base
+            { x: 0, y: 2 }
+        ],
+        [   // Top
+            { x: 0, y: -2 }
+        ],
+        [   // Sides
+            { x: 2, y: 0 },
+            { x: 2, y: 0 }
+        ]
+    ]
+
+
 
     updateCollisionMapFromBitmap(
         collisionMap,
@@ -203,4 +225,61 @@ export class Collisions {
         }
         return 0;
     }
+
+    getSurfaceNormal(collisionMap, terrainWidth, terrainHeight, px, py) {
+        // Se asume que (px, py) es un punto de colisión con el terreno
+        // Comprobamos un área 3x3 alrededor para evaluar la pendiente
+
+        // Vectores unitarios para vecinos 8 direcciones
+        const neighbors = [
+            { dx: -1, dy: -1 },
+            { dx: 0, dy: -1 },
+            { dx: 1, dy: -1 },
+            { dx: -1, dy: 0 },
+            { dx: 1, dy: 0 },
+            { dx: -1, dy: 1 },
+            { dx: 0, dy: 1 },
+            { dx: 1, dy: 1 },
+        ];
+
+        // Vamos a sumar vectores "hacia fuera" para calcular normal
+        let normalX = 0;
+        let normalY = 0;
+
+        for (const n of neighbors) {
+            const nx = px + n.dx;
+            const ny = py + n.dy;
+
+            if (nx < 0 || ny < 0 || nx >= terrainWidth || ny >= terrainHeight) {
+                continue;
+            }
+
+            const solid = collisionMap[ny * terrainWidth + nx] === 1;
+
+            // Si el vecino está vacío (no sólido), la superficie apunta hacia allí
+            if (!solid) {
+                normalX += n.dx;
+                normalY += n.dy;
+            }
+        }
+
+        // Normalizar vector
+        const length = Math.hypot(normalX, normalY);
+        if (length === 0) {
+            // Si no detectamos ninguna dirección, normal vertical arriba
+            return { x: 0, y: -1 };
+        }
+
+        return { x: normalX / length, y: normalY / length };
+    }
+
+    reflectVector(vx, vy, nx, ny) {
+        const dot = vx * nx + vy * ny;
+        const rx = vx - 2 * dot * nx;
+        const ry = vy - 2 * dot * ny;
+        return { x: rx, y: ry };
+    }
+
+
+
 }

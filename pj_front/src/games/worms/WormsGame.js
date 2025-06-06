@@ -32,6 +32,8 @@ export class Game extends Phaser.Scene {
         this.cameras.main.setBounds(0, 0, 800, 600);
         this.camera = this.cameras.main;
 
+        this.add.image(410, 250, "background").setDepth(-2);
+
         // // Animacion explosion
         // fire = this.add.particles("fuego");
 
@@ -49,14 +51,19 @@ export class Game extends Phaser.Scene {
         // });
 
         // // Grenade
-        this.grenade = this.physics.add.sprite(100, 10, "grenade");
-        this.grenade.setBounce(0.7).setCollideWorldBounds(false);
-        // .disableBody(true, true)
+        this.grenade = this.physics.add.sprite(500, 150, "grenade");
+        this.grenade
+            .setBounce(0)  // Desactivamos rebote para hacerlo manual
+            .setCollideWorldBounds(false)
+            .setMaxVelocity(300, 1000)
+            .setVelocityX(400);
+        this.grenade.collideDown;
+        this.grenade.collideLeft;
+        this.grenade.collideTop;
+        this.grenade.collideRight;
 
         // // Para calcular la potencia del disparo
         this.chargeStartTime = null;
-
-        this.add.image(410, 250, "background").setDepth(-2);
 
         // Gusano animado con físicas
         this.anims.create({
@@ -123,9 +130,9 @@ export class Game extends Phaser.Scene {
             this.terrainWidth * this.terrainHeight
         );
 
-        this.colisiones = new Collisions(this);
+        this.collisions = new Collisions(this);
 
-        this.colisiones.updateCollisionMapFromBitmap(
+        this.collisions.updateCollisionMapFromBitmap(
             this.collisionMap,
             this.terrainBitmap,
             this.terrainWidth,
@@ -150,7 +157,7 @@ export class Game extends Phaser.Scene {
             this.terrainBitmap.refresh();
 
             // Actualizar mapa lógico en zona destruida
-            this.colisiones.updateCollisionMapArea(
+            this.collisions.updateCollisionMapArea(
                 this.collisionMap,
                 this.terrainBitmap,
                 this.terrainWidth,
@@ -161,25 +168,6 @@ export class Game extends Phaser.Scene {
                 43
             );
 
-            // Listener eventos de WebSocket
-            window.addEventListener("rivalAttack", (event) => {
-                const { x, y } = event.detail;
-                this.terrain.erase("explosion", x - 23, y - 21.5);
-                // this.terrain.erase.arc(x, y, 16, 0, Math.PI * 2);
-                this.terrainBitmap.context.clearRect(x - 23, y - 21.5, 46, 43);
-                this.terrainBitmap.refresh();
-                this.colisiones.updateCollisionMapArea(
-                    this.collisionMap,
-                    this.terrainBitmap,
-                    this.terrainWidth,
-                    this.terrainHeight,
-                    localX - 23,
-                    localY - 21.5,
-                    46,
-                    43
-                );
-            });
-
             const rivalSocketId = store.getState().match.rivalSocketId;
 
             if (rivalSocketId) {
@@ -189,6 +177,27 @@ export class Game extends Phaser.Scene {
                     y: localY,
                 });
             }
+
+
+        });
+
+        // Listener eventos de WebSocket
+        window.addEventListener("rivalAttack", (event) => {
+            const { x, y } = event.detail;
+            this.terrain.erase("explosion", x - 23, y - 21.5);
+            // this.terrain.erase.arc(x, y, 16, 0, Math.PI * 2);
+            this.terrainBitmap.context.clearRect(x - 23, y - 21.5, 46, 43);
+            this.terrainBitmap.refresh();
+            this.collisions.updateCollisionMapArea(
+                this.collisionMap,
+                this.terrainBitmap,
+                this.terrainWidth,
+                this.terrainHeight,
+                x - 23,
+                y - 21.5,
+                46,
+                43
+            );
         });
 
         // Crear instancia de Clouds y comenzar la creación de nubes
@@ -200,8 +209,6 @@ export class Game extends Phaser.Scene {
         this.fireButton = this.input.keyboard.addKey(
             Phaser.Input.Keyboard.KeyCodes.SPACE
         );
-
-        this.physics.add.overlap(this.grenade, this.worms, this.terrain);
     }
 
     update() {
@@ -213,9 +220,14 @@ export class Game extends Phaser.Scene {
             label.setPosition(worm.x, worm.y - 40);
         });
 
+        if (this.grenade.active) {
+            this.grenadeVsLand();
+        }
+
+
         // Comprobar colisiones con el terreno usando el mapa lógico
         this.worms.forEach((worm) => {
-            const collisions = this.colisiones.checkCollisionDirections(
+            const wormCollisions = this.collisions.checkCollisionDirections(
                 this.collisionMap,
                 this.terrainWidth,
                 this.terrainHeight,
@@ -225,7 +237,7 @@ export class Game extends Phaser.Scene {
 
             // iguala los valores de los objetos que comparten
             // sustituye el codigo de abajo
-            Object.assign(worm, collisions);
+            Object.assign(worm, wormCollisions);
 
             // Si colisión abajo, parar gravedad y velocidad Y
             if (worm.collideDown) {
@@ -244,7 +256,7 @@ export class Game extends Phaser.Scene {
 
             // Bloquear movimiento lateral solo si se mueve hacia colisión
             if (worm.collideLeft && worm.body.velocity.x < 0) {
-                const climbStep = this.colisiones.canClimb(
+                const climbStep = this.collisions.canClimb(
                     this.collisionMap,
                     this.terrainWidth,
                     this.terrainHeight,
@@ -261,7 +273,7 @@ export class Game extends Phaser.Scene {
             }
 
             if (worm.collideRight && worm.body.velocity.x > 0) {
-                const climbStep = this.colisiones.canClimb(
+                const climbStep = this.collisions.canClimb(
                     this.collisionMap,
                     this.terrainWidth,
                     this.terrainHeight,
@@ -305,6 +317,20 @@ export class Game extends Phaser.Scene {
             worm1.anims.stop();
         }
 
+        if (this.grenade.active) {
+            const grenadeCollisions = this.collisions.checkCollisionDirections(
+                this.collisionMap,
+                this.terrainWidth,
+                this.terrainHeight,
+                this.grenade.body.center.x,
+                this.grenade.body.center.y
+            );
+            Object.assign(this.grenade, grenadeCollisions);
+            // if (this.grenade.collideDown && this.grenade.body.velocity.y >= 0) {
+            //     this.grenade.body.allowGravity = false;
+            // }
+        }
+
         // Cursor dinámico según colisión con terreno
         const pointer = this.input.activePointer;
         const alpha = this.textures.getPixelAlpha(
@@ -313,5 +339,68 @@ export class Game extends Phaser.Scene {
             "terrainBitmap"
         );
         this.game.canvas.style.cursor = alpha > 0 ? "crosshair" : "default";
+
+
+    }
+
+
+    grenadeVsLand() {
+        const x = Math.floor(this.grenade.body.center.x);
+        const y = Math.floor(this.grenade.body.center.y);
+
+        const isInsideTerrain = this.collisions.isSolid(
+            this.collisionMap,
+            this.terrainWidth,
+            this.terrainHeight,
+            x,
+            y
+        );
+
+        if (isInsideTerrain) {
+            const normal = this.collisions.getSurfaceNormal(
+                this.collisionMap,
+                this.terrainWidth,
+                this.terrainHeight,
+                x,
+                y
+            );
+
+            const vx = this.grenade.body.velocity.x;
+            const vy = this.grenade.body.velocity.y;
+
+            const reflected = this.collisions.reflectVector(vx, vy, normal.x, normal.y);
+
+            const bounceFactor = 0.6;
+            this.grenade.setVelocity(reflected.x * bounceFactor, reflected.y * bounceFactor);
+
+            this.grenade.setDrag(50, 0);
+
+            const speed = Math.hypot(reflected.x, reflected.y);
+            if (speed < 10) {
+                this.grenade.setVelocity(0);
+                // this.removeGrenade(); // O lo que debas hacer cuando se detiene
+            }
+        }
+    }
+
+
+
+
+    removeGrenade(hasExploded) {
+        if (typeof hasExploded === "undefined") {
+            hasExploded = false;
+        }
+        this.grenade.disableBody(true, true);
+        this.camera.stopFollow();
+        let delay = 1000;
+        if (hasExploded) delay = 2000;
+
+        this.cameraTween = this.tweens.add({
+            targets: this.camera,
+            scrollX: 0,
+            duration: 1000,
+            ease: "Quintic.Out",
+            delay: delay,
+        });
     }
 }
