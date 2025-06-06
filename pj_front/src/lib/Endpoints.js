@@ -5,6 +5,7 @@ export const ENDPOINTS = {
   REGISTER: `${API_BASE}/api/User/register`,
   GAMES: `${API_BASE}/api/Game`,
   USERS: `${API_BASE}/api/User/AllUsers`,
+  PROFILES: `${API_BASE}/api/User/Profiles`, 
   TOGGLE_ROLE: (userId) => `${API_BASE}/api/User/toggle-role/${userId}`,
   DELETE_USER: (userId) => `${API_BASE}/api/User/Delete/${userId}`,
   TOGGLE_BAN: (userId) => `${API_BASE}/api/User/ban/${userId}`,

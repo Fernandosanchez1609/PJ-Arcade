@@ -53,9 +53,7 @@ export function useFriendship() {
   };
 
   const acceptRequest = async (requestId) => {
-    const newFriend = await acceptFriendRequest(requestId);
-    dispatch(removePendingReceivedRequest(requestId));
-    dispatch(addFriend(newFriend));
+    await acceptFriendRequest(requestId);
     await fetchAll();
   };
 

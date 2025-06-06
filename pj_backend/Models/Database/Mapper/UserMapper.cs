@@ -15,7 +15,7 @@ public static class UserMapper
         };
     }
 
-    public static ProfileDto ToProfileDto(User user)
+    public static ProfileDto ToProfileDto(this User user)
     {
         return new ProfileDto
         {

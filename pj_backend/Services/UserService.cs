@@ -122,5 +122,12 @@ public class UserService
 
         return user.Name;
     }
+
+    public async Task<IEnumerable<ProfileDto>> GetAllUserProfilesAsync()
+    {
+        var users = await _unitOfWork.UserRepository.GetAllAsync();
+        return users.Select(u => u.ToProfileDto());
+    }
+
 }
 

@@ -158,4 +158,19 @@ public class UserController : ControllerBase
         return Ok(mensaje);
     }
 
+    [HttpGet("profiles")]
+    [Authorize]
+    public async Task<ActionResult<IEnumerable<ProfileDto>>> GetAllUserProfiles()
+    {
+        try
+        {
+            var profiles = await _userService.GetAllUserProfilesAsync();
+            return Ok(profiles);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Error al obtener los perfiles: {ex.Message}");
+        }
+    }
+
 }
