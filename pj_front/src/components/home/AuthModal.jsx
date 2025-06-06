@@ -3,6 +3,8 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { toast } from "react-toastify";
+
 
 function AuthModal({ onClose }) {
   const [isLogin, setIsLogin] = useState(true);
@@ -10,8 +12,6 @@ function AuthModal({ onClose }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-
-  // Usamos el hook para acceder a login, register y logout
   const { login, register } = useAuth();
 
   const handleSubmit = async (e) => {
@@ -22,20 +22,21 @@ function AuthModal({ onClose }) {
       if (isLogin) {
         // Llamamos al login del hook, que actualiza Redux y localStorage
         data = await login({ email, password });
-        console.log("login exitoso", data);
+        
+        toast.success("bienvenido de nuevo 🎉");
       } else {
         if (password !== confirmPassword) {
-          alert("Las contraseñas no coinciden");
+          toast.error("Las contraseñas no coinciden");
           return;
         }
         // Llamamos al register del hook
         data = await register({ name: username, email, password });
-        console.log("registro exitoso", data);
+        toast.success("Registro exitoso 🎉");
       }
 
       onClose();
     } catch (err) {
-      alert(err.message);
+      toast.error(err.message || "Algo salió mal.");
     }
   };
 

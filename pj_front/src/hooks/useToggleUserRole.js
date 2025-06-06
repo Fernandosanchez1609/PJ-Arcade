@@ -17,7 +17,7 @@ export function useToggleUserRole(onSuccess) {
 
       if (onSuccess) onSuccess();
     } catch (err) {
-      alert(err.message);
+      toast.error(err.message || "Algo salió mal.");
     }
   };
 

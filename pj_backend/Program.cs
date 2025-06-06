@@ -71,7 +71,7 @@ namespace pj_backend
 
             //inyeccion de servicios
             builder.Services.AddScoped<UserService>();
-            builder.Services.AddSingleton<WSService>();
+            builder.Services.AddScoped<WSService>();
             builder.Services.AddScoped<GameRepository>();
             builder.Services.AddScoped<GameService>();
             builder.Services.AddSingleton<MatchmakingService>();

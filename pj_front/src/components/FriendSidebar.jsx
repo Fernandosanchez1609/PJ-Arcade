@@ -1,41 +1,40 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
+import { useFriendship } from '@/hooks/useFriendship';
+import { useAuth } from '@/hooks/useAuth';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { getFriends, getPendingReceivedRequests, getPendingSentRequests } from "@/lib/friendshipService";
 import styles from "./FriendSidebar.module.css";
+import { sendMessage } from '@/lib/WsClient';
 
 export default function FriendSidebar() {
-  const [activeTab, setActiveTab] = useState("friends");
-  const [isOpen, setIsOpen] = useState(true);
-
-  const [friends, setFriends] = useState([]);
-  const [receivedRequests, setReceivedRequests] = useState([]);
-  const [sentRequests, setSentRequests] = useState([]);
+  const onlineStatus = useSelector((state) => state.friendship.onlineStatus);
+  const [isOpen, setIsOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState('friends');
+  const { token, user } = useAuth();
+  const {
+    friends,
+    pendingReceived,
+    pendingSent,
+    fetchAll,
+    acceptRequest,
+    rejectRequest,
+  } = useFriendship();
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [friendsData, receivedData, sentData] = await Promise.all([
-          getFriends(),
-          getPendingReceivedRequests(),
-          getPendingSentRequests(),
-        ]);
-        setFriends(friendsData);
-        setReceivedRequests(receivedData);
-        setSentRequests(sentData);
-      } catch (error) {
-        console.error("Error loading friends data:", error);
-      }
-    };
-    fetchData();
-  }, []);
+    fetchAll();
+  }, [token, user]);
+
+  const handleAceptRequest = async (requestId, newFriendId) => {
+    await acceptRequest(requestId);
+    sendMessage("RequestAcepted", newFriendId );
+  }
 
   return (
     <div
-      className={`${styles.sidebar} ${
-        isOpen ? styles.sidebarOpen : styles.sidebarClosed
-      }`}
+      className={`${styles.sidebar} ${isOpen ? styles.sidebarOpen : styles.sidebarClosed
+        }`}
     >
       <button
         onClick={() => setIsOpen(!isOpen)}
@@ -58,27 +57,50 @@ export default function FriendSidebar() {
 
         <TabsContent value="friends">
           <ul className={styles.listMarginTop}>
-            {friends.map((friend) => (
-              <li key={friend.userId} className={styles.listItem}>
-                {friend.name}
-              </li>
-            ))}
+            {friends.map((friend) => {
+              const isOnline = onlineStatus[friend.userId];
+              return (
+                <li key={friend.userId} className={styles.listItem}>
+                  {friend.name}{" "}
+                  <span>
+                    {isOnline ? "🟢" : "⚪"}
+                  </span>
+                </li>
+              );
+            })}
           </ul>
         </TabsContent>
 
         <TabsContent value="received">
           <ul className={styles.listMarginTop}>
-            {receivedRequests.map((req) => (
-              <li key={req.id} className={styles.listItem}>
-                {req.requester.name}
+            {pendingReceived.map((req) => (
+              <li key={req.id} className={styles.listItem} style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <span>{req.requester.name}</span>
+                <span>
+                  <button
+                    onClick={() => handleAceptRequest(req.id, req.requester.id)}
+                    aria-label="Aceptar solicitud"
+                    style={{ marginRight: 8, cursor: "pointer", background: "none", border: "none", fontSize: "1.2rem" }}
+                  >
+                    ✔️
+                  </button>
+                  <button
+                    onClick={() => rejectRequest(req.id)}
+                    aria-label="Rechazar solicitud"
+                    style={{ cursor: "pointer", background: "none", border: "none", fontSize: "1.2rem" }}
+                  >
+                    ❌
+                  </button>
+                </span>
               </li>
             ))}
           </ul>
         </TabsContent>
 
+
         <TabsContent value="sent">
           <ul className={styles.listMarginTop}>
-            {sentRequests.map((req) => (
+            {pendingSent.map((req) => (
               <li key={req.id} className={styles.listItem}>
                 {req.addressee.name}
               </li>

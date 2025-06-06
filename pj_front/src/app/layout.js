@@ -6,6 +6,8 @@ import WsConnector from "@/components/WsConnector";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import FriendSidebar from "@/components/FriendSidebar";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -23,7 +25,7 @@ export const metadata = {
 };
 
 export default function RootLayout({ children }) {
-   return (
+  return (
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
@@ -33,7 +35,21 @@ export default function RootLayout({ children }) {
           <div className="flex flex-col min-h-screen">
             <Header />
             <AuthInitializer>
-              <main className="flex-1 min-h-screen">{children}</main>
+              <main className="flex-1 min-h-screen">
+                {children}
+                <ToastContainer
+                  position="bottom-right"
+                  autoClose={3000}
+                  hideProgressBar={false}
+                  newestOnTop={false}
+                  closeOnClick
+                  rtl={false}
+                  pauseOnFocusLoss
+                  draggable
+                  pauseOnHover
+                  theme="colored"
+                />
+              </main>
               <FriendSidebar />
             </AuthInitializer>
             <Footer />

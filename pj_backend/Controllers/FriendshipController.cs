@@ -4,6 +4,7 @@ using pj_backend.Services;
 using pj_backend.Models.Database.Dtos;
 using pj_backend.Models.Database.Entities.enums;
 using pj_backend.Models.Database.Mapper;
+using pj_backend.WS;
 
 namespace pj_backend.Controllers;
 
@@ -13,10 +14,13 @@ namespace pj_backend.Controllers;
 public class FriendshipController : ControllerBase
 {
     private readonly FriendshipService _service;
-
-    public FriendshipController(FriendshipService service)
+    private readonly WSService _wsService;
+    private readonly UserService _userService;
+    public FriendshipController(FriendshipService service, WSService wsService, UserService userService)
     {
         _service = service;
+        _wsService = wsService;
+        _userService = userService;
     }
 
    
@@ -27,7 +31,12 @@ public class FriendshipController : ControllerBase
     {
         int requesterId = GetUserId();
 
+        string requesterName = await _userService.GetUserNameById(requesterId);
+
         var result = await _service.SendFriendRequestAsync(requesterId, dto.AddresseeId);
+        WSMessage message = new WSMessage { Data =$"{requesterName} te ha mandado una solicitud de amistad" ,Type = "RequestRecived"};
+
+        await _wsService.SendByUserId(dto.AddresseeId, message);
         return result ? Ok("Solicitud enviada") : BadRequest("No se pudo enviar la solicitud");
     }
 
@@ -38,6 +47,7 @@ public class FriendshipController : ControllerBase
         int userId = GetUserId();
 
         var result = await _service.AcceptRequestAsync(id, userId);
+       
         return result ? Ok("Solicitud aceptada") : NotFound("No puedes aceptar esta solicitud");
     }
 

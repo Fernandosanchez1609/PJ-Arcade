@@ -2,6 +2,10 @@ import { ENDPOINTS } from "./Endpoints";
 
 export async function getFriends() {
   const token = localStorage.getItem("token");
+  if (!token) {
+    return [];
+  }
+
   const res = await fetch(ENDPOINTS.GET_FRIENDS, {
     method: "GET",
     headers: {
@@ -16,6 +20,9 @@ export async function getFriends() {
 
 export async function getPendingReceivedRequests() {
   const token = localStorage.getItem("token");
+  if (!token) {
+    return [];
+  }
   const res = await fetch(ENDPOINTS.GET_PENDING_RECEIVED_REQUESTS, {
     method: "GET",
     headers: {
@@ -30,6 +37,9 @@ export async function getPendingReceivedRequests() {
 
 export async function getPendingSentRequests() {
   const token = localStorage.getItem("token");
+  if (!token) {
+    return [];
+  }
   const res = await fetch(ENDPOINTS.GET_PENDING_SENT_REQUESTS, {
     method: "GET",
     headers: {
@@ -41,3 +51,48 @@ export async function getPendingSentRequests() {
   return await res.json();
 }
 
+export async function sendFriendRequest(receiverId) {
+  const token = localStorage.getItem("token");
+  if (!token) throw new Error("Usuario no autenticado");
+
+  const res = await fetch(ENDPOINTS.SEND_FRIEND_REQUEST, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ receiverId }),
+  });
+  if (!res.ok) throw new Error("Error al enviar solicitud de amistad");
+  return await res.json();
+}
+
+export async function acceptFriendRequest(requestId) {
+  const token = localStorage.getItem("token");
+  if (!token) throw new Error("Usuario no autenticado");
+
+  const res = await fetch(ENDPOINTS.ACCEPT_FRIEND_REQUEST(requestId), {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  if (!res.ok) throw new Error("Error al aceptar solicitud de amistad");
+  return await res.json();
+}
+
+export async function rejectFriendRequest(requestId) {
+  const token = localStorage.getItem("token");
+  if (!token) throw new Error("Usuario no autenticado");
+
+  const res = await fetch(ENDPOINTS.REJECT_FRIEND_REQUEST(requestId), {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  if (!res.ok) throw new Error("Error al rechazar solicitud de amistad");
+  return await res.json();
+}

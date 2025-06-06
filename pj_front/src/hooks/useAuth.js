@@ -4,6 +4,7 @@
 import { useDispatch, useSelector } from 'react-redux';
 import { setCredentials, clearCredentials } from '@/store/slices/authSlice';
 import * as authService from '@/lib/authService';
+import { sendMessage } from '@/lib/WsClient';
 
 export function useAuth() {
   const dispatch = useDispatch();
@@ -13,7 +14,7 @@ export function useAuth() {
   // Llama al endpoint, recoge el token y lo guarda en Redux (+ localStorage via slice)
   const login = async ({ email, password }) => {
     const data = await authService.login({ email, password });
-    // <-- Aquí lees accessToken en lugar de token
+  
     const accessToken = data.accessToken;
     dispatch(setCredentials(accessToken));
     return data;
@@ -29,6 +30,7 @@ export function useAuth() {
 
   // Borra token de store y de localStorage
   const logout = () => {
+    sendMessage("Unidentify", {userId: user.id});
     dispatch(clearCredentials());
   };
 

@@ -116,6 +116,11 @@ public class UserService
         return user.IsBanned;
     }
 
+    public async Task<string> GetUserNameById(int userId)
+    {
+        var user = await _unitOfWork.UserRepository.GetByIdAsync(userId);
 
+        return user.Name;
+    }
 }
 

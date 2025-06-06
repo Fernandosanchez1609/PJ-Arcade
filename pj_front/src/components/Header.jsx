@@ -5,6 +5,7 @@ import { useState } from 'react';
 import AuthModal from './home/AuthModal';
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "next/navigation"; 
+import { sendMessage } from "@/lib/WsClient";
 
 const Header = () => {
     const { token, user, logout } = useAuth();
@@ -22,6 +23,12 @@ const Header = () => {
           setPlayerName("Inicia Sesión ⇒");
         }
     }, [token, user]);
+
+    useEffect(() => {
+      if (user != null) {
+        sendMessage("Identify", { userId: user.id });
+      }
+    },[user]);
 
     const handleLogout = () => {
       

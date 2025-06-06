@@ -79,7 +79,7 @@ public class UserController : ControllerBase
 
             if (user == null)
             {
-                return Unauthorized(error); // Mensaje específico: incorrecto o baneado
+                return Unauthorized(error); 
             }
 
             var tokenDescriptor = new SecurityTokenDescriptor

@@ -87,4 +87,26 @@ public class FriendshipService
         return await _repository.GetAllAsync(predicate, include);
     }
 
+    public async Task<List<string>> GetFriendIdsAsync(string userId)
+    {
+        int id = int.Parse(userId);
+
+        var friendships = await _repository.GetAllAsync(f =>
+            f.Status == FriendshipStatus.Accepted &&
+            (f.RequesterId == id || f.AddresseeId == id)
+        );
+
+        var friendIds = new List<string>();
+
+        foreach (var f in friendships)
+        {
+            if (f.RequesterId == id)
+                friendIds.Add(f.AddresseeId.ToString());
+            else
+                friendIds.Add(f.RequesterId.ToString());
+        }
+
+        return friendIds;
+    }
+
 }
