@@ -40,9 +40,10 @@ namespace pj_backend.Services
                     break;
                 case "RequestAcepted":
                     var notifiAcepted = jsonEl.GetString();
+                    onlineFriends = await GetFriendsOnline(notifiAcepted);
                     await _manager.SendMessageToUserAsync(notifiAcepted, new WSMessage {
-                        Type = "RequestAcepted",
-                        Data = "Han aceptado tu solicitud de amistad"
+                        Type = "FriendsOnlineList",
+                        Data = onlineFriends
                     });
                     break;
                 case "Unidentify":

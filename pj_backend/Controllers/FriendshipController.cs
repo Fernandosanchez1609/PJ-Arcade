@@ -106,5 +106,7 @@ public class FriendshipController : ControllerBase
         return Ok(FriendshipMapper.ToDTOList(pendingRequests));
     }
 
+    
+
 
 }

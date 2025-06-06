@@ -61,10 +61,12 @@ export async function sendFriendRequest(receiverId) {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify({ receiverId }),
+    body: JSON.stringify({ addresseeId: receiverId }),
   });
+
   if (!res.ok) throw new Error("Error al enviar solicitud de amistad");
-  return await res.json();
+
+  return { message: "Solicitud enviada correctamente" };
 }
 
 export async function acceptFriendRequest(requestId) {
