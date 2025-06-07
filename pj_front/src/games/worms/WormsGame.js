@@ -243,10 +243,10 @@ export class Game extends Phaser.Scene {
             if (worm.collideDown) {
                 worm.setVelocityY(0);
                 worm.body.allowGravity = false;
-                worm.body.blocked.down = true; // opcional para estados Phaser
+                // worm.body.blocked.down = true; // opcional para estados Phaser
             } else {
                 worm.body.allowGravity = true;
-                worm.body.blocked.down = false;
+                // worm.body.blocked.down = false;
             }
 
             if (worm.collideTop) {
@@ -265,10 +265,12 @@ export class Game extends Phaser.Scene {
                     -1
                 );
                 if (climbStep > 0) {
-                    worm.setY(worm.y - climbStep); // sube
+                    worm.setY(worm.y - climbStep);
+                    worm.body.updateFromGameObject?.();
                 } else {
-                    worm.setVelocityX(0);
-                    worm.setX(worm.x + 0.5); // empuja hacia fuera
+                    worm.body.setVelocityX(+0);
+                    worm.setX(worm.x+= 0.3) ;
+                    worm.body.updateFromGameObject?.();
                 }
             }
 
@@ -279,15 +281,18 @@ export class Game extends Phaser.Scene {
                     this.terrainHeight,
                     worm.x,
                     worm.y,
-                    -1
+                    +1 // <--- importante
                 );
                 if (climbStep > 0) {
-                    worm.setY(worm.y - climbStep); // sube
+                    worm.setY(worm.y - climbStep);
+                    worm.body.updateFromGameObject?.();
                 } else {
-                    worm.setVelocityX(0);
-                    worm.setX(worm.x - 0.5); // empuja hacia fuera
+                    worm.body.setVelocityX(0);
+                    worm.setX(worm.x-= 0.3) ;
+                    worm.body.updateFromGameObject?.();
                 }
             }
+
 
             if (worm.y >= this.physics.world.bounds.height) {
                 worm.y = this.physics.world.bounds.height; // En el futuro matará al gusano
