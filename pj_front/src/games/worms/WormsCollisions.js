@@ -15,10 +15,13 @@ export class Collisions {
         { x: 0, y: -60 }, // arriba centro
         { x: 10, y: -60 }, // arriba derecha
     ];
-    wormSidesOffsets = [
+    wormLeftOffsets = [
         { x: -10, y: -35 }, // izquierda abajo
         { x: 10, y: -35 }, // derecha abajo
         { x: -10, y: -45 }, // izquierda centro?
+    ];
+
+    wormRightOffsets = [
         { x: 10, y: -45 }, // derecha centro?
         { x: -10, y: -55 }, // izquierda arriba?
         { x: 10, y: -55 }, // derecha arriba?
@@ -112,8 +115,7 @@ export class Collisions {
         let collideDown = false,
             collideTop = false,
             collideLeft = false,
-            collideRight = false,
-            collisionsArray = [];
+            collideRight = false;
 
         for (let i = 0; i < this.wormBaseOffsets.length - 1; i++) {
             const checkX = Math.floor(px + this.wormBaseOffsets[i].x);
@@ -128,13 +130,9 @@ export class Collisions {
                     checkY
                 )
             ) {
-                collisionsArray[i] = true;
+                collideDown = true;
             }
         }
-
-        collideDown =
-            (collisionsArray[0] && collisionsArray[1]) ||
-            (collisionsArray[1] && collisionsArray[2]);
 
         for (const offset of this.wormTopOffsets) {
             const checkX = Math.floor(px + offset.x);
@@ -152,7 +150,7 @@ export class Collisions {
             }
         }
 
-        for (const offset of this.wormSidesOffsets) {
+        for (const offset of this.wormLeftOffsets) {
             const checkX = Math.floor(px + offset.x);
             const checkY = Math.floor(py + offset.y);
             if (
@@ -164,8 +162,23 @@ export class Collisions {
                     checkY
                 )
             ) {
-                if (offset.x < 0) collideLeft = true;
-                else if (offset.x > 0) collideRight = true;
+                collideLeft = true;
+            }
+        }
+
+        for (const offset of this.wormRightOffsets) {
+            const checkX = Math.floor(px + offset.x);
+            const checkY = Math.floor(py + offset.y);
+            if (
+                this.isSolid(
+                    collisionMap,
+                    terrainWidth,
+                    terrainHeight,
+                    checkX,
+                    checkY
+                )
+            ) {
+                collideRight = true;
             }
         }
 
@@ -179,11 +192,26 @@ export class Collisions {
             const newY = py - i;
 
             let blocked = false;
-            for (const offset of this.wormSidesOffsets) {
-                if (
-                    (direction === -1 && offset.x < 0) ||
-                    (direction === 1 && offset.x > 0)
-                ) {
+
+            if ((direction === -1)) {
+                for (const offset of this.wormLeftOffsets) {
+                    const checkX = Math.floor(newX + offset.x);
+                    const checkY = Math.floor(newY + offset.y);
+                    if (
+                        this.isSolid(
+                            collisionMap,
+                            terrainWidth,
+                            terrainHeight,
+                            checkX,
+                            checkY
+                        )
+                    ) {
+                        blocked = true;
+                        break;
+                    }
+                }
+            } else if ((direction === 1)) {
+                for (const offset of this.wormLeftOffsets) {
                     const checkX = Math.floor(newX + offset.x);
                     const checkY = Math.floor(newY + offset.y);
                     if (
