@@ -37,18 +37,28 @@ export default function FriendSidebar() {
   }, [token, user]);
 
   const handleAceptRequest = async (requestId, newFriendId) => {
-    await acceptRequest(requestId);
-    sendMessage("RequestAcepted", newFriendId);
-  }
+    try {
+      await acceptRequest(requestId);
+      sendMessage("RequestAcepted", newFriendId);
+    } catch (error) {
+      console.error("Error al aceptar solicitud de amistad:", error);
+      toast.error("No se pudo aceptar la solicitud.");
+    }
+  };
+
   useEffect(() => {
     if (showSearchModal) {
-      setLoadingProfiles(true);
-      fetchProfiles().then((data) => {
+      const loadProfiles = async () => {
+        setLoadingProfiles(true);
+        const data = await fetchProfiles();
         setProfiles(data);
         setLoadingProfiles(false);
-      });
+      };
+
+      loadProfiles();
     }
   }, [showSearchModal]);
+
 
   return (
     <div
@@ -149,8 +159,8 @@ export default function FriendSidebar() {
                 friendIds={friends.map((f) => f.userId)}
                 onSendRequest={async (id) => {
                   try {
-                    await sendRequest(id);
-                    await fetchAll();
+                    sendRequest(id);
+                    fetchAll();
                     toast.success("Solicitud de amistad enviada correctamente.");
                   } catch (error) {
                     toast.error("Error al enviar solicitud de amistad:", error);
