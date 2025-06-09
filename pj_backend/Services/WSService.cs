@@ -67,6 +67,14 @@ namespace pj_backend.Services
                     var rival = jsonEl.GetProperty("socketId").GetString();
                     await _manager.SendMessageAsync(rival, message);
                     break;
+                case "ChangeActiveWorm":
+                    rival = jsonEl.GetProperty("socketId").GetString();
+                    await _manager.SendMessageAsync(rival, message);
+                    break;
+                case "WormMove":
+                    rival = jsonEl.GetProperty("socketId").GetString();
+                    await _manager.SendMessageAsync(rival, message);
+                    break;
                 case "Error":
                     await _manager.SendMessageAsync(socketId, message);
                     break;

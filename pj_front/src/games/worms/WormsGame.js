@@ -6,7 +6,10 @@ import { Collisions } from "@/games/worms/WormsCollisions.js";
 export class Game extends Phaser.Scene {
     constructor() {
         super({ key: "worms" });
+        this.isMyTurn = false; // Variable para controlar el turno del jugador
     }
+
+
 
     preload() {
         this.load.image("background", "/images/sky-background.png");
@@ -33,6 +36,15 @@ export class Game extends Phaser.Scene {
         this.camera = this.cameras.main;
 
         this.add.image(410, 250, "background").setDepth(-2);
+
+        this.currentWormIndex = 0;
+        const role = store.getState().match.playerRole;
+
+        if (role === "Player1") {
+            this.isMyTurn = true;
+        } else {
+            this.isMyTurn = false;
+        }
 
         // // Animacion explosion
         // fire = this.add.particles("fuego");
@@ -170,6 +182,7 @@ export class Game extends Phaser.Scene {
 
             const rivalSocketId = store.getState().match.rivalSocketId;
 
+
             if (rivalSocketId) {
                 sendMessage("Atack", {
                     socketId: rivalSocketId,
@@ -200,6 +213,43 @@ export class Game extends Phaser.Scene {
             );
         });
 
+        window.addEventListener("changeActiveWorm", (event) => {
+            const { wormIndex } = event.detail;
+            this.currentWormIndex = wormIndex;
+            if (this.isMyTurn) {
+                this.isMyTurn = false;
+            } else {
+                this.isMyTurn = true;
+            }
+            console.log("es mi turno?", this.isMyTurn)
+        });
+
+        window.addEventListener("wormMove", (event) => {
+            const {
+                x,
+                y,
+                velocityX,
+                velocityY,
+                flipX,
+                anim,
+            } = event.detail;
+
+            const worm = this.worms[this.currentWormIndex];
+            if (!worm) return; // prevención extra
+
+            worm.x = x;
+            worm.y = y;
+            worm.setVelocity(velocityX, velocityY);
+            worm.setFlipX(flipX);
+
+            if (anim && anim !== worm.anims.getName()) {
+                worm.play(anim, true);
+            }
+        });
+
+
+
+
         // Crear instancia de Clouds y comenzar la creación de nubes
         this.clouds = new Clouds(this); // Pasa la escena al constructor de Clouds
         this.clouds.startClouds(); // Comienza la creación de las nubes
@@ -209,11 +259,38 @@ export class Game extends Phaser.Scene {
         this.fireButton = this.input.keyboard.addKey(
             Phaser.Input.Keyboard.KeyCodes.SPACE
         );
+
+        this.nextWormKey = this.input.keyboard.addKey(
+            Phaser.Input.Keyboard.KeyCodes.T
+        );
+
     }
 
     update() {
         const cursors = this.cursors;
-        const worm1 = this.worms[0];
+        const worm1 = this.worms[this.currentWormIndex];
+
+
+        if (Phaser.Input.Keyboard.JustDown(this.nextWormKey)) {
+            this.currentWormIndex = (this.currentWormIndex + 1) % this.worms.length;
+
+            const rivalSocketId = store.getState().match.rivalSocketId;
+
+            if (rivalSocketId) {
+                sendMessage("ChangeActiveWorm", {
+                    socketId: rivalSocketId,
+                    wormIndex: this.currentWormIndex,
+                });
+            }
+            if (this.isMyTurn) {
+                this.isMyTurn = false;
+            } else {
+                this.isMyTurn = true;
+            }
+
+
+            console.log("es mi turno?", this.isMyTurn)
+        }
 
         // Posición etiquetas
         this.wormLabels.forEach((label, index) => {
@@ -260,11 +337,11 @@ export class Game extends Phaser.Scene {
                     -1
                 );
                 if (climb > 0) {
-                    
+
                     worm.y -= climb;
                 } else {
-                   worm.body.setVelocityX(0);
-                    
+                    worm.body.setVelocityX(0);
+
                 }
                 worm.body.updateFromGameObject?.();
             }
@@ -282,7 +359,7 @@ export class Game extends Phaser.Scene {
                     worm.y -= climb;
                 } else {
                     worm.body.setVelocityX(0);
-                    
+
                 }
                 worm.body.updateFromGameObject?.();
             }
@@ -294,24 +371,56 @@ export class Game extends Phaser.Scene {
             }
         });
 
-        // Salto
-        if (cursors.up.isDown && worm1.collisionFlags?.collideDown) {
-            worm1.setVelocityY(-300);
+
+        //movimiento del gusano activo
+        if (this.isMyTurn) {
+            // Salto
+            if (cursors.up.isDown && worm1.collisionFlags?.collideDown) {
+                worm1.setVelocityY(-300);
+            }
+
+            // Movimiento horizontal
+            if (cursors.left.isDown) {
+                worm1.setVelocityX(-100);
+                worm1.play("walk", true);
+                worm1.setFlipX(false);
+            } else if (cursors.right.isDown) {
+                worm1.setVelocityX(100);
+                worm1.play("walk", true);
+                worm1.setFlipX(true);
+            } else {
+                worm1.setVelocityX(0);
+                worm1.anims.stop();
+            }
+
         }
 
-        // Movimiento horizontal
-        if (cursors.left.isDown) {
-            worm1.setVelocityX(-100);
-            worm1.play("walk", true);
-            worm1.setFlipX(false);
-        } else if (cursors.right.isDown) {
-            worm1.setVelocityX(100);
-            worm1.play("walk", true);
-            worm1.setFlipX(true);
-        } else {
-            worm1.setVelocityX(0);
-            worm1.anims.stop();
+        //movimiento websocket
+        // Enviar posición del gusano activo al rival
+        if (this.isMyTurn) {
+            const worm = this.worms[this.currentWormIndex];
+
+            // Detectar cambio relevante
+            if (
+                worm.body.velocity.x !== 0 ||
+                worm.body.velocity.y !== 0 ||
+                Phaser.Input.Keyboard.JustDown(this.cursors.left) ||
+                Phaser.Input.Keyboard.JustDown(this.cursors.right)
+            ) {
+                const rivalSocketId = store.getState().match.rivalSocketId;
+                sendMessage("WormMove", {
+                    socketId: rivalSocketId,
+                    x: worm.x,
+                    y: worm.y,
+                    velocityX: worm.body.velocity.x,
+                    velocityY: worm.body.velocity.y,
+                    flipX: worm.flipX,
+                    anim: worm.anims.getName() || null,
+                });
+            }
         }
+
+
 
         // Colisiones de la granada
         if (this.grenade.active) {
