@@ -45,7 +45,7 @@ export default function FriendSidebar() {
     console.log("Aceptando solicitud de amistad:", requestId, newFriendId);
     try {
       await acceptRequest(requestId);
-      sendMessage("RequestAccepted", {newFriend: newFriendId.toStrinhg()});
+      sendMessage("RequestAccepted", {newFriend: newFriendId});
     } catch (error) {
       console.error("Error al aceptar solicitud de amistad:", error);
       toast.error("No se pudo aceptar la solicitud.");
