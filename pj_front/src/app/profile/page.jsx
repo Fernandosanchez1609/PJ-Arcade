@@ -1,32 +1,50 @@
 // src/app/profile/page.js
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState, useCallback } from "react";
+import { useFetchUsers } from "@/hooks/useFetchUsers";
+import { useToggleUserRole } from "@/hooks/useToggleUserRole";
+import { useDeleteUser } from "@/hooks/useDeleteUser";
+import UserCardList from "@/components/admin/UserCardList";
+import { useBanUser } from "@/hooks/useBanUser";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
+import ProfilePic from "@/components/profile/Profile";
+import styles from "./ProfilePage.module.css";
 
 export default function ProfilePage() {
-  const { token, user } = useAuth();
-  const router = useRouter();
+    const { token, user } = useAuth();
+    const router = useRouter();
+    const { fetchUsers } = useFetchUsers();
 
-  
-  useEffect(() => {
+    const [users, setUsers] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        if (!token) {
+            router.replace("/");
+        }
+    }, [token, router]);
+
     if (!token) {
-      router.replace("/"); 
+        return null;
     }
-  }, [token, router]);
 
+    return (
+        <div className={styles.container}>
+            <section>
+                <p></p>
+                <button>Cambiar contraseña</button>
+            </section>
+            <section>
+                <ProfilePic />
+                <p>{user?.name || "Usuario"}</p>
+                <button>
+                    <img src="" alt="Editar perfil" />
+                </button>
+            </section>
+        </div>
 
-  if (!token) {
-    return null;
-  }
-
-  return (
-    <main className="flex flex-col items-center justify-center min-h-screen py-2 bg-gray-100">
-      <h1 className="text-4xl font-bold mb-4">
-        ¡Bienvenido, {user.name || user.email}!
-      </h1>
-      <p>no tenemos esta pagina hecha aun.</p>
-    </main>
-  );
+    );
 }
