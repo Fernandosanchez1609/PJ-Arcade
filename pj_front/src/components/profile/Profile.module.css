@@ -4,3 +4,8 @@
     gap: 1.5rem;
     padding: 3rem;
 }
+
+.avatar {
+    font-size: 164;
+    color: var(--principal_orange);
+}

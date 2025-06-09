@@ -9,8 +9,6 @@ export class Game extends Phaser.Scene {
         this.isMyTurn = false; // Variable para controlar el turno del jugador
     }
 
-
-
     preload() {
         this.load.image("background", "/images/sky-background.png");
         for (let i = 1; i <= 6; i++) {
@@ -118,7 +116,8 @@ export class Game extends Phaser.Scene {
                     stroke: "#000",
                     strokeThickness: 3,
                 })
-                .setOrigin(0.5);
+                .setOrigin(0.5)
+                .setDepth(-2);
 
             this.wormLabels.push(label);
         }
@@ -201,7 +200,6 @@ export class Game extends Phaser.Scene {
 
             const rivalSocketId = store.getState().match.rivalSocketId;
 
-
             if (rivalSocketId) {
                 sendMessage("Atack", {
                     socketId: rivalSocketId,
@@ -238,18 +236,11 @@ export class Game extends Phaser.Scene {
             } else {
                 this.isMyTurn = true;
             }
-            console.log("es mi turno?", this.isMyTurn)
+            console.log("es mi turno?", this.isMyTurn);
         });
 
         window.addEventListener("wormMove", (event) => {
-            const {
-                x,
-                y,
-                velocityX,
-                velocityY,
-                flipX,
-                anim,
-            } = event.detail;
+            const { x, y, velocityX, velocityY, flipX, anim } = event.detail;
 
             const worm = this.worms[this.currentWormIndex];
             if (!worm) return; // prevención extra
@@ -263,9 +254,6 @@ export class Game extends Phaser.Scene {
                 worm.play(anim, true);
             }
         });
-
-
-
 
         // Crear instancia de Clouds y comenzar la creación de nubes
         this.clouds = new Clouds(this); // Pasa la escena al constructor de Clouds
@@ -284,16 +272,15 @@ export class Game extends Phaser.Scene {
         this.nextWormKey = this.input.keyboard.addKey(
             Phaser.Input.Keyboard.KeyCodes.T
         );
-
     }
 
     update() {
         const cursors = this.cursors;
         const worm1 = this.worms[this.currentWormIndex];
 
-
         if (Phaser.Input.Keyboard.JustDown(this.nextWormKey)) {
-            this.currentWormIndex = (this.currentWormIndex + 1) % this.worms.length;
+            this.currentWormIndex =
+                (this.currentWormIndex + 1) % this.worms.length;
 
             const rivalSocketId = store.getState().match.rivalSocketId;
 
@@ -309,8 +296,7 @@ export class Game extends Phaser.Scene {
                 this.isMyTurn = true;
             }
 
-
-            console.log("es mi turno?", this.isMyTurn)
+            console.log("es mi turno?", this.isMyTurn);
         }
 
         // Posición etiquetas
@@ -351,9 +337,9 @@ export class Game extends Phaser.Scene {
             this.grenadeVsLand();
         } else {
             //  Allow them to set the angle, between -90 (straight up) and 0 (facing to the right)
-            if (this.cursors.up.isDown && this.crosshair.angle > -179) {
+            if (this.cursors.up.isDown) {
                 this.crosshair.angle--;
-            } else if (this.cursors.down.isDown && this.crosshair.angle < 0) {
+            } else if (this.cursors.down.isDown) {
                 this.crosshair.angle++;
             }
 
@@ -369,9 +355,9 @@ export class Game extends Phaser.Scene {
                 this.chargeStartTime = null;
 
                 // Limita la potencia de disparo entre 100 y 600
-                const power = Phaser.Math.Clamp(chargeDuration * 2, 100, 600);
+                const firePower = Phaser.Math.Clamp(chargeDuration * 2, 100, 600);
 
-                this.launchGrenade(worm1.x, worm1.y - 20, power);
+                this.launchGrenade(this.crosshair.x, this.crosshair.y - 20, firePower);
             }
         }
 
@@ -409,11 +395,9 @@ export class Game extends Phaser.Scene {
                     -1
                 );
                 if (climb > 0) {
-
                     worm.y -= climb;
                 } else {
                     worm.body.setVelocityX(0);
-
                 }
                 worm.body.updateFromGameObject?.();
             }
@@ -431,7 +415,6 @@ export class Game extends Phaser.Scene {
                     worm.y -= climb;
                 } else {
                     worm.body.setVelocityX(0);
-
                 }
                 worm.body.updateFromGameObject?.();
             }
@@ -442,7 +425,6 @@ export class Game extends Phaser.Scene {
                 worm.body.velocity.y = Math.min(0, worm.body.velocity.y);
             }
         });
-
 
         //movimiento del gusano activo
         if (this.isMyTurn) {
@@ -464,7 +446,6 @@ export class Game extends Phaser.Scene {
                 worm1.setVelocityX(0);
                 worm1.anims.stop();
             }
-
         }
 
         //movimiento websocket
@@ -492,8 +473,6 @@ export class Game extends Phaser.Scene {
             }
         }
 
-
-
         // Colisiones de la granada
         if (this.grenade.active) {
             const grenadeFlags = this.collisions.checkCollisionDirections(
@@ -519,16 +498,17 @@ export class Game extends Phaser.Scene {
         this.crosshair.setPosition(
             worm1.body.center.x +
                 20 * Math.cos(Phaser.Math.DegToRad(this.crosshair.angle)),
-            worm1.body.center.y -
+            worm1.body.center.y +
                 20 * Math.sin(Phaser.Math.DegToRad(this.crosshair.angle))
         );
 
         if (
+            this.grenade.velocity < 2 ||
             this.grenade.x < 0 ||
             this.grenade.x > 800 ||
             this.grenade.y > 600
         ) {
-            removeGrenade();
+            this.removeGrenade();
         }
     }
 
@@ -549,8 +529,8 @@ export class Game extends Phaser.Scene {
                 this.collisionMap,
                 this.terrainWidth,
                 this.terrainHeight,
-                x,
-                y
+                this.grenade.body.center.x,
+                this.grenade.body.center.y
             );
 
             const vx = this.grenade.body.velocity.x;
@@ -573,13 +553,12 @@ export class Game extends Phaser.Scene {
 
             const speed = Math.hypot(reflected.x, reflected.y);
             if (
-                speed < 10 ||
-                this.grenade.x < 0 ||
-                this.grenade.x > 800 ||
-                this.grenade.y > 600
+                speed < 2 ||
+                this.grenade.x <= 0 ||
+                this.grenade.x >= 800 ||
+                this.grenade.y >= 600
             ) {
-                this.grenade.setVelocity(0);
-                this.removeGrenade(); // O lo que debas hacer cuando se detiene
+                this.removeGrenade();
             }
         }
     }
@@ -587,7 +566,7 @@ export class Game extends Phaser.Scene {
     removeGrenade(hasExploded) {
         if (typeof hasExploded === "undefined") {
             hasExploded = false;
-        }
+        } 
         this.grenade.disableBody(true, true);
         this.camera.stopFollow();
         let delay = 1000;

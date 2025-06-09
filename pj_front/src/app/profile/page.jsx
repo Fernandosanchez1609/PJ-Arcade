@@ -13,24 +13,26 @@ export default function ProfilePage() {
 
     useEffect(() => {
         if (!token) {
-            router.replace("/");
+            // router.replace("/");
+            router.push("/");
         }
     }, [token, user]);
 
     return (
         <div className={styles.container}>
             <section>
-                <p></p>
+                <h1 className={styles.email}>
+                    Email: {user?.email || "Correo Electrónico"}
+                </h1>
                 <button>Cambiar contraseña</button>
             </section>
             <section>
-                <ProfilePic />
-                <p>{user.name || "Usuario"}</p>
-                <button>
-                    <img src="" alt="Editar perfil" />
+                <ProfilePic user={user} />
+                <p>{user?.name || "Usuario"}</p>
+                <button aria-label="Editar perfil">
+                    <img src="/edit.svg" alt="Editar perfil" />
                 </button>
             </section>
         </div>
-
     );
 }
