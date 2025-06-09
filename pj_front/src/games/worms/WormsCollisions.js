@@ -16,21 +16,22 @@ export class Collisions {
         { x: 10, y: -60 }, // arriba derecha
     ];
     wormLeftOffsets = [
-        { x: -10, y: -35 }, // izquierda abajo
-        { x: 10, y: -35 }, // derecha abajo
+        { x: -10, y: -40 }, // izquierda abajo
         { x: -10, y: -45 }, // izquierda centro?
+        { x: -10, y: -55 }, // izquierda arriba?
     ];
 
     wormRightOffsets = [
         { x: 10, y: -45 }, // derecha centro?
-        { x: -10, y: -55 }, // izquierda arriba?
+        { x: 10, y: -35 }, // derecha abajo
         { x: 10, y: -55 }, // derecha arriba?
     ];
 
     wormOffSetts = [
         this.wormBaseOffsets,
         this.wormTopOffsets,
-        this.wormSidesOffsets
+        this.wormLeftOffsets,
+        this.wormRightOffsets
     ]
 
 

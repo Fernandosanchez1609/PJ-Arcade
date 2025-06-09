@@ -213,50 +213,45 @@ export class Game extends Phaser.Scene {
 
     update() {
         const cursors = this.cursors;
-        const worm1 = this.worms[0]; // ← Controla solo el gusano 1 por ahora
+        const worm1 = this.worms[0];
 
+        // Posición etiquetas
         this.wormLabels.forEach((label, index) => {
             const worm = this.worms[index];
             label.setPosition(worm.x, worm.y - 40);
         });
 
+        // Explosión
         if (this.grenade.active) {
             this.grenadeVsLand();
         }
 
-
-        // Comprobar colisiones con el terreno usando el mapa lógico
+        // Colisiones gusanos
         this.worms.forEach((worm) => {
-            const wormCollisions = this.collisions.checkCollisionDirections(
+            const flags = this.collisions.checkCollisionDirections(
                 this.collisionMap,
                 this.terrainWidth,
                 this.terrainHeight,
                 worm.body.center.x,
                 worm.body.center.y
             );
+            worm.collisionFlags = flags;
 
-            // iguala los valores de los objetos que comparten
-            // sustituye el codigo de abajo
-            Object.assign(worm, wormCollisions);
-
-            // Si colisión abajo, parar gravedad y velocidad Y
-            if (worm.collideDown) {
+            // Gravedad vertical
+            if (flags.collideDown) {
                 worm.setVelocityY(0);
                 worm.body.allowGravity = false;
-                // worm.body.blocked.down = true; // opcional para estados Phaser
             } else {
                 worm.body.allowGravity = true;
-                // worm.body.blocked.down = false;
             }
 
-            if (worm.collideTop) {
+            if (flags.collideTop && worm.body.velocity.y < 0) {
                 worm.setVelocityY(0);
-                worm.body.allowGravity = true;
             }
 
-            // Bloquear movimiento lateral solo si se mueve hacia colisión
-            if (worm.collideLeft && worm.body.velocity.x < 0) {
-                const climbStep = this.collisions.canClimb(
+            // Movimiento horizontal (bloqueo y escalada)
+            if (flags.collideLeft && worm.body.velocity.x < 0) {
+                const climb = this.collisions.canClimb(
                     this.collisionMap,
                     this.terrainWidth,
                     this.terrainHeight,
@@ -264,51 +259,47 @@ export class Game extends Phaser.Scene {
                     worm.y,
                     -1
                 );
-                if (climbStep > 0) {
-                    worm.setY(worm.y - climbStep);
-                    worm.body.updateFromGameObject?.();
+                if (climb > 0) {
+                    
+                    worm.y -= climb;
                 } else {
-                    worm.body.setVelocityX(+0);
-                    worm.setX(worm.x+= 0.3) ;
-                    worm.body.updateFromGameObject?.();
+                   worm.body.setVelocityX(0);
+                    
                 }
+                worm.body.updateFromGameObject?.();
             }
 
-            if (worm.collideRight && worm.body.velocity.x > 0) {
-                const climbStep = this.collisions.canClimb(
+            if (flags.collideRight && worm.body.velocity.x > 0) {
+                const climb = this.collisions.canClimb(
                     this.collisionMap,
                     this.terrainWidth,
                     this.terrainHeight,
                     worm.x,
                     worm.y,
-                    +1 // <--- importante
+                    1
                 );
-                if (climbStep > 0) {
-                    worm.setY(worm.y - climbStep);
-                    worm.body.updateFromGameObject?.();
+                if (climb > 0) {
+                    worm.y -= climb;
                 } else {
                     worm.body.setVelocityX(0);
-                    worm.setX(worm.x-= 0.3) ;
-                    worm.body.updateFromGameObject?.();
+                    
                 }
+                worm.body.updateFromGameObject?.();
             }
 
-
+            // Fuera de los límites
             if (worm.y >= this.physics.world.bounds.height) {
-                worm.y = this.physics.world.bounds.height; // En el futuro matará al gusano
+                worm.setY(this.physics.world.bounds.height);
                 worm.body.velocity.y = Math.min(0, worm.body.velocity.y);
             }
         });
 
         // Salto
-        if (
-            cursors.up.isDown &&
-            worm1.collideDown // COMENTADA PARA DEBUGGEAR GUSANO VOLADOR
-        ) {
-            worm1.setVelocityY(-300); // ← valor negativo para saltar hacia arriba
+        if (cursors.up.isDown && worm1.collisionFlags?.collideDown) {
+            worm1.setVelocityY(-300);
         }
 
-        // Movimiento horizontal controlado
+        // Movimiento horizontal
         if (cursors.left.isDown) {
             worm1.setVelocityX(-100);
             worm1.play("walk", true);
@@ -322,21 +313,19 @@ export class Game extends Phaser.Scene {
             worm1.anims.stop();
         }
 
+        // Colisiones de la granada
         if (this.grenade.active) {
-            const grenadeCollisions = this.collisions.checkCollisionDirections(
+            const grenadeFlags = this.collisions.checkCollisionDirections(
                 this.collisionMap,
                 this.terrainWidth,
                 this.terrainHeight,
                 this.grenade.body.center.x,
                 this.grenade.body.center.y
             );
-            Object.assign(this.grenade, grenadeCollisions);
-            // if (this.grenade.collideDown && this.grenade.body.velocity.y >= 0) {
-            //     this.grenade.body.allowGravity = false;
-            // }
+            this.grenade.collisionFlags = grenadeFlags;
         }
 
-        // Cursor dinámico según colisión con terreno
+        // Cursor visual
         const pointer = this.input.activePointer;
         const alpha = this.textures.getPixelAlpha(
             pointer.x,
@@ -344,9 +333,8 @@ export class Game extends Phaser.Scene {
             "terrainBitmap"
         );
         this.game.canvas.style.cursor = alpha > 0 ? "crosshair" : "default";
-
-
     }
+
 
 
     grenadeVsLand() {
