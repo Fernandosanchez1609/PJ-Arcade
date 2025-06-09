@@ -23,7 +23,7 @@ public class FriendshipController : ControllerBase
         _userService = userService;
     }
 
-   
+
     private int GetUserId() => int.Parse(User.FindFirst("id")!.Value);
 
     [HttpPost("send")]
@@ -34,7 +34,7 @@ public class FriendshipController : ControllerBase
         string requesterName = await _userService.GetUserNameById(requesterId);
 
         var result = await _service.SendFriendRequestAsync(requesterId, dto.AddresseeId);
-        WSMessage message = new WSMessage { Data =$"{requesterName} te ha mandado una solicitud de amistad" ,Type = "RequestRecived"};
+        WSMessage message = new WSMessage { Data = $"{requesterName} te ha mandado una solicitud de amistad", Type = "RequestRecived" };
 
         await _wsService.SendByUserId(dto.AddresseeId, message);
         return result ? Ok("Solicitud enviada") : BadRequest("No se pudo enviar la solicitud");
@@ -47,9 +47,26 @@ public class FriendshipController : ControllerBase
         int userId = GetUserId();
 
         var result = await _service.AcceptRequestAsync(id, userId);
-       
-        return result ? Ok("Solicitud aceptada") : NotFound("No puedes aceptar esta solicitud");
+        if (!result) return NotFound("No puedes aceptar esta solicitud");
+
+        string accepterName = await _userService.GetUserNameById(userId);
+
+        var friendship = await _service.GetByIdAsync(id);
+        if (friendship == null) return NotFound("Solicitud no encontrada");
+
+        int requesterId = friendship.RequesterId;
+
+        WSMessage message = new WSMessage
+        {
+            Data = $"{accepterName} ha aceptado tu solicitud de amistad",
+            Type = "RequestAccepted"
+        };
+
+        await _wsService.SendByUserId(requesterId, message);
+
+        return Ok("Solicitud aceptada");
     }
+
 
     [HttpPost("reject/{id}")]
     public async Task<IActionResult> RejectFriendRequest(int id)
@@ -106,7 +123,7 @@ public class FriendshipController : ControllerBase
         return Ok(FriendshipMapper.ToDTOList(pendingRequests));
     }
 
-    
+
 
 
 }

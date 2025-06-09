@@ -21,7 +21,7 @@ export default function WsConnector() {
           fetchAll();
           toast.info(msg.Data);
           break;
-        case "RequestAcepted":
+        case "RequestAccepted":
           fetchAll();
           toast.info(msg.Data);
           break;
@@ -59,6 +59,13 @@ export default function WsConnector() {
         case "Atack":
           const { x, y } = msg.Data;
           window.dispatchEvent(new CustomEvent("rivalAttack", { detail: { x, y } }));
+          break;
+        case "ChangeActiveWorm":
+          const { wormIndex } = msg.Data;
+          window.dispatchEvent(new CustomEvent("changeActiveWorm", { detail: { wormIndex } }));
+          break;
+        case "WormMove":
+          window.dispatchEvent(new CustomEvent("wormMove", { detail: msg.Data }));
           break;
         default:
           console.warn("[WS] Mensaje no manejado:", msg);
