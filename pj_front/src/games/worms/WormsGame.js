@@ -50,19 +50,19 @@ export class Game extends Phaser.Scene {
         //     on: false,
         // });
 
-        // // Grenade
-        this.grenade = this.physics.add.sprite(500, 150, "grenade");
+        // Grenade
+        this.grenade = this.physics.add.sprite(0, 0, "grenade");
         this.grenade
-            .setBounce(0)  // Desactivamos rebote para hacerlo manual
+            .setBounce(0) // Desactivamos rebote para hacerlo manual
             .setCollideWorldBounds(false)
-            .setMaxVelocity(300, 1000)
+            .disableBody(true, true)
             .setVelocityX(400);
         this.grenade.collideDown;
         this.grenade.collideLeft;
         this.grenade.collideTop;
         this.grenade.collideRight;
 
-        // // Para calcular la potencia del disparo
+        // Para calcular la potencia del disparo
         this.chargeStartTime = null;
 
         // Gusano animado con físicas
@@ -139,6 +139,16 @@ export class Game extends Phaser.Scene {
             this.terrainHeight
         );
 
+        // Barra de carga del disparo
+        this.chargeBarBg = this.add
+            .rectangle(0, 0, 52, 8, 0x000000)
+            .setOrigin(0.5)
+            .setVisible(false);
+        this.chargeBarFill = this.add
+            .rectangle(0, 0, 0, 6, 0x00ff00)
+            .setOrigin(0.5)
+            .setVisible(false);
+
         this.input.on("pointerdown", (pointer) => {
             const localX =
                 pointer.x - (this.terrain.x - this.terrain.width / 2);
@@ -177,8 +187,6 @@ export class Game extends Phaser.Scene {
                     y: localY,
                 });
             }
-
-
         });
 
         // Listener eventos de WebSocket
@@ -207,6 +215,10 @@ export class Game extends Phaser.Scene {
         this.cursors = this.input.keyboard.createCursorKeys();
 
         this.fireButton = this.input.keyboard.addKey(
+            Phaser.Input.Keyboard.KeyCodes.ENTER
+        );
+
+        this.jumpButton = this.input.keyboard.addKey(
             Phaser.Input.Keyboard.KeyCodes.SPACE
         );
     }
@@ -220,6 +232,33 @@ export class Game extends Phaser.Scene {
             const worm = this.worms[index];
             label.setPosition(worm.x, worm.y - 40);
         });
+
+        // Barra de carga visual sobre worm1
+        if (this.chargeStartTime !== null) {
+            const chargeDuration = this.time.now - this.chargeStartTime;
+            const power = Phaser.Math.Clamp(chargeDuration * 2, 100, 600);
+            const percent = (power - 100) / (600 - 100); // de 0 a 1
+
+            const red = Phaser.Display.Color.Interpolate.ColorWithColor(
+                new Phaser.Display.Color(0, 255, 0),
+                new Phaser.Display.Color(255, 0, 0),
+                1,
+                percent
+            );
+            const colorHex = Phaser.Display.Color.GetColor(red.r, red.g, red.b);
+            this.chargeBarFill.setFillStyle(colorHex);
+
+            this.chargeBarBg
+                .setVisible(true)
+                .setPosition(worm1.x, worm1.y - 60);
+            this.chargeBarFill
+                .setVisible(true)
+                .setPosition(worm1.x, worm1.y - 60)
+                .setScale(percent, 1);
+        } else {
+            this.chargeBarBg.setVisible(false);
+            this.chargeBarFill.setVisible(false);
+        }
 
         // Explosión
         if (this.grenade.active) {
@@ -260,11 +299,9 @@ export class Game extends Phaser.Scene {
                     -1
                 );
                 if (climb > 0) {
-                    
                     worm.y -= climb;
                 } else {
-                   worm.body.setVelocityX(0);
-                    
+                    worm.body.setVelocityX(0);
                 }
                 worm.body.updateFromGameObject?.();
             }
@@ -282,7 +319,6 @@ export class Game extends Phaser.Scene {
                     worm.y -= climb;
                 } else {
                     worm.body.setVelocityX(0);
-                    
                 }
                 worm.body.updateFromGameObject?.();
             }
@@ -295,7 +331,7 @@ export class Game extends Phaser.Scene {
         });
 
         // Salto
-        if (cursors.up.isDown && worm1.collisionFlags?.collideDown) {
+        if (this.jumpButton.isDown && worm1.collisionFlags?.collideDown) {
             worm1.setVelocityY(-300);
         }
 
@@ -311,6 +347,29 @@ export class Game extends Phaser.Scene {
         } else {
             worm1.setVelocityX(0);
             worm1.anims.stop();
+        }
+
+        // Disparo cargado
+        if (Phaser.Input.Keyboard.JustDown(this.fireButton)) {
+            this.chargeStartTime = this.time.now;
+        }
+
+        if (
+            Phaser.Input.Keyboard.JustUp(this.fireButton) &&
+            this.chargeStartTime !== null
+        ) {
+            const chargeDuration = this.time.now - this.chargeStartTime;
+            this.chargeStartTime = null;
+
+            // Limita la potencia de disparo entre 100 y 600
+            const power = Phaser.Math.Clamp(chargeDuration * 2, 100, 600);
+
+            this.launchGrenade(
+                worm1.x,
+                worm1.y - 20,
+                power,
+                worm1.flipX ? -1 : 1
+            );
         }
 
         // Colisiones de la granada
@@ -334,8 +393,6 @@ export class Game extends Phaser.Scene {
         );
         this.game.canvas.style.cursor = alpha > 0 ? "crosshair" : "default";
     }
-
-
 
     grenadeVsLand() {
         const x = Math.floor(this.grenade.body.center.x);
@@ -361,23 +418,33 @@ export class Game extends Phaser.Scene {
             const vx = this.grenade.body.velocity.x;
             const vy = this.grenade.body.velocity.y;
 
-            const reflected = this.collisions.reflectVector(vx, vy, normal.x, normal.y);
+            const reflected = this.collisions.reflectVector(
+                vx,
+                vy,
+                normal.x,
+                normal.y
+            );
 
             const bounceFactor = 0.6;
-            this.grenade.setVelocity(reflected.x * bounceFactor, reflected.y * bounceFactor);
+            this.grenade.setVelocity(
+                reflected.x * bounceFactor,
+                reflected.y * bounceFactor
+            );
 
             this.grenade.setDrag(50, 0);
 
             const speed = Math.hypot(reflected.x, reflected.y);
-            if (speed < 10) {
+            if (
+                speed < 10 ||
+                this.grenade.x < 0 ||
+                this.grenade.x > 800 ||
+                this.grenade.y > 600
+            ) {
                 this.grenade.setVelocity(0);
-                // this.removeGrenade(); // O lo que debas hacer cuando se detiene
+                this.removeGrenade(); // O lo que debas hacer cuando se detiene
             }
         }
     }
-
-
-
 
     removeGrenade(hasExploded) {
         if (typeof hasExploded === "undefined") {
@@ -395,5 +462,25 @@ export class Game extends Phaser.Scene {
             ease: "Quintic.Out",
             delay: delay,
         });
+    }
+
+    launchGrenade(x, y, power, direction) {
+        if (this.grenade.active) return;
+
+        this.grenade
+            .enableBody(true, x, y, true, true)
+            .setVelocity(0)
+            .setDrag(0)
+            .setBounce(0)
+            .setCollideWorldBounds(false)
+            .setMaxVelocity(300, 1000);
+
+        const angle = Phaser.Math.DegToRad(45); // 45 grados
+        const vx = Math.cos(angle) * power * direction;
+        const vy = -Math.sin(angle) * power;
+
+        this.grenade.setVelocity(vx, vy);
+
+        this.camera.startFollow(this.grenade, true, 0.1, 0.1);
     }
 }
