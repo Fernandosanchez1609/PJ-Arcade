@@ -5,26 +5,26 @@ export class Collisions {
 
 
     wormBaseOffsets = [
-        { x: -7, y: -35 }, // abajo izquierda
-        { x: 0, y: -35 }, // abajo centro
-        { x: 7, y: -35 }, // abajo derecha
+        { x: -7, y: 15 }, // abajo izquierda
+        { x: 0, y: 15 }, // abajo centro
+        { x: 7, y: 15 }, // abajo derecha
     ];
 
     wormTopOffsets = [
-        { x: -10, y: -60 }, // arriba izquierda
-        { x: 0, y: -60 }, // arriba centro
-        { x: 10, y: -60 }, // arriba derecha
+        { x: -10, y: -15 }, // arriba izquierda
+        { x: 0, y: -15 }, // arriba centro
+        { x: 10, y: -15 }, // arriba derecha
     ];
     wormLeftOffsets = [
-        { x: -10, y: -40 }, // izquierda abajo
-        { x: -10, y: -45 }, // izquierda centro?
-        { x: -10, y: -55 }, // izquierda arriba?
+        { x: -10, y: 10 }, // izquierda abajo
+        { x: -10, y: 10 }, // izquierda centro?
+        { x: -10, y: -10 }, // izquierda arriba?
     ];
 
     wormRightOffsets = [
-        { x: 10, y: -45 }, // derecha centro?
-        { x: 10, y: -35 }, // derecha abajo
-        { x: 10, y: -55 }, // derecha arriba?
+        { x: 10, y: 0 }, // derecha centro?
+        { x: 10, y: 15 }, // derecha abajo
+        { x: 10, y: -10 }, // derecha arriba?
     ];
 
     wormOffSetts = [

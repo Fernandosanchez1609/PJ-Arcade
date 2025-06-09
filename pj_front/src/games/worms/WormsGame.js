@@ -128,6 +128,7 @@ export class Game extends Phaser.Scene {
                 this.worms[0].body.center.y + 20,
                 "crosshair"
             )
+            .setAngle(0)
             .setOrigin(0);
 
         // Terreno
@@ -140,7 +141,7 @@ export class Game extends Phaser.Scene {
             800,
             600
         );
-        this.terrainBitmap.context.drawImage(srcImage, 0, 0);
+        this.terrainBitmap.context.drawImage(srcImage, 0, 50);
         this.terrainBitmap.refresh();
 
         // Crear mapa lógico de colisión para el terreno
@@ -195,7 +196,7 @@ export class Game extends Phaser.Scene {
                 localX - 23,
                 localY - 21.5,
                 46,
-                43
+                90
             );
 
             const rivalSocketId = store.getState().match.rivalSocketId;
@@ -355,9 +356,13 @@ export class Game extends Phaser.Scene {
                 this.chargeStartTime = null;
 
                 // Limita la potencia de disparo entre 100 y 600
-                const firePower = Phaser.Math.Clamp(chargeDuration * 2, 100, 600);
+                const firePower = Phaser.Math.Clamp(chargeDuration, 100, 600);
 
-                this.launchGrenade(this.crosshair.x, this.crosshair.y - 20, firePower);
+                this.launchGrenade(
+                    this.crosshair.x,
+                    this.crosshair.y - 20,
+                    firePower
+                );
             }
         }
 
@@ -566,7 +571,7 @@ export class Game extends Phaser.Scene {
     removeGrenade(hasExploded) {
         if (typeof hasExploded === "undefined") {
             hasExploded = false;
-        } 
+        }
         this.grenade.disableBody(true, true);
         this.camera.stopFollow();
         let delay = 1000;
