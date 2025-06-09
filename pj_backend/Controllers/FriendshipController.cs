@@ -62,6 +62,7 @@ public class FriendshipController : ControllerBase
             Type = "RequestAccepted"
         };
 
+        await _wsService.NotifyFriendsUserConnected(requesterId.ToString());
         await _wsService.SendByUserId(requesterId, message);
 
         return Ok("Solicitud aceptada");
