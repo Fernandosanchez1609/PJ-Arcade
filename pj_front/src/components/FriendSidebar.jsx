@@ -33,13 +33,17 @@ export default function FriendSidebar() {
 
   console.log(friends)
   useEffect(() => {
-    fetchAll();
+    const fetchData = async () => {
+      await fetchAll();
+    };
+    fetchData();
   }, [token, user]);
+
 
   const handleAceptRequest = async (requestId, newFriendId) => {
     try {
       await acceptRequest(requestId);
-      sendMessage("RequestAcepted", newFriendId);
+      sendMessage("RequestAcepted", {newFriendId});
     } catch (error) {
       console.error("Error al aceptar solicitud de amistad:", error);
       toast.error("No se pudo aceptar la solicitud.");
@@ -86,7 +90,12 @@ export default function FriendSidebar() {
 
         <TabsContent value="friends">
           <ul className={styles.listMarginTop}>
-            {friends.map((friend) => {
+            {friends.map((friend, index) => {
+              if (!friend || !friend.name || !friend.userId) {
+                console.warn("Amigo inválido:", friend);
+                return null;
+              }
+
               const isOnline = onlineStatus[friend.userId];
               return (
                 <li key={friend.userId} className={styles.listItem}>
@@ -97,6 +106,7 @@ export default function FriendSidebar() {
                 </li>
               );
             })}
+
           </ul>
         </TabsContent>
 
@@ -107,12 +117,13 @@ export default function FriendSidebar() {
                 key={req.id}
                 className={`${styles.listItem} ${styles.listItemActionsContainer}`}
               >
-                <span>{req.requester.name}</span>
+                <span>{req.requester?.name ?? 'Desconocido'}</span>
                 <span>
                   <button
-                    onClick={() => handleAceptRequest(req.id, req.requester.id)}
+                    onClick={() => handleAceptRequest(req.id, req.requester?.id)}
                     aria-label="Aceptar solicitud"
                     className={`${styles.listItemButton} ${styles.listItemButtonAccept}`}
+                    disabled={!req.requester}
                   >
                     ✔️
                   </button>
@@ -127,6 +138,7 @@ export default function FriendSidebar() {
               </li>
             ))}
           </ul>
+
         </TabsContent>
 
 
@@ -134,9 +146,10 @@ export default function FriendSidebar() {
           <ul className={styles.listMarginTop}>
             {pendingSent.map((req) => (
               <li key={req.id} className={styles.listItem}>
-                {req.addressee.name}
+                {req.addressee?.name ?? 'Desconocido'}
               </li>
             ))}
+
           </ul>
         </TabsContent>
       </Tabs>
@@ -159,8 +172,8 @@ export default function FriendSidebar() {
                 friendIds={friends.map((f) => f.userId)}
                 onSendRequest={async (id) => {
                   try {
-                    sendRequest(id);
-                    fetchAll();
+                    await sendRequest(id);
+                    await fetchAll();
                     toast.success("Solicitud de amistad enviada correctamente.");
                   } catch (error) {
                     toast.error("Error al enviar solicitud de amistad:", error);

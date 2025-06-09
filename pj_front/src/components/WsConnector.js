@@ -21,7 +21,7 @@ export default function WsConnector() {
           fetchAll();
           toast.info(msg.Data);
           break;
-        case "RequestAcepted":
+        case "RequestAccepted":
           fetchAll();
           toast.info(msg.Data);
           break;

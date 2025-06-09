@@ -81,8 +81,11 @@ export async function acceptFriendRequest(requestId) {
     },
   });
   if (!res.ok) throw new Error("Error al aceptar solicitud de amistad");
-  return await res.json();
+
+  // Cambia a res.text() porque la respuesta es texto plano
+  return await res.text();
 }
+
 
 export async function rejectFriendRequest(requestId) {
   const token = localStorage.getItem("token");

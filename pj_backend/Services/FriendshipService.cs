@@ -109,4 +109,10 @@ public class FriendshipService
         return friendIds;
     }
 
+    public async Task<Friendship?> GetByIdAsync(int id)
+    {
+        return await _repository.GetByIdAsync(id);
+    }
+
+
 }
