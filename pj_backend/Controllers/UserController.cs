@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using pj_backend.Models.Database.Dtos;
+using pj_backend.Models.Database.Entities;
 using pj_backend.Models.Database.Repositories;
 using pj_backend.Services;
 using System.IdentityModel.Tokens.Jwt;
@@ -47,6 +48,7 @@ public class UserController : ControllerBase
         {
             { "id", newUser.UserId.ToString() },
             { "name", newUser.Name.ToString() },
+            { "email", newUser.Email.ToString() },
             { ClaimTypes.Role, newUser.Rol }
         },
 
@@ -88,6 +90,7 @@ public class UserController : ControllerBase
             {
                 { "id", user.UserId.ToString() },
                 { "name", user.Name.ToString() },
+                { "email", user.Email.ToString() },
                 { ClaimTypes.Role, user.Rol }
             },
                 Expires = DateTime.UtcNow.AddSeconds(3000),

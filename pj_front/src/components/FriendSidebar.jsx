@@ -32,6 +32,7 @@ export default function FriendSidebar() {
   } = useFriendship();
 
   console.log(friends)
+  console.log(pendingReceived)
   useEffect(() => {
     const fetchData = async () => {
       await fetchAll();
@@ -41,9 +42,10 @@ export default function FriendSidebar() {
 
 
   const handleAceptRequest = async (requestId, newFriendId) => {
+    console.log("Aceptando solicitud de amistad:", requestId, newFriendId);
     try {
       await acceptRequest(requestId);
-      sendMessage("RequestAcepted", {newFriendId});
+      sendMessage("RequestAccepted", {newFriend: newFriendId.toStrinhg()});
     } catch (error) {
       console.error("Error al aceptar solicitud de amistad:", error);
       toast.error("No se pudo aceptar la solicitud.");
@@ -120,7 +122,7 @@ export default function FriendSidebar() {
                 <span>{req.requester?.name ?? 'Desconocido'}</span>
                 <span>
                   <button
-                    onClick={() => handleAceptRequest(req.id, req.requester?.id)}
+                    onClick={() => handleAceptRequest(req.id, req.requester?.userId)}
                     aria-label="Aceptar solicitud"
                     className={`${styles.listItemButton} ${styles.listItemButtonAccept}`}
                     disabled={!req.requester}

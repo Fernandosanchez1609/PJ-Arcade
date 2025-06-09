@@ -38,8 +38,8 @@ namespace pj_backend.Services
                     });
                     await NotifyFriendsUserConnected(userId);
                     break;
-                case "RequestAcepted":
-                    var notifiAcepted = jsonEl.GetString();
+                case "RequestAccepted":
+                    var notifiAcepted = jsonEl.GetProperty("newFriend").GetString();
                     onlineFriends = await GetFriendsOnline(notifiAcepted);
                     await _manager.SendMessageToUserAsync(notifiAcepted, new WSMessage {
                         Type = "FriendsOnlineList",
