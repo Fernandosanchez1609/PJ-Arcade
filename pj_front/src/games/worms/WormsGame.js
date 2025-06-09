@@ -554,16 +554,24 @@ export class Game extends Phaser.Scene {
                 reflected.y * bounceFactor
             );
 
-            this.grenade.setDrag(50, 0);
-
             const speed = Math.hypot(reflected.x, reflected.y);
+
             if (
-                speed < 2 ||
                 this.grenade.x <= 0 ||
                 this.grenade.x >= 800 ||
                 this.grenade.y >= 600
             ) {
                 this.removeGrenade();
+            } else {
+                this.time.delayedCall(
+                    3000,
+                    () => {
+                        console.log("Han pasado 3 segundos");
+                        this.removeGrenade(true);
+                    },
+                    [],
+                    this
+                );
             }
         }
     }
@@ -571,11 +579,48 @@ export class Game extends Phaser.Scene {
     removeGrenade(hasExploded) {
         if (typeof hasExploded === "undefined") {
             hasExploded = false;
+        } else {
+            this.terrain.erase(
+                "explosion",
+                this.grenade.body.center.x,
+                this.grenade.body.center.y
+            );
+
+            // Corrige el clearRect → usa el tamaño de la explosión
+            this.terrainBitmap.context.clearRect(
+                this.grenade.body.center.x,
+                this.grenade.body.center.y,
+                46,
+                43
+            );
+            this.terrainBitmap.refresh();
+
+            // Actualizar mapa lógico en zona destruida
+            this.collisions.updateCollisionMapArea(
+                this.collisionMap,
+                this.terrainBitmap,
+                this.terrainWidth,
+                this.terrainHeight,
+                this.grenade.body.center.x,
+                this.grenade.body.center.y,
+                46,
+                43
+            );
+
+            const rivalSocketId = store.getState().match.rivalSocketId;
+
+            if (rivalSocketId) {
+                sendMessage("Atack", {
+                    socketId: rivalSocketId,
+                    x: this.grenade.body.center.x,
+                    y: this.grenade.body.center.y,
+                });
+            }
         }
         this.grenade.disableBody(true, true);
         this.camera.stopFollow();
         let delay = 1000;
-        if (hasExploded) delay = 2000;
+        if (hasExploded) delay = 1000;
 
         this.cameraTween = this.tweens.add({
             targets: this.camera,
