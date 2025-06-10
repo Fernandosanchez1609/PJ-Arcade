@@ -44,7 +44,7 @@ export class Clouds {
             group = this.cloudFrontGroup;
         }
 
-        cloud.setScale(scale).setDepth(-1);
+        cloud.setScale(scale).setDepth(-2);
         group.add(cloud);
 
         // Usamos this.scene.tweens.add en lugar de this.tweens.add

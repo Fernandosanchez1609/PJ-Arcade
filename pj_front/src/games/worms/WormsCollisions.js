@@ -26,27 +26,32 @@ export class Collisions {
         { x: 10, y: -10 }, // derecha arriba?
     ];
 
-    wormOffSetts = [
+    wormOffsets = [
         this.wormBaseOffsets,
         this.wormTopOffsets,
         this.wormLeftOffsets,
         this.wormRightOffsets,
     ];
 
-    grenadeOffSetts = [
-        [
-            // Base
-            { x: 0, y: 2 },
-        ],
-        [
-            // Top
-            { x: 0, y: -2 },
-        ],
-        [
-            // Sides
-            { x: 2, y: 0 },
-            { x: 2, y: 0 },
-        ],
+    grenadeBaseOffsets = [
+        { x: -5, y: 10 },
+        { x: 0, y: 10 },
+        { x: 5, y: 10 },
+    ];
+    grenadeTopOffsets = [
+        { x: -5, y: -10 },
+        { x: 0, y: -10 },
+        { x: 5, y: -10 },
+    ];
+    grenadeLeftOffsets = [
+        { x: -10, y: -5},
+        { x: -10, y: 0 },
+        { x: -10, y: 5 },
+    ];
+    grenadeRightOffsets = [
+        { x: 10, y: 5 },
+        { x: 10, y: 0 },
+        { x: 10, y: -5},
     ];
 
     updateCollisionMapFromBitmap(
@@ -169,6 +174,79 @@ export class Collisions {
         for (const offset of this.wormRightOffsets) {
             const checkX = Math.floor(px + offset.x);
             const checkY = Math.floor(py + offset.y);
+            if (
+                this.isSolid(
+                    collisionMap,
+                    terrainWidth,
+                    terrainHeight,
+                    checkX,
+                    checkY
+                )
+            ) {
+                collideRight = true;
+            }
+        }
+
+        return { collideDown, collideLeft, collideTop, collideRight };
+    }
+
+    checkCollisionGrenade(collisionMap, terrainWidth, terrainHeight, px, py) {
+        let collideDown = false,
+            collideTop = false,
+            collideLeft = false,
+            collideRight = false;
+
+        for (let i = 0; i < this.grenadeBaseOffsets.length - 1; i++) {
+            const checkX = Math.floor(px + this.grenadeBaseOffsets[i].x);
+            const checkY = Math.floor(py + this.grenadeBaseOffsets[i].y);
+            if (
+                this.isSolid(
+                    collisionMap,
+                    terrainWidth,
+                    terrainHeight,
+                    checkX,
+                    checkY
+                )
+            ) {
+                collideDown = true;
+            }
+        }
+
+        for (let i = 0; i < this.grenadeTopOffsets.length - 1; i++) {
+            const checkX = Math.floor(px + this.grenadeTopOffsets[i].x);
+            const checkY = Math.floor(py + this.grenadeTopOffsets[i].y);
+            if (
+                this.isSolid(
+                    collisionMap,
+                    terrainWidth,
+                    terrainHeight,
+                    checkX,
+                    checkY
+                )
+            ) {
+                collideTop = true;
+            }
+        }
+
+        for (let i = 0; i < this.grenadeLeftOffsets.length - 1; i++) {
+            const checkX = Math.floor(px + this.grenadeLeftOffsets[i].x);
+            const checkY = Math.floor(py + this.grenadeLeftOffsets[i].y);
+            if (
+                this.isSolid(
+                    collisionMap,
+                    terrainWidth,
+                    terrainHeight,
+                    checkX,
+                    checkY
+                )
+            ) {
+                collideLeft = true;
+            }
+        }
+
+        for (let i = 0; i < this.grenadeRightOffsets.length - 1; i++) {
+            const checkX = Math.floor(px + this.grenadeRightOffsets[i].x);
+            const checkY = Math.floor(py + this.grenadeRightOffsets[i].y);
             if (
                 this.isSolid(
                     collisionMap,
@@ -348,7 +426,7 @@ export class Collisions {
 
             const speed = Math.hypot(reflected.x, reflected.y);
 
-            const bounceFactor = 0.6;
+            const bounceFactor = 3;
             this.grenade.setVelocity(speed * bounceFactor);
 
             if (
