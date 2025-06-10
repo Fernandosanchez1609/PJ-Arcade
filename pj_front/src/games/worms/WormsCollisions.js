@@ -3,7 +3,6 @@ export class Collisions {
         this.scene = scene;
     }
 
-
     wormBaseOffsets = [
         { x: -7, y: 15 }, // abajo izquierda
         { x: 0, y: 15 }, // abajo centro
@@ -31,24 +30,24 @@ export class Collisions {
         this.wormBaseOffsets,
         this.wormTopOffsets,
         this.wormLeftOffsets,
-        this.wormRightOffsets
-    ]
-
+        this.wormRightOffsets,
+    ];
 
     grenadeOffSetts = [
-        [   // Base
-            { x: 0, y: 2 }
+        [
+            // Base
+            { x: 0, y: 2 },
         ],
-        [   // Top
-            { x: 0, y: -2 }
+        [
+            // Top
+            { x: 0, y: -2 },
         ],
-        [   // Sides
+        [
+            // Sides
             { x: 2, y: 0 },
-            { x: 2, y: 0 }
-        ]
-    ]
-
-
+            { x: 2, y: 0 },
+        ],
+    ];
 
     updateCollisionMapFromBitmap(
         collisionMap,
@@ -194,7 +193,7 @@ export class Collisions {
 
             let blocked = false;
 
-            if ((direction === -1)) {
+            if (direction === -1) {
                 for (const offset of this.wormLeftOffsets) {
                     const checkX = Math.floor(newX + offset.x);
                     const checkY = Math.floor(newY + offset.y);
@@ -211,7 +210,7 @@ export class Collisions {
                         break;
                     }
                 }
-            } else if ((direction === 1)) {
+            } else if (direction === 1) {
                 for (const offset of this.wormLeftOffsets) {
                     const checkX = Math.floor(newX + offset.x);
                     const checkY = Math.floor(newY + offset.y);
@@ -287,8 +286,9 @@ export class Collisions {
 
             // Si el vecino está vacío (no sólido), la superficie apunta hacia allí
             if (!solid) {
-                normalX += n.dx;
-                normalY += n.dy;
+                const dist = Math.hypot(n.dx, n.dy);
+                normalX += n.dx / dist;
+                normalY += n.dy / dist;
             }
         }
 
@@ -309,6 +309,65 @@ export class Collisions {
         return { x: rx, y: ry };
     }
 
+    grenadeVsLand(
+        collisionMap,
+        terrainWidth,
+        terrainHeight,
+        grenadeX,
+        grenadeY
+    ) {
+        // const x = Math.floor(this.grenade.body.center.x);
+        // const y = Math.floor(this.grenade.body.center.y);
 
+        const isInsideTerrain = this.isSolid(
+            collisionMap,
+            terrainWidth,
+            terrainHeight,
+            grenadeX,
+            grenadeY
+        );
 
+        if (isInsideTerrain) {
+            const normal = this.getSurfaceNormal(
+                this.collisionMap,
+                this.terrainWidth,
+                this.terrainHeight,
+                grenadeX,
+                grenadeY
+            );
+
+            const vx = this.grenade.body.velocity.x;
+            const vy = this.grenade.body.velocity.y;
+
+            const reflected = this.collisions.reflectVector(
+                vx,
+                vy,
+                normal.x,
+                normal.y
+            );
+
+            const speed = Math.hypot(reflected.x, reflected.y);
+
+            const bounceFactor = 0.6;
+            this.grenade.setVelocity(speed * bounceFactor);
+
+            if (
+                this.grenade.x <= 0 ||
+                this.grenade.x >= 800 ||
+                this.grenade.y >= 600
+            ) {
+                this.removeGrenade();
+            } else {
+                this.time.delayedCall(
+                    3000,
+                    () => {
+                        console.log("Han pasado 3 segundos");
+                        this.removeGrenade(true);
+                    },
+                    [],
+                    this
+                );
+            }
+        }
+    }
 }

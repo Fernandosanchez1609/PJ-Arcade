@@ -132,7 +132,7 @@ export class Game extends Phaser.Scene {
             .setOrigin(0);
 
         // Terreno
-        this.terrain = this.add.renderTexture(400, 350, 800, 600).setDepth(0);
+        this.terrain = this.add.renderTexture(400, 350, 800, 600).setDepth(0); // A1. AQUI SUMA 50 A LAS Y PARA QUE NO ESTÉ CENTRADO
         this.terrain.draw("terrain", 0, 0);
 
         const srcImage = this.textures.get("terrain").getSourceImage();
@@ -141,7 +141,7 @@ export class Game extends Phaser.Scene {
             800,
             600
         );
-        this.terrainBitmap.context.drawImage(srcImage, 0, 50);
+        this.terrainBitmap.context.drawImage(srcImage, 0, 50); // A2. POR ESO AQUI ES (0, 50)
         this.terrainBitmap.refresh();
 
         // Crear mapa lógico de colisión para el terreno
@@ -174,17 +174,34 @@ export class Game extends Phaser.Scene {
             const localX =
                 pointer.x - (this.terrain.x - this.terrain.width / 2);
             const localY =
-                pointer.y - (this.terrain.y - this.terrain.height / 2);
+                pointer.y - (this.terrain.y - this.terrain.height / 2); // A3. POR ESO AQUI SUMA 50 (-21.5 + 50 = 28.5)
 
-            this.terrain.erase("explosion", localX - 23, localY - 21.5);
+            this.terrain.erase("explosion", localX - 23, localY - 21.5); // A4.  AQUI POR ALGUN MOTIVO NO HAY QUE SUMAR 50
 
             // Corrige el clearRect → usa el tamaño de la explosión
             this.terrainBitmap.context.clearRect(
                 localX - 23,
-                localY - 21.5,
+                localY + 28.5, // A3. POR ESO AQUI SUMA 50 (-21.5 + 50 = 28.5)
                 46,
                 43
             );
+            // this.terrainBitmap.context.save();
+            // this.terrainBitmap.context.beginPath();
+            // this.terrainBitmap.context.arc(
+            //     localX - 23,
+            //     localY + 28.5,
+            //     16,
+            //     0,
+            //     Math.PI * 2
+            // );
+            // this.terrainBitmap.context.clip();
+            // this.terrainBitmap.context.clearRect(
+            //     localX - 23 - 16,
+            //     localY + 28.5 - 16,
+            //     32,
+            //     32
+            // );
+            // this.terrainBitmap.context.restore();
             this.terrainBitmap.refresh();
 
             // Actualizar mapa lógico en zona destruida
@@ -194,7 +211,7 @@ export class Game extends Phaser.Scene {
                 this.terrainWidth,
                 this.terrainHeight,
                 localX - 23,
-                localY - 21.5,
+                localY + 28.5, // A3. POR ESO AQUI SUMA 50 (-21.5 + 50 = 28.5)
                 46,
                 90
             );
@@ -205,7 +222,7 @@ export class Game extends Phaser.Scene {
                 sendMessage("Atack", {
                     socketId: rivalSocketId,
                     x: localX,
-                    y: localY,
+                    y: localY, // A4.  AQUI POR ALGUN MOTIVO NO HAY QUE SUMAR 50
                 });
             }
         });
@@ -213,17 +230,23 @@ export class Game extends Phaser.Scene {
         // Listener eventos de WebSocket
         window.addEventListener("rivalAttack", (event) => {
             const { x, y } = event.detail;
-            this.terrain.erase("explosion", x - 23, y - 21.5);
+            this.terrain.erase("explosion", x - 23, y - 21.5); // A4.  AQUI POR ALGUN MOTIVO NO HAY QUE SUMAR 50
             // this.terrain.erase.arc(x, y, 16, 0, Math.PI * 2);
-            this.terrainBitmap.context.clearRect(x - 23, y - 21.5, 46, 43);
-            this.terrainBitmap.refresh();
+            this.terrainBitmap.context.clearRect(x - 23, y + 28.5, 46, 43); // A3. POR ESO AQUI SUMA 50 (-21.5 + 50 = 28.5)
+            // this.terrainBitmap.context.save();
+            // this.terrainBitmap.context.beginPath();
+            // this.terrainBitmap.context.arc(x, y, 16, 0, Math.PI * 2);
+            // this.terrainBitmap.context.clip();
+            // this.terrainBitmap.context.clearRect(x - 16, y - 16, 32, 32);
+            // this.terrainBitmap.context.restore();
+            // this.terrainBitmap.refresh();
             this.collisions.updateCollisionMapArea(
                 this.collisionMap,
                 this.terrainBitmap,
                 this.terrainWidth,
                 this.terrainHeight,
                 x - 23,
-                y - 21.5,
+                y + 28.5,
                 46,
                 43
             );
@@ -564,7 +587,7 @@ export class Game extends Phaser.Scene {
                 this.removeGrenade();
             } else {
                 this.time.delayedCall(
-                    3000,
+                    1000,
                     () => {
                         console.log("Han pasado 3 segundos");
                         this.removeGrenade(true);
@@ -582,14 +605,14 @@ export class Game extends Phaser.Scene {
         } else {
             this.terrain.erase(
                 "explosion",
-                this.grenade.body.center.x,
-                this.grenade.body.center.y
+                this.grenade.body.center.x - 23,
+                this.grenade.body.center.y - 71.5
             );
 
             // Corrige el clearRect → usa el tamaño de la explosión
             this.terrainBitmap.context.clearRect(
-                this.grenade.body.center.x,
-                this.grenade.body.center.y,
+                this.grenade.body.center.x - 23,
+                this.grenade.body.center.y - 21.5,
                 46,
                 43
             );
@@ -601,8 +624,8 @@ export class Game extends Phaser.Scene {
                 this.terrainBitmap,
                 this.terrainWidth,
                 this.terrainHeight,
-                this.grenade.body.center.x,
-                this.grenade.body.center.y,
+                this.grenade.body.center.x - 23,
+                this.grenade.body.center.y - 21.5,
                 46,
                 43
             );
@@ -613,7 +636,7 @@ export class Game extends Phaser.Scene {
                 sendMessage("Atack", {
                     socketId: rivalSocketId,
                     x: this.grenade.body.center.x,
-                    y: this.grenade.body.center.y,
+                    y: this.grenade.body.center.y - 50,
                 });
             }
         }
