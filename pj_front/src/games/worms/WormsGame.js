@@ -254,36 +254,11 @@ export class Game extends Phaser.Scene {
         this.jumpButton = this.input.keyboard.addKey(
             Phaser.Input.Keyboard.KeyCodes.SPACE
         );
-
-        this.nextWormKey = this.input.keyboard.addKey(
-            Phaser.Input.Keyboard.KeyCodes.T
-        );
     }
 
     update() {
         const cursors = this.cursors;
         const worm1 = this.worms[this.currentWormIndex];
-
-        if (Phaser.Input.Keyboard.JustDown(this.nextWormKey)) {
-            this.currentWormIndex =
-                (this.currentWormIndex + 1) % this.worms.length;
-
-            const rivalSocketId = store.getState().match.rivalSocketId;
-
-            if (rivalSocketId) {
-                sendMessage("ChangeActiveWorm", {
-                    socketId: rivalSocketId,
-                    wormIndex: this.currentWormIndex,
-                });
-            }
-            if (this.isMyTurn) {
-                this.isMyTurn = false;
-            } else {
-                this.isMyTurn = true;
-            }
-
-            console.log("es mi turno?", this.isMyTurn);
-        }
 
         // Posición etiquetas
         this.wormLabels.forEach((label, index) => {
@@ -404,6 +379,7 @@ export class Game extends Phaser.Scene {
         }
 
         // Cursor visual
+        if (this.isMyTurn) {
         const pointer = this.input.activePointer;
         const alpha = this.textures.getPixelAlpha(
             pointer.x,
@@ -419,7 +395,7 @@ export class Game extends Phaser.Scene {
             worm1.body.center.y +
             10 * Math.sin(Phaser.Math.DegToRad(this.crosshair.angle))
         );
-
+        } 
         // Explosión
         if (
             this.grenade.active
@@ -473,7 +449,8 @@ export class Game extends Phaser.Scene {
                     this
                 );
             }
-        } else {
+        } else if (this.isMyTurn) {
+
             //  Allow them to set the angle, between -90 (straight up) and 0 (facing to the right)
             if (this.cursors.up.isDown) {
                 this.crosshair.angle--;
@@ -557,6 +534,21 @@ export class Game extends Phaser.Scene {
             ease: "Quintic.Out",
             delay: delay,
         });
+
+        this.currentWormIndex = (this.currentWormIndex + 1) % this.worms.length;
+            if (rivalSocketId) {
+                sendMessage("ChangeActiveWorm", {
+                    socketId: rivalSocketId,
+                    wormIndex: this.currentWormIndex,
+                });
+            }
+            if (this.isMyTurn) {
+                this.isMyTurn = false;
+            } else {
+                this.isMyTurn = true;
+            }
+
+        console.log("es mi turno?", this.isMyTurn);
     }
 
     launchGrenade(x, y, power) {
