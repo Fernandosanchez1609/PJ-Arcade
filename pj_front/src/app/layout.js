@@ -32,10 +32,10 @@ export default function RootLayout({ children }) {
       >
         <ReduxProvider>
           <WsConnector />
-          <div className="flex flex-col min-h-screen">
+          <div className="grid min-h-screen grid-rows-[auto_1fr_auto]">
             <Header />
             <AuthInitializer>
-              <main className="flex-1 min-h-screen">
+              <main className="relative">
                 {children}
                 <ToastContainer
                   position="bottom-right"
@@ -49,8 +49,8 @@ export default function RootLayout({ children }) {
                   pauseOnHover
                   theme="colored"
                 />
+                <FriendSidebar />
               </main>
-              <FriendSidebar />
             </AuthInitializer>
             <Footer />
           </div>
