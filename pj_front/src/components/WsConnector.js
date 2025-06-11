@@ -57,8 +57,8 @@ export default function WsConnector() {
           }));
           break;
         case "Atack":
-          const { x, y } = msg.Data;
-          window.dispatchEvent(new CustomEvent("rivalAttack", { detail: { x, y } }));
+          const { x, y, power, angle } = msg.Data;
+          window.dispatchEvent(new CustomEvent("rivalAttack", { detail: { x, y, power, angle } }));
           break;
         case "ChangeActiveWorm":
           const { wormIndex } = msg.Data;
