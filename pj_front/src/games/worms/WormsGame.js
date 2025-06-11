@@ -8,6 +8,7 @@ export class Game extends Phaser.Scene {
         super({ key: "worms" });
         this.isMyTurn = false; // Variable para controlar el turno del jugador
         this.hasExploded = false; // Variable para controlar si la granada ha explotado
+        const maxlife = 100;
     }
 
     preload() {
@@ -89,7 +90,7 @@ export class Game extends Phaser.Scene {
                 .body.setSize(20, 45, true);
 
             worm.wormId = i + 1; // número del 1 al 6
-            worm.life = 100;
+            worm.life = this.maxLife;
             worm.collideDown;
             worm.collideLeft;
             worm.collideTop;
@@ -97,6 +98,12 @@ export class Game extends Phaser.Scene {
 
             this.worms.push(worm);
         }
+
+        // Gráficos para la barra de vida
+        this.healthBarBackground = this.add.graphics();
+        this.healthBarFill = this.add.graphics();
+
+        this.drawHealthBar();
 
         // para mostrar el numero del gusano
         this.wormLabels = [];
@@ -113,6 +120,7 @@ export class Game extends Phaser.Scene {
                 .setDepth(-1);
 
             this.wormLabels.push(label);
+            const healthBar = this.drawHealthBar(worm.x, worm.y - 20);
         }
 
         this.crosshair = this.add
@@ -388,27 +396,24 @@ export class Game extends Phaser.Scene {
 
         // Cursor visual
         if (this.isMyTurn) {
-        const pointer = this.input.activePointer;
-        const alpha = this.textures.getPixelAlpha(
-            pointer.x,
-            pointer.y,
-            "terrainBitmap"
-        );
-        this.game.canvas.style.cursor = alpha > 0 ? "crosshair" : "default";
+            const pointer = this.input.activePointer;
+            const alpha = this.textures.getPixelAlpha(
+                pointer.x,
+                pointer.y,
+                "terrainBitmap"
+            );
+            this.game.canvas.style.cursor = alpha > 0 ? "crosshair" : "default";
 
-        // Actualizar posición del crosshair para que siga al gusano
-        this.crosshair.setPosition(
-            worm1.body.center.x +
-            10 * Math.cos(Phaser.Math.DegToRad(this.crosshair.angle)),
-            worm1.body.center.y +
-            10 * Math.sin(Phaser.Math.DegToRad(this.crosshair.angle))
-        );
-        } 
+            // Actualizar posición del crosshair para que siga al gusano
+            this.crosshair.setPosition(
+                worm1.body.center.x +
+                    10 * Math.cos(Phaser.Math.DegToRad(this.crosshair.angle)),
+                worm1.body.center.y +
+                    10 * Math.sin(Phaser.Math.DegToRad(this.crosshair.angle))
+            );
+        }
         // Explosión
-        if (
-            this.grenade.active
-
-        ) {
+        if (this.grenade.active) {
             // Colisiones de la granada
             const grenadeFlags = this.collisions.checkCollisionGrenade(
                 this.collisionMap,
@@ -450,15 +455,33 @@ export class Game extends Phaser.Scene {
                 this.time.delayedCall(
                     3000,
                     () => {
-                        console.log("Han pasado 2.5 segundos");
-                        this.removeGrenade();
+                        this.grenade.hasExploded = true;
+
+                        this.removeGrenade(true);
+                        this.worms.forEach((worm) => {
+                            const receivesDamage = this.isInRange(
+                                worm.body.x,
+                                worm.body.y,
+                                this.grenade.body.x,
+                                this.grenade.body.y
+                            );
+                            if (
+                                receivesDamage &&
+                                this.grenade.hasExploded === true
+                            ) {
+                                console.log("vida pre-explosion: " + worm.life);
+                                worm.life -= this.grenade.damage;
+                                console.log(
+                                    "vida post-explosion: " + worm.life
+                                );
+                            }
+                        });
                     },
                     [],
                     this
                 );
             }
         } else if (this.isMyTurn) {
-
             //  Allow them to set the angle, between -90 (straight up) and 0 (facing to the right)
             if (this.cursors.up.isDown) {
                 this.crosshair.angle--;
@@ -544,17 +567,17 @@ export class Game extends Phaser.Scene {
         });
 
         this.currentWormIndex = (this.currentWormIndex + 1) % this.worms.length;
-            if (rivalSocketId) {
-                sendMessage("ChangeActiveWorm", {
-                    socketId: rivalSocketId,
-                    wormIndex: this.currentWormIndex,
-                });
-            }
-            if (this.isMyTurn) {
-                this.isMyTurn = false;
-            } else {
-                this.isMyTurn = true;
-            }
+        if (rivalSocketId) {
+            sendMessage("ChangeActiveWorm", {
+                socketId: rivalSocketId,
+                wormIndex: this.currentWormIndex,
+            });
+        }
+        if (this.isMyTurn) {
+            this.isMyTurn = false;
+        } else {
+            this.isMyTurn = true;
+        }
 
         console.log("es mi turno?", this.isMyTurn);
     }
@@ -594,5 +617,28 @@ export class Game extends Phaser.Scene {
             wormY >= explosionY - 16 &&
             wormY <= explosionY + 16
         );
+    }
+
+    drawHealthBar(x, y) {
+        const width = 80;
+        const height = 10;
+
+        const percent = Phaser.Math.Clamp(
+            this.currentLife / this.maxLife,
+            0,
+            1
+        );
+
+        // Fondo (gris)
+        this.healthBarBackground.clear();
+        this.healthBarBackground.fillStyle(0x555555, 1);
+        this.healthBarBackground.fillRect(x, y, width, height);
+
+        // Relleno (verde -> rojo según la vida)
+        this.healthBarFill.clear();
+        const color =
+            percent > 0.5 ? 0x00ff00 : percent > 0.25 ? 0xffff00 : 0xff0000;
+        this.healthBarFill.fillStyle(color, 1);
+        this.healthBarFill.fillRect(x, y, width * percent, height);
     }
 }
