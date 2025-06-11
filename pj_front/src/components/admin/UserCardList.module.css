@@ -1,90 +1,85 @@
-
 .grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
-  gap: 1.5rem;
-  padding: 3rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+    gap: 1.5rem;
+    padding: 3rem;
 }
 
 .card {
-  display: flex;
-  align-items: space-between;
-  justify-content: space-between;
-  background-color: var(--header_footer);
-  padding: 1.5rem;
-  border-radius: 16px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  transition: box-shadow 0.2s ease;
-  color: white;
+    display: flex;
+    align-items: space-between;
+    justify-content: space-between;
+    background-color: var(--header_footer);
+    padding: 1.5rem;
+    border-radius: 16px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.2s ease;
+    color: white;
 }
 
-
 .name {
-  font-size: 1.25rem;
-  font-weight: bold;
-  margin-bottom: 0.5rem;
-  color: var(--principal_orange);
+    font-size: 1.25rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+    color: var(--principal_orange);
 }
 
 .email {
-  margin-bottom: 0.25rem;
+    margin-bottom: 0.25rem;
 }
 
 .role {
-  font-size: 0.9rem;
-  margin-bottom: 0.75rem;
+    font-size: 0.9rem;
+    margin-bottom: 0.75rem;
 }
 
 .buttons {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
 }
 
 .toggleBtn {
-  display: block;
-  width: 100%;
-  padding: 0.2rem;
-  background-color: #2563eb;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: bold;
-
+    display: block;
+    width: 100%;
+    padding: 0.2rem;
+    background-color: #2563eb;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
 }
 
 .toggleBtn:hover {
-  background-color: #1d4ed8;
+    background-color: #1d4ed8;
 }
 .banBtn {
-  background-color: #f39c12;
-  color: white;
-  border: none;
-  border-radius: 0.4rem;
-  transition: background-color 0.3s ease;
-padding: 0.2rem;
+    background-color: #f39c12;
+    color: white;
+    border: none;
+    border-radius: 0.4rem;
+    transition: background-color 0.3s ease;
+    padding: 0.2rem;
 }
 
 .banBtn:hover {
-  background-color: #e67e22;
+    background-color: #e67e22;
 }
-
 
 /* Estilos para el botón de eliminar */
 .deleteBtn {
-  display: block;
-  width: 100%;
- padding: 0.2rem;
-  background-color: #ef4444;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: bold;
+    display: block;
+    width: 100%;
+    padding: 0.2rem;
+    background-color: #ef4444;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
 }
 
 .deleteBtn:hover {
-  background-color: #dc2626;
+    background-color: #dc2626;
 }

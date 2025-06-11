@@ -2,6 +2,7 @@ import { sendMessage } from "@/lib/WsClient";
 import { store } from "@/store/store";
 import { Clouds } from "@/games/worms/WormsClouds";
 import { Collisions } from "@/games/worms/WormsCollisions.js";
+import { HandleGrenade } from "@/games/worms/Grenade.js";
 
 export class Game extends Phaser.Scene {
     constructor() {
@@ -103,7 +104,6 @@ export class Game extends Phaser.Scene {
         this.healthBarBackground = this.add.graphics();
         this.healthBarFill = this.add.graphics();
 
-
         // para mostrar el numero del gusano
         this.wormLabels = [];
 
@@ -133,12 +133,12 @@ export class Game extends Phaser.Scene {
 
         this.crosshair = this.add
             .image(
-                this.worms[0].body.center.x + 10,
-                this.worms[0].body.center.y + 10,
+                this.worms[0].body.center.x,
+                this.worms[0].body.center.y,
                 "crosshair"
             )
             .setAngle(-90)
-            .setOrigin(0)
+            .setOrigin(0, 0.5)
             .setDepth(-1);
 
         // Terreno
@@ -294,7 +294,6 @@ export class Game extends Phaser.Scene {
             labels.lifeLabel.setText(`${worm.life}`); // por si la vida cambia dinámicamente
         });
 
-
         // Colisiones gusanos
         this.worms.forEach((worm) => {
             const flags = this.collisions.checkCollisionDirections(
@@ -418,11 +417,14 @@ export class Game extends Phaser.Scene {
             this.game.canvas.style.cursor = alpha > 0 ? "crosshair" : "default";
 
             // Actualizar posición del crosshair para que siga al gusano
+            const distance = 30;
             this.crosshair.setPosition(
                 worm1.body.center.x +
-                10 * Math.cos(Phaser.Math.DegToRad(this.crosshair.angle)),
+                    distance *
+                        Math.cos(Phaser.Math.DegToRad(this.crosshair.angle)),
                 worm1.body.center.y +
-                10 * Math.sin(Phaser.Math.DegToRad(this.crosshair.angle))
+                    distance *
+                        Math.sin(Phaser.Math.DegToRad(this.crosshair.angle))
             );
         }
         // Explosión
@@ -477,17 +479,17 @@ export class Game extends Phaser.Scene {
                             );
 
                             if (receivesDamage) {
-                                console.log("Gusano #" + worm.wormId + " recibe daño")
+                                console.log(
+                                    "Gusano #" + worm.wormId + " recibe daño"
+                                );
                                 console.log("vida pre-explosion: " + worm.life);
                                 worm.life -= this.grenade.damage;
                                 console.log(
                                     "vida post-explosion: " + worm.life
                                 );
-
                             }
                         });
                         this.removeGrenade(true);
-
                     },
                     [],
                     this
@@ -626,9 +628,6 @@ export class Game extends Phaser.Scene {
         const dx = wormX - explosionX;
         const dy = wormY - explosionY;
         const distance = Math.sqrt(dx * dx + dy * dy);
-        return distance <= 32;  
+        return distance <= 32;
     }
-
-
-
 }

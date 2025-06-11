@@ -137,11 +137,11 @@
   height: auto;
   border-radius: 8px;
   object-fit: cover;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
 .gameCard h3 {
-  font-size: 1.2rem;
+  font-size: 1.5rem;
   font-weight: 500;
   color: var(--principal_orange);
   text-align: center;
