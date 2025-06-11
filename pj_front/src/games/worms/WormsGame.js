@@ -39,12 +39,6 @@ export class Game extends Phaser.Scene {
         this.currentWormIndex = 0;
         const role = store.getState().match.playerRole;
 
-        if (role === "Player1") {
-            this.isMyTurn = true;
-        } else {
-            this.isMyTurn = false;
-        }
-
         // // Animacion explosion
         // fire = this.add.particles("fuego");
 
@@ -68,10 +62,17 @@ export class Game extends Phaser.Scene {
             .setCollideWorldBounds(false)
             .disableBody(true, true)
             .setDepth(0);
+        this.grenade.damage = 20;
         this.grenade.collideDown;
         this.grenade.collideLeft;
         this.grenade.collideTop;
         this.grenade.collideRight;
+
+        if (role === "Player1") {
+            this.isMyTurn = true;
+        } else {
+            this.isMyTurn = false;
+        }
 
         // Para calcular la potencia del disparo
         this.chargeStartTime = null;
@@ -97,6 +98,7 @@ export class Game extends Phaser.Scene {
                 .body.setSize(20, 45, true);
 
             worm.wormId = i + 1; // número del 1 al 6
+            worm.life = 100;
             worm.collideDown;
             worm.collideLeft;
             worm.collideTop;
@@ -487,14 +489,7 @@ export class Game extends Phaser.Scene {
         );
 
         // Explosión
-        if (
-            this.grenade.active
-            // &&
-            // (this.grenade.body.x > worm1.body.center.x + 10 ||
-            //     this.grenade.body.x < worm1.body.center.x + 10 ||
-            //     this.grenade.body.y > worm1.body.center.y + 10 ||
-            //     this.grenade.body.y < worm1.body.center.y + 10)
-        ) {
+        if (this.grenade.active) {
             // Colisiones de la granada
             const grenadeFlags = this.collisions.checkCollisionGrenade(
                 this.collisionMap,
@@ -526,17 +521,36 @@ export class Game extends Phaser.Scene {
             }
 
             if (
-                this.grenade.x <= 0 ||
-                this.grenade.x >= 800 ||
-                this.grenade.y >= 600
+                this.grenade.body.x <= 0 ||
+                this.grenade.body.x >= 800 ||
+                this.grenade.body.y >= 600
             ) {
                 this.removeGrenade();
-            } else {
+            } else if (!this.grenade.hasExplosionTimer) {
+                this.grenade.hasExplosionTimer = true; // ⚠️ Solo se configura una vez
+
                 this.time.delayedCall(
-                    2500,
+                    3000,
                     () => {
-                        console.log("Han pasado 2.5 segundos");
+                        if (this.grenade.hasExploded) return; // Evita daño duplicado
+                        this.grenade.hasExploded = true;
+
                         this.removeGrenade(true);
+                        this.worms.forEach((worm) => {
+                            const receivesDamage = this.isInRange(
+                                worm.body.x,
+                                worm.body.y,
+                                this.grenade.body.x,
+                                this.grenade.body.y
+                            );
+                            if (receivesDamage) {
+                                console.log("vida pre-explosion: " + worm.life);
+                                worm.life -= this.grenade.damage;
+                                console.log(
+                                    "vida post-explosion: " + worm.life
+                                );
+                            }
+                        });
                     },
                     [],
                     this
@@ -639,26 +653,28 @@ export class Game extends Phaser.Scene {
             .setCollideWorldBounds(false);
 
         this.physics.velocityFromAngle(
-            // CON ESTO CALCULAMOS TRAYECTORIA DISPAROS
             this.crosshair.angle,
             power,
             this.grenade.body.velocity
         );
     }
 
-    invertGrenadeX(
-        vx
-        // , vy
-    ) {
-        const bounceFactor = 0.8;
+    invertGrenadeX(vx) {
+        const bounceFactor = 0.75;
         this.grenade.setVelocityX(-vx * bounceFactor);
     }
 
-    invertGrenadeY(
-        //vx,
-        vy
-    ) {
-        const bounceFactor = 0.8;
+    invertGrenadeY(vy) {
+        const bounceFactor = 0.75;
         this.grenade.setVelocityY(-vy * bounceFactor);
+    }
+
+    isInRange(wormX, wormY, explosionX, explosionY) {
+        return (
+            wormX >= explosionX - 16 &&
+            wormX <= explosionX + 16 &&
+            wormY >= explosionY - 16 &&
+            wormY <= explosionY + 16
+        );
     }
 }

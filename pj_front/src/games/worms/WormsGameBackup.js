@@ -6,6 +6,7 @@ import { Collisions } from "@/games/worms/WormsCollisions.js";
 export class Game extends Phaser.Scene {
     constructor() {
         super({ key: "worms" });
+        this.isMyTurn = false; // Variable para controlar el turno del jugador
     }
 
     preload() {
@@ -33,7 +34,16 @@ export class Game extends Phaser.Scene {
         this.cameras.main.setBounds(0, 0, 800, 600);
         this.camera = this.cameras.main;
 
-        this.add.image(410, 250, "background").setDepth(-2);
+        this.add.image(410, 250, "background").setDepth(-3);
+
+        this.currentWormIndex = 0;
+        const role = store.getState().match.playerRole;
+
+        if (role === "Player1") {
+            this.isMyTurn = true;
+        } else {
+            this.isMyTurn = false;
+        }
 
         // // Animacion explosion
         // fire = this.add.particles("fuego");
@@ -57,7 +67,7 @@ export class Game extends Phaser.Scene {
             .setBounce(0) // Desactivamos rebote para hacerlo manual
             .setCollideWorldBounds(false)
             .disableBody(true, true)
-            .setVelocityX(400);
+            .setDepth(0);
         this.grenade.collideDown;
         this.grenade.collideLeft;
         this.grenade.collideTop;
@@ -106,21 +116,24 @@ export class Game extends Phaser.Scene {
                     stroke: "#000",
                     strokeThickness: 3,
                 })
-                .setOrigin(0.5);
+                .setOrigin(0.5)
+                .setDepth(-1);
 
             this.wormLabels.push(label);
         }
 
         this.crosshair = this.add
             .image(
-                this.worms[0].body.center.x + 20,
-                this.worms[0].body.center.y + 20,
+                this.worms[0].body.center.x + 10,
+                this.worms[0].body.center.y + 10,
                 "crosshair"
             )
-            .setOrigin(0);
+            .setAngle(-90)
+            .setOrigin(0)
+            .setDepth(-1);
 
         // Terreno
-        this.terrain = this.add.renderTexture(400, 350, 800, 600).setDepth(0);
+        this.terrain = this.add.renderTexture(400, 350, 800, 600).setDepth(0); // A1. AQUI SUMA 50 A LAS Y PARA QUE NO ESTÉ CENTRADO
         this.terrain.draw("terrain", 0, 0);
 
         const srcImage = this.textures.get("terrain").getSourceImage();
@@ -129,7 +142,7 @@ export class Game extends Phaser.Scene {
             800,
             600
         );
-        this.terrainBitmap.context.drawImage(srcImage, 0, 0);
+        this.terrainBitmap.context.drawImage(srcImage, 0, 50); // A2. POR ESO AQUI ES (0, 50)
         this.terrainBitmap.refresh();
 
         // Crear mapa lógico de colisión para el terreno
@@ -162,17 +175,34 @@ export class Game extends Phaser.Scene {
             const localX =
                 pointer.x - (this.terrain.x - this.terrain.width / 2);
             const localY =
-                pointer.y - (this.terrain.y - this.terrain.height / 2);
+                pointer.y - (this.terrain.y - this.terrain.height / 2); // A3. POR ESO AQUI SUMA 50 (-21.5 + 50 = 28.5)
 
-            this.terrain.erase("explosion", localX - 23, localY - 21.5);
+            this.terrain.erase("explosion", localX - 23, localY - 21.5); // A4.  AQUI POR ALGUN MOTIVO NO HAY QUE SUMAR 50
 
             // Corrige el clearRect → usa el tamaño de la explosión
             this.terrainBitmap.context.clearRect(
                 localX - 23,
-                localY - 21.5,
+                localY + 28.5, // A3. POR ESO AQUI SUMA 50 (-21.5 + 50 = 28.5)
                 46,
                 43
             );
+            // this.terrainBitmap.context.save();
+            // this.terrainBitmap.context.beginPath();
+            // this.terrainBitmap.context.arc(
+            //     localX - 23,
+            //     localY + 28.5,
+            //     16,
+            //     0,
+            //     Math.PI * 2
+            // );
+            // this.terrainBitmap.context.clip();
+            // this.terrainBitmap.context.clearRect(
+            //     localX - 23 - 16,
+            //     localY + 28.5 - 16,
+            //     32,
+            //     32
+            // );
+            // this.terrainBitmap.context.restore();
             this.terrainBitmap.refresh();
 
             // Actualizar mapa lógico en zona destruida
@@ -182,9 +212,9 @@ export class Game extends Phaser.Scene {
                 this.terrainWidth,
                 this.terrainHeight,
                 localX - 23,
-                localY - 21.5,
+                localY + 28.5, // A3. POR ESO AQUI SUMA 50 (-21.5 + 50 = 28.5)
                 46,
-                43
+                90
             );
 
             const rivalSocketId = store.getState().match.rivalSocketId;
@@ -193,7 +223,7 @@ export class Game extends Phaser.Scene {
                 sendMessage("Atack", {
                     socketId: rivalSocketId,
                     x: localX,
-                    y: localY,
+                    y: localY, // A4.  AQUI POR ALGUN MOTIVO NO HAY QUE SUMAR 50
                 });
             }
         });
@@ -201,20 +231,53 @@ export class Game extends Phaser.Scene {
         // Listener eventos de WebSocket
         window.addEventListener("rivalAttack", (event) => {
             const { x, y } = event.detail;
-            this.terrain.erase("explosion", x - 23, y - 21.5);
+            this.terrain.erase("explosion", x - 23, y - 21.5); // A4.  AQUI POR ALGUN MOTIVO NO HAY QUE SUMAR 50
             // this.terrain.erase.arc(x, y, 16, 0, Math.PI * 2);
-            this.terrainBitmap.context.clearRect(x - 23, y - 21.5, 46, 43);
-            this.terrainBitmap.refresh();
+            this.terrainBitmap.context.clearRect(x - 23, y + 28.5, 46, 43); // A3. POR ESO AQUI SUMA 50 (-21.5 + 50 = 28.5)
+            // this.terrainBitmap.context.save();
+            // this.terrainBitmap.context.beginPath();
+            // this.terrainBitmap.context.arc(x, y, 16, 0, Math.PI * 2);
+            // this.terrainBitmap.context.clip();
+            // this.terrainBitmap.context.clearRect(x - 16, y - 16, 32, 32);
+            // this.terrainBitmap.context.restore();
+            // this.terrainBitmap.refresh();
             this.collisions.updateCollisionMapArea(
                 this.collisionMap,
                 this.terrainBitmap,
                 this.terrainWidth,
                 this.terrainHeight,
                 x - 23,
-                y - 21.5,
+                y + 28.5,
                 46,
                 43
             );
+        });
+
+        window.addEventListener("changeActiveWorm", (event) => {
+            const { wormIndex } = event.detail;
+            this.currentWormIndex = wormIndex;
+            if (this.isMyTurn) {
+                this.isMyTurn = false;
+            } else {
+                this.isMyTurn = true;
+            }
+            console.log("es mi turno?", this.isMyTurn);
+        });
+
+        window.addEventListener("wormMove", (event) => {
+            const { x, y, velocityX, velocityY, flipX, anim } = event.detail;
+
+            const worm = this.worms[this.currentWormIndex];
+            if (!worm) return; // prevención extra
+
+            worm.x = x;
+            worm.y = y;
+            worm.setVelocity(velocityX, velocityY);
+            worm.setFlipX(flipX);
+
+            if (anim && anim !== worm.anims.getName()) {
+                worm.play(anim, true);
+            }
         });
 
         // Crear instancia de Clouds y comenzar la creación de nubes
@@ -230,11 +293,36 @@ export class Game extends Phaser.Scene {
         this.jumpButton = this.input.keyboard.addKey(
             Phaser.Input.Keyboard.KeyCodes.SPACE
         );
+
+        this.nextWormKey = this.input.keyboard.addKey(
+            Phaser.Input.Keyboard.KeyCodes.T
+        );
     }
 
     update() {
         const cursors = this.cursors;
-        const worm1 = this.worms[0];
+        const worm1 = this.worms[this.currentWormIndex];
+
+        if (Phaser.Input.Keyboard.JustDown(this.nextWormKey)) {
+            this.currentWormIndex =
+                (this.currentWormIndex + 1) % this.worms.length;
+
+            const rivalSocketId = store.getState().match.rivalSocketId;
+
+            if (rivalSocketId) {
+                sendMessage("ChangeActiveWorm", {
+                    socketId: rivalSocketId,
+                    wormIndex: this.currentWormIndex,
+                });
+            }
+            if (this.isMyTurn) {
+                this.isMyTurn = false;
+            } else {
+                this.isMyTurn = true;
+            }
+
+            console.log("es mi turno?", this.isMyTurn);
+        }
 
         // Posición etiquetas
         this.wormLabels.forEach((label, index) => {
@@ -268,35 +356,6 @@ export class Game extends Phaser.Scene {
         //     this.chargeBarBg.setVisible(false);
         //     this.chargeBarFill.setVisible(false);
         // }
-
-        // Explosión
-        if (this.grenade.active) {
-            this.grenadeVsLand();
-        } else {
-            //  Allow them to set the angle, between -90 (straight up) and 0 (facing to the right)
-            if (this.cursors.up.isDown && this.crosshair.angle > -179) {
-                this.crosshair.angle--;
-            } else if (this.cursors.down.isDown && this.crosshair.angle < 0) {
-                this.crosshair.angle++;
-            }
-
-            if (Phaser.Input.Keyboard.JustDown(this.fireButton)) {
-                this.chargeStartTime = this.time.now;
-            }
-
-            if (
-                Phaser.Input.Keyboard.JustUp(this.fireButton) &&
-                this.chargeStartTime !== null
-            ) {
-                const chargeDuration = this.time.now - this.chargeStartTime;
-                this.chargeStartTime = null;
-
-                // Limita la potencia de disparo entre 100 y 600
-                const power = Phaser.Math.Clamp(chargeDuration * 2, 100, 600);
-
-                this.launchGrenade(worm1.x, worm1.y - 20, power);
-            }
-        }
 
         // Colisiones gusanos
         this.worms.forEach((worm) => {
@@ -363,35 +422,51 @@ export class Game extends Phaser.Scene {
             }
         });
 
-        // Salto
-        if (this.jumpButton.isDown && worm1.collisionFlags?.collideDown) {
-            worm1.setVelocityY(-300);
+        //movimiento del gusano activo
+        if (this.isMyTurn) {
+            // Salto
+            if (this.jumpButton.isDown && worm1.collisionFlags?.collideDown) {
+                worm1.setVelocityY(-300);
+            }
+
+            // Movimiento horizontal
+            if (cursors.left.isDown) {
+                worm1.setVelocityX(-100);
+                worm1.play("walk", true);
+                worm1.setFlipX(false);
+            } else if (cursors.right.isDown) {
+                worm1.setVelocityX(100);
+                worm1.play("walk", true);
+                worm1.setFlipX(true);
+            } else {
+                worm1.setVelocityX(0);
+                worm1.anims.stop();
+            }
         }
 
-        // Movimiento horizontal
-        if (cursors.left.isDown) {
-            worm1.setVelocityX(-100);
-            worm1.play("walk", true);
-            worm1.setFlipX(false);
-        } else if (cursors.right.isDown) {
-            worm1.setVelocityX(100);
-            worm1.play("walk", true);
-            worm1.setFlipX(true);
-        } else {
-            worm1.setVelocityX(0);
-            worm1.anims.stop();
-        }
+        //movimiento websocket
+        // Enviar posición del gusano activo al rival
+        if (this.isMyTurn) {
+            const worm = this.worms[this.currentWormIndex];
 
-        // Colisiones de la granada
-        if (this.grenade.active) {
-            const grenadeFlags = this.collisions.checkCollisionDirections(
-                this.collisionMap,
-                this.terrainWidth,
-                this.terrainHeight,
-                this.grenade.body.center.x,
-                this.grenade.body.center.y
-            );
-            this.grenade.collisionFlags = grenadeFlags;
+            // Detectar cambio relevante
+            if (
+                worm.body.velocity.x !== 0 ||
+                worm.body.velocity.y !== 0 ||
+                Phaser.Input.Keyboard.JustDown(this.cursors.left) ||
+                Phaser.Input.Keyboard.JustDown(this.cursors.right)
+            ) {
+                const rivalSocketId = store.getState().match.rivalSocketId;
+                sendMessage("WormMove", {
+                    socketId: rivalSocketId,
+                    x: worm.x,
+                    y: worm.y,
+                    velocityX: worm.body.velocity.x,
+                    velocityY: worm.body.velocity.y,
+                    flipX: worm.flipX,
+                    anim: worm.anims.getName() || null,
+                });
+            }
         }
 
         // Cursor visual
@@ -406,68 +481,94 @@ export class Game extends Phaser.Scene {
         // Actualizar posición del crosshair para que siga al gusano
         this.crosshair.setPosition(
             worm1.body.center.x +
-                20 * Math.cos(Phaser.Math.DegToRad(this.crosshair.angle)),
-            worm1.body.center.y -
-                20 * Math.sin(Phaser.Math.DegToRad(this.crosshair.angle))
+                10 * Math.cos(Phaser.Math.DegToRad(this.crosshair.angle)),
+            worm1.body.center.y +
+                10 * Math.sin(Phaser.Math.DegToRad(this.crosshair.angle))
         );
 
+        // Explosión
         if (
-            this.grenade.x < 0 ||
-            this.grenade.x > 800 ||
-            this.grenade.y > 600
+            this.grenade.active
+            // &&
+            // (this.grenade.body.x > worm1.body.center.x + 10 ||
+            //     this.grenade.body.x < worm1.body.center.x + 10 ||
+            //     this.grenade.body.y > worm1.body.center.y + 10 ||
+            //     this.grenade.body.y < worm1.body.center.y + 10)
         ) {
-            removeGrenade();
-        }
-    }
-
-    grenadeVsLand() {
-        const x = Math.floor(this.grenade.body.center.x);
-        const y = Math.floor(this.grenade.body.center.y);
-
-        const isInsideTerrain = this.collisions.isSolid(
-            this.collisionMap,
-            this.terrainWidth,
-            this.terrainHeight,
-            x,
-            y
-        );
-
-        if (isInsideTerrain) {
-            const normal = this.collisions.getSurfaceNormal(
+            // Colisiones de la granada
+            const grenadeFlags = this.collisions.checkCollisionGrenade(
                 this.collisionMap,
                 this.terrainWidth,
                 this.terrainHeight,
-                x,
-                y
+                Math.floor(this.grenade.body.center.x),
+                Math.floor(this.grenade.body.center.y)
             );
+            this.grenade.collisionFlags = grenadeFlags;
 
-            const vx = this.grenade.body.velocity.x;
-            const vy = this.grenade.body.velocity.y;
+            if (grenadeFlags.collideLeft) {
+                this.invertGrenadeX(this.grenade.body.velocity.x);
+            } else if (grenadeFlags.collideRight) {
+                this.invertGrenadeX(this.grenade.body.velocity.x);
+            }
 
-            const reflected = this.collisions.reflectVector(
-                vx,
-                vy,
-                normal.x,
-                normal.y
-            );
+            if (grenadeFlags.collideTop && this.grenade.body.velocity.y < 0) {
+                this.invertGrenadeY(this.grenade.body.velocity.y);
+            }
 
-            const bounceFactor = 0.6;
-            this.grenade.setVelocity(
-                reflected.x * bounceFactor,
-                reflected.y * bounceFactor
-            );
+            if (grenadeFlags.collideDown) {
+                this.invertGrenadeY(this.grenade.body.velocity.y);
+                const fall = 1;
+                if (Math.abs(this.grenade.body.velocity.y) > fall) {
+                    this.grenade.body.allowGravity = false;
+                }
+            } else {
+                this.grenade.body.allowGravity = true;
+            }
 
-            this.grenade.setDrag(50, 0);
-
-            const speed = Math.hypot(reflected.x, reflected.y);
             if (
-                speed < 10 ||
-                this.grenade.x < 0 ||
-                this.grenade.x > 800 ||
-                this.grenade.y > 600
+                this.grenade.x <= 0 ||
+                this.grenade.x >= 800 ||
+                this.grenade.y >= 600
             ) {
-                this.grenade.setVelocity(0);
-                this.removeGrenade(); // O lo que debas hacer cuando se detiene
+                this.removeGrenade();
+            } else {
+                this.time.delayedCall(
+                    2500,
+                    () => {
+                        console.log("Han pasado 2.5 segundos");
+                        this.removeGrenade(true);
+                    },
+                    [],
+                    this
+                );
+            }
+        } else {
+            //  Allow them to set the angle, between -90 (straight up) and 0 (facing to the right)
+            if (this.cursors.up.isDown) {
+                this.crosshair.angle--;
+            } else if (this.cursors.down.isDown) {
+                this.crosshair.angle++;
+            }
+
+            if (Phaser.Input.Keyboard.JustDown(this.fireButton)) {
+                this.chargeStartTime = this.time.now;
+            }
+
+            if (
+                Phaser.Input.Keyboard.JustUp(this.fireButton) &&
+                this.chargeStartTime !== null
+            ) {
+                const chargeDuration = this.time.now - this.chargeStartTime;
+                this.chargeStartTime = null;
+
+                // Limita la potencia de disparo entre 100 y 600
+                const firePower = Phaser.Math.Clamp(chargeDuration, 20, 600);
+
+                this.launchGrenade(
+                    this.crosshair.x,
+                    this.crosshair.y - 15,
+                    firePower
+                );
             }
         }
     }
@@ -475,11 +576,48 @@ export class Game extends Phaser.Scene {
     removeGrenade(hasExploded) {
         if (typeof hasExploded === "undefined") {
             hasExploded = false;
+        } else {
+            this.terrain.erase(
+                "explosion",
+                this.grenade.body.center.x - 23,
+                this.grenade.body.center.y - 71.5
+            );
+
+            // Corrige el clearRect → usa el tamaño de la explosión
+            this.terrainBitmap.context.clearRect(
+                this.grenade.body.center.x - 23,
+                this.grenade.body.center.y - 21.5,
+                46,
+                43
+            );
+            this.terrainBitmap.refresh();
+
+            // Actualizar mapa lógico en zona destruida
+            this.collisions.updateCollisionMapArea(
+                this.collisionMap,
+                this.terrainBitmap,
+                this.terrainWidth,
+                this.terrainHeight,
+                this.grenade.body.center.x - 23,
+                this.grenade.body.center.y - 21.5,
+                46,
+                43
+            );
+
+            const rivalSocketId = store.getState().match.rivalSocketId;
+
+            if (rivalSocketId) {
+                sendMessage("Atack", {
+                    socketId: rivalSocketId,
+                    x: this.grenade.body.center.x,
+                    y: this.grenade.body.center.y - 50,
+                });
+            }
         }
         this.grenade.disableBody(true, true);
         this.camera.stopFollow();
         let delay = 1000;
-        if (hasExploded) delay = 2000;
+        if (hasExploded) delay = 1000;
 
         this.cameraTween = this.tweens.add({
             targets: this.camera,
@@ -500,18 +638,27 @@ export class Game extends Phaser.Scene {
             .setBounce(0)
             .setCollideWorldBounds(false);
 
-        const trayectory = this.physics.velocityFromAngle(
+        this.physics.velocityFromAngle(
             // CON ESTO CALCULAMOS TRAYECTORIA DISPAROS
             this.crosshair.angle,
             power,
             this.grenade.body.velocity
         );
+    }
 
-        // const vx = Math.cos(angle) * power * direction;
-        // const vy = -Math.sin(angle) * power;
+    invertGrenadeX(
+        vx
+        // , vy
+    ) {
+        const bounceFactor = 0.8;
+        this.grenade.setVelocityX(-vx * bounceFactor);
+    }
 
-        // this.grenade.setVelocity(vx, vy);
-
-        // this.camera.startFollow(this.grenade, true, 0.1, 0.1);
+    invertGrenadeY(
+        //vx,
+        vy
+    ) {
+        const bounceFactor = 0.8;
+        this.grenade.setVelocityY(-vy * bounceFactor);
     }
 }
