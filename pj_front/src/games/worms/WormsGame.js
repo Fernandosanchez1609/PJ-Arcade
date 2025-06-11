@@ -100,10 +100,6 @@ export class Game extends Phaser.Scene {
             this.worms.push(worm);
         }
 
-        // Gráficos para la barra de vida
-        this.healthBarBackground = this.add.graphics();
-        this.healthBarFill = this.add.graphics();
-
         // para mostrar el numero del gusano
         this.wormLabels = [];
 
@@ -170,15 +166,20 @@ export class Game extends Phaser.Scene {
             this.terrainHeight
         );
 
-        // Barra de carga del disparo
-        this.chargeBarBg = this.add
-            .rectangle(0, 0, 52, 8, 0x000000)
-            .setOrigin(0.5)
-            .setVisible(false);
-        this.chargeBarFill = this.add
-            .rectangle(0, 0, 0, 6, 0x00ff00)
-            .setOrigin(0.5)
-            .setVisible(false);
+        // Potencia máxima de carga (en ms)
+        this.maxCharge = 600;
+
+        this.chargeBar = this.add.rectangle(0, 0, 0, 8, 0x00ff00);
+        this.chargeBar.setOrigin(1, 0.5); // nace desde el extremo derecho
+        this.chargeBar.setVisible(false);
+
+        this.chargeBarBg = this.add.rectangle(0, 0, 200, 8, 0x333333);
+        this.chargeBarBg.setOrigin(1, 0.5); // igual origen
+        this.chargeBarBg.setVisible(false);
+
+        // Oculta al inicio
+        this.chargeBar.setVisible(false);
+        this.chargeBarBg.setVisible(false);
 
         this.input.on("pointerdown", (pointer) => {
             const localX =
@@ -505,6 +506,10 @@ export class Game extends Phaser.Scene {
 
             if (Phaser.Input.Keyboard.JustDown(this.fireButton)) {
                 this.chargeStartTime = this.time.now;
+
+                // Mostrar la barra de carga
+                this.chargeBar.setVisible(true);
+                this.chargeBarBg.setVisible(true);
             }
 
             if (
@@ -515,14 +520,64 @@ export class Game extends Phaser.Scene {
                 this.chargeStartTime = null;
 
                 // Limita la potencia de disparo entre 100 y 600
-                const firePower = Phaser.Math.Clamp(chargeDuration, 20, 600);
+                const firePower = Phaser.Math.Clamp(
+                    chargeDuration,
+                    20,
+                    this.maxCharge
+                );
 
                 this.launchGrenade(
                     this.crosshair.x,
                     this.crosshair.y - 15,
                     firePower
                 );
+
+                // Ocultar barra al disparar
+                this.chargeBar.setVisible(false);
+                this.chargeBarBg.setVisible(false);
             }
+        }
+
+        // Barra de carga: actualizar si se está cargando
+        if (this.chargeStartTime !== null) {
+            const elapsed = this.time.now - this.chargeStartTime;
+            const clamped = Phaser.Math.Clamp(elapsed, 0, this.maxCharge);
+            const percentage = clamped / this.maxCharge;
+
+            const maxLength = 200;
+            const currentLength = maxLength * percentage;
+
+            // Coordenadas de origen y destino
+            const fromX = worm1.body.center.x;
+            const fromY = worm1.body.center.y;
+            const toX = this.crosshair.x;
+            const toY = this.crosshair.y;
+
+            // Ángulo entre gusano y cruceta
+            const angleRad = Phaser.Math.Angle.Between(fromX, fromY, toX, toY);
+            const angleDeg = Phaser.Math.RadToDeg(angleRad);
+
+            // Posicionar la barra desde la cruceta apuntando hacia el gusano
+            this.chargeBar.setPosition(toX, toY);
+            this.chargeBar.setRotation(angleRad + Math.PI); // invertida para crecer hacia el gusano
+            this.chargeBar.width = currentLength;
+
+            // Barra de fondo igual, pero siempre del mismo largo
+            this.chargeBarBg.setPosition(toX, toY);
+            this.chargeBarBg.setRotation(angleRad + Math.PI);
+            this.chargeBarBg.width = maxLength;
+
+            // Color interpolado
+            const color = Phaser.Display.Color.Interpolate.ColorWithColor(
+                new Phaser.Display.Color(0, 255, 0),
+                new Phaser.Display.Color(255, 0, 0),
+                1,
+                percentage
+            );
+
+            this.chargeBar.setFillStyle(
+                Phaser.Display.Color.GetColor(color.r, color.g, color.b)
+            );
         }
     }
 
