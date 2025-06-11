@@ -8,7 +8,7 @@ export class Game extends Phaser.Scene {
         super({ key: "worms" });
         this.isMyTurn = false; // Variable para controlar el turno del jugador
         this.hasExploded = false; // Variable para controlar si la granada ha explotado
-        const maxlife = 100;
+        this.maxLife = 100;
     }
 
     preload() {
@@ -103,13 +103,12 @@ export class Game extends Phaser.Scene {
         this.healthBarBackground = this.add.graphics();
         this.healthBarFill = this.add.graphics();
 
-        this.drawHealthBar();
 
         // para mostrar el numero del gusano
         this.wormLabels = [];
 
         for (let worm of this.worms) {
-            const label = this.add
+            const nameLabel = this.add
                 .text(worm.x, worm.y - 40, `#${worm.wormId}`, {
                     font: "16px Arial",
                     fill: "#ffffff",
@@ -119,8 +118,17 @@ export class Game extends Phaser.Scene {
                 .setOrigin(0.5)
                 .setDepth(-1);
 
-            this.wormLabels.push(label);
-            const healthBar = this.drawHealthBar(worm.x, worm.y - 20);
+            const lifeLabel = this.add
+                .text(worm.x, worm.y - 25, `${worm.life}`, {
+                    font: "16px Arial",
+                    fill: "#ffffff",
+                    stroke: "#000",
+                    strokeThickness: 3,
+                })
+                .setOrigin(0.5)
+                .setDepth(-1);
+
+            this.wormLabels.push({ nameLabel, lifeLabel });
         }
 
         this.crosshair = this.add
@@ -277,10 +285,15 @@ export class Game extends Phaser.Scene {
         const worm1 = this.worms[this.currentWormIndex];
 
         // Posición etiquetas
-        this.wormLabels.forEach((label, index) => {
+        this.wormLabels.forEach((labels, index) => {
             const worm = this.worms[index];
-            label.setPosition(worm.x, worm.y - 40);
+            if (!worm) return;
+
+            labels.nameLabel.setPosition(worm.x, worm.y - 40);
+            labels.lifeLabel.setPosition(worm.x, worm.y - 25);
+            labels.lifeLabel.setText(`${worm.life}`); // por si la vida cambia dinámicamente
         });
+
 
         // Colisiones gusanos
         this.worms.forEach((worm) => {
@@ -407,9 +420,9 @@ export class Game extends Phaser.Scene {
             // Actualizar posición del crosshair para que siga al gusano
             this.crosshair.setPosition(
                 worm1.body.center.x +
-                    10 * Math.cos(Phaser.Math.DegToRad(this.crosshair.angle)),
+                10 * Math.cos(Phaser.Math.DegToRad(this.crosshair.angle)),
                 worm1.body.center.y +
-                    10 * Math.sin(Phaser.Math.DegToRad(this.crosshair.angle))
+                10 * Math.sin(Phaser.Math.DegToRad(this.crosshair.angle))
             );
         }
         // Explosión
@@ -455,27 +468,26 @@ export class Game extends Phaser.Scene {
                 this.time.delayedCall(
                     3000,
                     () => {
-                        this.grenade.hasExploded = true;
-
-                        this.removeGrenade(true);
                         this.worms.forEach((worm) => {
                             const receivesDamage = this.isInRange(
-                                worm.body.x,
-                                worm.body.y,
-                                this.grenade.body.x,
-                                this.grenade.body.y
+                                worm.body.center.x,
+                                worm.body.center.y,
+                                this.grenade.body.center.x,
+                                this.grenade.body.center.y
                             );
-                            if (
-                                receivesDamage &&
-                                this.grenade.hasExploded === true
-                            ) {
+
+                            if (receivesDamage) {
+                                console.log("Gusano #" + worm.wormId + " recibe daño")
                                 console.log("vida pre-explosion: " + worm.life);
                                 worm.life -= this.grenade.damage;
                                 console.log(
                                     "vida post-explosion: " + worm.life
                                 );
+
                             }
                         });
+                        this.removeGrenade(true);
+
                     },
                     [],
                     this
@@ -611,34 +623,12 @@ export class Game extends Phaser.Scene {
     }
 
     isInRange(wormX, wormY, explosionX, explosionY) {
-        return (
-            wormX >= explosionX - 16 &&
-            wormX <= explosionX + 16 &&
-            wormY >= explosionY - 16 &&
-            wormY <= explosionY + 16
-        );
+        const dx = wormX - explosionX;
+        const dy = wormY - explosionY;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        return distance <= 32;  
     }
 
-    drawHealthBar(x, y) {
-        const width = 80;
-        const height = 10;
 
-        const percent = Phaser.Math.Clamp(
-            this.currentLife / this.maxLife,
-            0,
-            1
-        );
 
-        // Fondo (gris)
-        this.healthBarBackground.clear();
-        this.healthBarBackground.fillStyle(0x555555, 1);
-        this.healthBarBackground.fillRect(x, y, width, height);
-
-        // Relleno (verde -> rojo según la vida)
-        this.healthBarFill.clear();
-        const color =
-            percent > 0.5 ? 0x00ff00 : percent > 0.25 ? 0xffff00 : 0xff0000;
-        this.healthBarFill.fillStyle(color, 1);
-        this.healthBarFill.fillRect(x, y, width * percent, height);
-    }
 }
