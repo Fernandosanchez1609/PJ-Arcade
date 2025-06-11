@@ -2,6 +2,7 @@ import { sendMessage } from "@/lib/WsClient";
 import { store } from "@/store/store";
 import { Clouds } from "@/games/worms/WormsClouds";
 import { Collisions } from "@/games/worms/WormsCollisions.js";
+import { HandleGrenade } from "@/games/worms/Grenade.js";
 
 export class Game extends Phaser.Scene {
     constructor() {
@@ -100,11 +101,6 @@ export class Game extends Phaser.Scene {
             this.worms.push(worm);
         }
 
-        // Gráficos para la barra de vida
-        this.healthBarBackground = this.add.graphics();
-        this.healthBarFill = this.add.graphics();
-
-
         // para mostrar el numero del gusano
         this.wormLabels = [];
 
@@ -134,12 +130,12 @@ export class Game extends Phaser.Scene {
 
         this.crosshair = this.add
             .image(
-                this.worms[0].body.center.x + 10,
-                this.worms[0].body.center.y + 10,
+                this.worms[0].body.center.x,
+                this.worms[0].body.center.y,
                 "crosshair"
             )
             .setAngle(-90)
-            .setOrigin(0)
+            .setOrigin(0, 0.5)
             .setDepth(-1);
 
         // Terreno
@@ -171,15 +167,20 @@ export class Game extends Phaser.Scene {
             this.terrainHeight
         );
 
-        // Barra de carga del disparo
-        this.chargeBarBg = this.add
-            .rectangle(0, 0, 52, 8, 0x000000)
-            .setOrigin(0.5)
-            .setVisible(false);
-        this.chargeBarFill = this.add
-            .rectangle(0, 0, 0, 6, 0x00ff00)
-            .setOrigin(0.5)
-            .setVisible(false);
+        // Potencia máxima de carga (en ms)
+        this.maxCharge = 600;
+
+        this.chargeBar = this.add.rectangle(0, 0, 0, 8, 0x00ff00);
+        this.chargeBar.setOrigin(1, 0.5); // nace desde el extremo derecho
+        this.chargeBar.setVisible(false);
+
+        this.chargeBarBg = this.add.rectangle(0, 0, 200, 8, 0x333333);
+        this.chargeBarBg.setOrigin(1, 0.5); // igual origen
+        this.chargeBarBg.setVisible(false);
+
+        // Oculta al inicio
+        this.chargeBar.setVisible(false);
+        this.chargeBarBg.setVisible(false);
 
         this.input.on("pointerdown", (pointer) => {
             const localX =
@@ -436,11 +437,14 @@ export class Game extends Phaser.Scene {
             this.game.canvas.style.cursor = alpha > 0 ? "crosshair" : "default";
 
             // Actualizar posición del crosshair para que siga al gusano
+            const distance = 30;
             this.crosshair.setPosition(
                 worm1.body.center.x +
-                10 * Math.cos(Phaser.Math.DegToRad(this.crosshair.angle)),
+                    distance *
+                        Math.cos(Phaser.Math.DegToRad(this.crosshair.angle)),
                 worm1.body.center.y +
-                10 * Math.sin(Phaser.Math.DegToRad(this.crosshair.angle))
+                    distance *
+                        Math.sin(Phaser.Math.DegToRad(this.crosshair.angle))
             );
         }
         // Explosión
@@ -505,7 +509,6 @@ export class Game extends Phaser.Scene {
                             }
                         });
                         this.removeGrenade(true);
-
                     },
                     [],
                     this
@@ -610,7 +613,4 @@ export class Game extends Phaser.Scene {
         const distance = Math.sqrt(dx * dx + dy * dy);
         return distance <= 32;
     }
-
-
-
 }
