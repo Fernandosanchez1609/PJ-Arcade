@@ -2,11 +2,14 @@ import { sendMessage } from "@/lib/WsClient";
 import { store } from "@/store/store";
 import { Clouds } from "@/games/worms/WormsClouds";
 import { Collisions } from "@/games/worms/WormsCollisions.js";
+import { HandleGrenade } from "@/games/worms/Grenade.js";
 
 export class Game extends Phaser.Scene {
     constructor() {
         super({ key: "worms" });
         this.isMyTurn = false; // Variable para controlar el turno del jugador
+        this.hasExploded = false; // Variable para controlar si la granada ha explotado
+        this.maxLife = 100;
     }
 
     preload() {
@@ -45,22 +48,6 @@ export class Game extends Phaser.Scene {
             this.isMyTurn = false;
         }
 
-        // // Animacion explosion
-        // fire = this.add.particles("fuego");
-
-        // this.emitter = fire.createEmitter({
-        //     frame: Phaser.Utils.Array.NumberArray(0, 9), // frames del 0 al 9
-        //     advanceParticleFrame: true, // esto hace que los frames avancen
-        //     frameRate: 20, // velocidad del cambio de frame
-        //     speedX: { min: -120, max: 120 },
-        //     speedY: { min: -200, max: -120 },
-        //     rotation: { min: -15, max: 15 },
-        //     lifespan: 2000,
-        //     maxParticles: 10,
-        //     quantity: 10,
-        //     on: false,
-        // });
-
         // Grenade
         this.grenade = this.physics.add.sprite(0, 0, "grenade");
         this.grenade
@@ -68,10 +55,17 @@ export class Game extends Phaser.Scene {
             .setCollideWorldBounds(false)
             .disableBody(true, true)
             .setDepth(0);
+        this.grenade.damage = 20;
         this.grenade.collideDown;
         this.grenade.collideLeft;
         this.grenade.collideTop;
         this.grenade.collideRight;
+
+        if (role === "Player1") {
+            this.isMyTurn = true;
+        } else {
+            this.isMyTurn = false;
+        }
 
         // Para calcular la potencia del disparo
         this.chargeStartTime = null;
@@ -97,6 +91,7 @@ export class Game extends Phaser.Scene {
                 .body.setSize(20, 45, true);
 
             worm.wormId = i + 1; // número del 1 al 6
+            worm.life = this.maxLife;
             worm.collideDown;
             worm.collideLeft;
             worm.collideTop;
@@ -109,7 +104,7 @@ export class Game extends Phaser.Scene {
         this.wormLabels = [];
 
         for (let worm of this.worms) {
-            const label = this.add
+            const nameLabel = this.add
                 .text(worm.x, worm.y - 40, `#${worm.wormId}`, {
                     font: "16px Arial",
                     fill: "#ffffff",
@@ -119,17 +114,27 @@ export class Game extends Phaser.Scene {
                 .setOrigin(0.5)
                 .setDepth(-1);
 
-            this.wormLabels.push(label);
+            const lifeLabel = this.add
+                .text(worm.x, worm.y - 25, `${worm.life}`, {
+                    font: "16px Arial",
+                    fill: "#ffffff",
+                    stroke: "#000",
+                    strokeThickness: 3,
+                })
+                .setOrigin(0.5)
+                .setDepth(-1);
+
+            this.wormLabels.push({ nameLabel, lifeLabel });
         }
 
         this.crosshair = this.add
             .image(
-                this.worms[0].body.center.x + 10,
-                this.worms[0].body.center.y + 10,
+                this.worms[0].body.center.x,
+                this.worms[0].body.center.y,
                 "crosshair"
             )
             .setAngle(-90)
-            .setOrigin(0)
+            .setOrigin(0, 0.5)
             .setDepth(-1);
 
         // Terreno
@@ -161,15 +166,20 @@ export class Game extends Phaser.Scene {
             this.terrainHeight
         );
 
-        // Barra de carga del disparo
-        this.chargeBarBg = this.add
-            .rectangle(0, 0, 52, 8, 0x000000)
-            .setOrigin(0.5)
-            .setVisible(false);
-        this.chargeBarFill = this.add
-            .rectangle(0, 0, 0, 6, 0x00ff00)
-            .setOrigin(0.5)
-            .setVisible(false);
+        // Potencia máxima de carga (en ms)
+        this.maxCharge = 600;
+
+        this.chargeBar = this.add.rectangle(0, 0, 0, 8, 0x00ff00);
+        this.chargeBar.setOrigin(1, 0.5); // nace desde el extremo derecho
+        this.chargeBar.setVisible(false);
+
+        this.chargeBarBg = this.add.rectangle(0, 0, 200, 8, 0x333333);
+        this.chargeBarBg.setOrigin(1, 0.5); // igual origen
+        this.chargeBarBg.setVisible(false);
+
+        // Oculta al inicio
+        this.chargeBar.setVisible(false);
+        this.chargeBarBg.setVisible(false);
 
         this.input.on("pointerdown", (pointer) => {
             const localX =
@@ -186,23 +196,6 @@ export class Game extends Phaser.Scene {
                 46,
                 43
             );
-            // this.terrainBitmap.context.save();
-            // this.terrainBitmap.context.beginPath();
-            // this.terrainBitmap.context.arc(
-            //     localX - 23,
-            //     localY + 28.5,
-            //     16,
-            //     0,
-            //     Math.PI * 2
-            // );
-            // this.terrainBitmap.context.clip();
-            // this.terrainBitmap.context.clearRect(
-            //     localX - 23 - 16,
-            //     localY + 28.5 - 16,
-            //     32,
-            //     32
-            // );
-            // this.terrainBitmap.context.restore();
             this.terrainBitmap.refresh();
 
             // Actualizar mapa lógico en zona destruida
@@ -234,13 +227,6 @@ export class Game extends Phaser.Scene {
             this.terrain.erase("explosion", x - 23, y - 21.5); // A4.  AQUI POR ALGUN MOTIVO NO HAY QUE SUMAR 50
             // this.terrain.erase.arc(x, y, 16, 0, Math.PI * 2);
             this.terrainBitmap.context.clearRect(x - 23, y + 28.5, 46, 43); // A3. POR ESO AQUI SUMA 50 (-21.5 + 50 = 28.5)
-            // this.terrainBitmap.context.save();
-            // this.terrainBitmap.context.beginPath();
-            // this.terrainBitmap.context.arc(x, y, 16, 0, Math.PI * 2);
-            // this.terrainBitmap.context.clip();
-            // this.terrainBitmap.context.clearRect(x - 16, y - 16, 32, 32);
-            // this.terrainBitmap.context.restore();
-            // this.terrainBitmap.refresh();
             this.collisions.updateCollisionMapArea(
                 this.collisionMap,
                 this.terrainBitmap,
@@ -293,69 +279,21 @@ export class Game extends Phaser.Scene {
         this.jumpButton = this.input.keyboard.addKey(
             Phaser.Input.Keyboard.KeyCodes.SPACE
         );
-
-        this.nextWormKey = this.input.keyboard.addKey(
-            Phaser.Input.Keyboard.KeyCodes.T
-        );
     }
 
     update() {
         const cursors = this.cursors;
         const worm1 = this.worms[this.currentWormIndex];
 
-        if (Phaser.Input.Keyboard.JustDown(this.nextWormKey)) {
-            this.currentWormIndex =
-                (this.currentWormIndex + 1) % this.worms.length;
-
-            const rivalSocketId = store.getState().match.rivalSocketId;
-
-            if (rivalSocketId) {
-                sendMessage("ChangeActiveWorm", {
-                    socketId: rivalSocketId,
-                    wormIndex: this.currentWormIndex,
-                });
-            }
-            if (this.isMyTurn) {
-                this.isMyTurn = false;
-            } else {
-                this.isMyTurn = true;
-            }
-
-            console.log("es mi turno?", this.isMyTurn);
-        }
-
         // Posición etiquetas
-        this.wormLabels.forEach((label, index) => {
+        this.wormLabels.forEach((labels, index) => {
             const worm = this.worms[index];
-            label.setPosition(worm.x, worm.y - 40);
+            if (!worm) return;
+
+            labels.nameLabel.setPosition(worm.x, worm.y - 40);
+            labels.lifeLabel.setPosition(worm.x, worm.y - 25);
+            labels.lifeLabel.setText(`${worm.life}`); // por si la vida cambia dinámicamente
         });
-
-        // Barra de carga visual sobre worm1
-        // if (this.chargeStartTime !== null) {
-        //     const chargeDuration = this.time.now - this.chargeStartTime;
-        //     const power = Phaser.Math.Clamp(chargeDuration * 2, 100, 600);
-        //     const percent = (power - 100) / (600 - 100); // de 0 a 1
-
-        //     const red = Phaser.Display.Color.Interpolate.ColorWithColor(
-        //         new Phaser.Display.Color(0, 255, 0),
-        //         new Phaser.Display.Color(255, 0, 0),
-        //         1,
-        //         percent
-        //     );
-        //     const colorHex = Phaser.Display.Color.GetColor(red.r, red.g, red.b);
-        //     this.chargeBarFill.setFillStyle(colorHex);
-
-        //     this.chargeBarBg
-        //         .setVisible(true)
-        //         .setPosition(worm1.x, worm1.y - 60);
-        //     this.chargeBarFill
-        //         .setVisible(true)
-        //         .setPosition(worm1.x, worm1.y - 60)
-        //         .setScale(percent, 1);
-        // } else {
-        //     this.chargeBarBg.setVisible(false);
-        //     this.chargeBarFill.setVisible(false);
-        // }
 
         // Colisiones gusanos
         this.worms.forEach((worm) => {
@@ -470,31 +408,28 @@ export class Game extends Phaser.Scene {
         }
 
         // Cursor visual
-        const pointer = this.input.activePointer;
-        const alpha = this.textures.getPixelAlpha(
-            pointer.x,
-            pointer.y,
-            "terrainBitmap"
-        );
-        this.game.canvas.style.cursor = alpha > 0 ? "crosshair" : "default";
+        if (this.isMyTurn) {
+            const pointer = this.input.activePointer;
+            const alpha = this.textures.getPixelAlpha(
+                pointer.x,
+                pointer.y,
+                "terrainBitmap"
+            );
+            this.game.canvas.style.cursor = alpha > 0 ? "crosshair" : "default";
 
-        // Actualizar posición del crosshair para que siga al gusano
-        this.crosshair.setPosition(
-            worm1.body.center.x +
-                10 * Math.cos(Phaser.Math.DegToRad(this.crosshair.angle)),
-            worm1.body.center.y +
-                10 * Math.sin(Phaser.Math.DegToRad(this.crosshair.angle))
-        );
-
+            // Actualizar posición del crosshair para que siga al gusano
+            const distance = 30;
+            this.crosshair.setPosition(
+                worm1.body.center.x +
+                distance *
+                Math.cos(Phaser.Math.DegToRad(this.crosshair.angle)),
+                worm1.body.center.y +
+                distance *
+                Math.sin(Phaser.Math.DegToRad(this.crosshair.angle))
+            );
+        }
         // Explosión
-        if (
-            this.grenade.active
-            // &&
-            // (this.grenade.body.x > worm1.body.center.x + 10 ||
-            //     this.grenade.body.x < worm1.body.center.x + 10 ||
-            //     this.grenade.body.y > worm1.body.center.y + 10 ||
-            //     this.grenade.body.y < worm1.body.center.y + 10)
-        ) {
+        if (this.grenade.active) {
             // Colisiones de la granada
             const grenadeFlags = this.collisions.checkCollisionGrenade(
                 this.collisionMap,
@@ -526,23 +461,42 @@ export class Game extends Phaser.Scene {
             }
 
             if (
-                this.grenade.x <= 0 ||
-                this.grenade.x >= 800 ||
-                this.grenade.y >= 600
+                this.grenade.body.x <= 0 ||
+                this.grenade.body.x >= 800 ||
+                this.grenade.body.y >= 600
             ) {
                 this.removeGrenade();
-            } else {
+            } else if (!this.grenade.delayedCallStarted) {
+                this.grenade.delayedCallStarted = true;
                 this.time.delayedCall(
-                    2500,
+                    3000,
                     () => {
-                        console.log("Han pasado 2.5 segundos");
+                        this.worms.forEach((worm) => {
+                            const receivesDamage = this.isInRange(
+                                worm.body.center.x,
+                                worm.body.center.y,
+                                this.grenade.body.center.x,
+                                this.grenade.body.center.y
+                            );
+
+                            if (receivesDamage) {
+                                console.log(
+                                    "Gusano #" + worm.wormId + " recibe daño"
+                                );
+                                console.log("vida pre-explosion: " + worm.life);
+                                worm.life -= this.grenade.damage;
+                                console.log(
+                                    "vida post-explosion: " + worm.life
+                                );
+                            }
+                        });
                         this.removeGrenade(true);
                     },
                     [],
                     this
                 );
             }
-        } else {
+        } else if (this.isMyTurn) {
             //  Allow them to set the angle, between -90 (straight up) and 0 (facing to the right)
             if (this.cursors.up.isDown) {
                 this.crosshair.angle--;
@@ -552,6 +506,10 @@ export class Game extends Phaser.Scene {
 
             if (Phaser.Input.Keyboard.JustDown(this.fireButton)) {
                 this.chargeStartTime = this.time.now;
+
+                // Mostrar la barra de carga
+                this.chargeBar.setVisible(true);
+                this.chargeBarBg.setVisible(true);
             }
 
             if (
@@ -562,62 +520,112 @@ export class Game extends Phaser.Scene {
                 this.chargeStartTime = null;
 
                 // Limita la potencia de disparo entre 100 y 600
-                const firePower = Phaser.Math.Clamp(chargeDuration, 20, 600);
+                const firePower = Phaser.Math.Clamp(
+                    chargeDuration,
+                    20,
+                    this.maxCharge
+                );
 
                 this.launchGrenade(
                     this.crosshair.x,
                     this.crosshair.y - 15,
                     firePower
                 );
+
+                // Ocultar barra al disparar
+                this.chargeBar.setVisible(false);
+                this.chargeBarBg.setVisible(false);
             }
+        }
+
+        // Barra de carga: actualizar si se está cargando
+        if (this.chargeStartTime !== null) {
+            const elapsed = this.time.now - this.chargeStartTime;
+            const clamped = Phaser.Math.Clamp(elapsed, 0, this.maxCharge);
+            const percentage = clamped / this.maxCharge;
+
+            const maxLength = 200;
+            const currentLength = maxLength * percentage;
+
+            // Coordenadas de origen y destino
+            const fromX = worm1.body.center.x;
+            const fromY = worm1.body.center.y;
+            const toX = this.crosshair.x;
+            const toY = this.crosshair.y;
+
+            // Ángulo entre gusano y cruceta
+            const angleRad = Phaser.Math.Angle.Between(fromX, fromY, toX, toY);
+            const angleDeg = Phaser.Math.RadToDeg(angleRad);
+
+            // Posicionar la barra desde la cruceta apuntando hacia el gusano
+            this.chargeBar.setPosition(toX, toY);
+            this.chargeBar.setRotation(angleRad + Math.PI); // invertida para crecer hacia el gusano
+            this.chargeBar.width = currentLength;
+
+            // Barra de fondo igual, pero siempre del mismo largo
+            this.chargeBarBg.setPosition(toX, toY);
+            this.chargeBarBg.setRotation(angleRad + Math.PI);
+            this.chargeBarBg.width = maxLength;
+
+            // Color interpolado
+            const color = Phaser.Display.Color.Interpolate.ColorWithColor(
+                new Phaser.Display.Color(0, 255, 0),
+                new Phaser.Display.Color(255, 0, 0),
+                1,
+                percentage
+            );
+
+            this.chargeBar.setFillStyle(
+                Phaser.Display.Color.GetColor(color.r, color.g, color.b)
+            );
         }
     }
 
-    removeGrenade(hasExploded) {
-        if (typeof hasExploded === "undefined") {
-            hasExploded = false;
-        } else {
-            this.terrain.erase(
-                "explosion",
-                this.grenade.body.center.x - 23,
-                this.grenade.body.center.y - 71.5
-            );
+    removeGrenade() {
+        console.log(this.hasExploded);
+        if (this.hasExploded) return;
+        this.hasExploded = true;
+        this.terrain.erase(
+            "explosion",
+            this.grenade.body.center.x - 23,
+            this.grenade.body.center.y - 71.5
+        );
 
-            // Corrige el clearRect → usa el tamaño de la explosión
-            this.terrainBitmap.context.clearRect(
-                this.grenade.body.center.x - 23,
-                this.grenade.body.center.y - 21.5,
-                46,
-                43
-            );
-            this.terrainBitmap.refresh();
+        // Corrige el clearRect → usa el tamaño de la explosión
+        this.terrainBitmap.context.clearRect(
+            this.grenade.body.center.x - 23,
+            this.grenade.body.center.y - 21.5,
+            46,
+            43
+        );
+        this.terrainBitmap.refresh();
 
-            // Actualizar mapa lógico en zona destruida
-            this.collisions.updateCollisionMapArea(
-                this.collisionMap,
-                this.terrainBitmap,
-                this.terrainWidth,
-                this.terrainHeight,
-                this.grenade.body.center.x - 23,
-                this.grenade.body.center.y - 21.5,
-                46,
-                43
-            );
+        // Actualizar mapa lógico en zona destruida
+        this.collisions.updateCollisionMapArea(
+            this.collisionMap,
+            this.terrainBitmap,
+            this.terrainWidth,
+            this.terrainHeight,
+            this.grenade.body.center.x - 23,
+            this.grenade.body.center.y - 21.5,
+            46,
+            43
+        );
 
-            const rivalSocketId = store.getState().match.rivalSocketId;
+        const rivalSocketId = store.getState().match.rivalSocketId;
 
-            if (rivalSocketId) {
-                sendMessage("Atack", {
-                    socketId: rivalSocketId,
-                    x: this.grenade.body.center.x,
-                    y: this.grenade.body.center.y - 50,
-                });
-            }
+        if (rivalSocketId) {
+            sendMessage("Atack", {
+                socketId: rivalSocketId,
+                x: this.grenade.body.center.x,
+                y: this.grenade.body.center.y - 50,
+            });
         }
+
         this.grenade.disableBody(true, true);
         this.camera.stopFollow();
         let delay = 1000;
-        if (hasExploded) delay = 1000;
+        if (this.hasExploded) delay = 1000;
 
         this.cameraTween = this.tweens.add({
             targets: this.camera,
@@ -626,11 +634,27 @@ export class Game extends Phaser.Scene {
             ease: "Quintic.Out",
             delay: delay,
         });
+
+        this.currentWormIndex = (this.currentWormIndex + 1) % this.worms.length;
+        if (rivalSocketId) {
+            sendMessage("ChangeActiveWorm", {
+                socketId: rivalSocketId,
+                wormIndex: this.currentWormIndex,
+            });
+        }
+        if (this.isMyTurn) {
+            this.isMyTurn = false;
+        } else {
+            this.isMyTurn = true;
+        }
+
+        console.log("es mi turno?", this.isMyTurn);
     }
 
     launchGrenade(x, y, power) {
         if (this.grenade.active) return;
-
+        this.hasExploded = false;
+        this.grenade.delayedCallStarted = false;
         this.grenade
             .enableBody(true, x, y, true, true)
             .setVelocity(0)
@@ -639,26 +663,26 @@ export class Game extends Phaser.Scene {
             .setCollideWorldBounds(false);
 
         this.physics.velocityFromAngle(
-            // CON ESTO CALCULAMOS TRAYECTORIA DISPAROS
             this.crosshair.angle,
             power,
             this.grenade.body.velocity
         );
     }
 
-    invertGrenadeX(
-        vx
-        // , vy
-    ) {
-        const bounceFactor = 0.8;
+    invertGrenadeX(vx) {
+        const bounceFactor = 0.75;
         this.grenade.setVelocityX(-vx * bounceFactor);
     }
 
-    invertGrenadeY(
-        //vx,
-        vy
-    ) {
-        const bounceFactor = 0.8;
+    invertGrenadeY(vy) {
+        const bounceFactor = 0.75;
         this.grenade.setVelocityY(-vy * bounceFactor);
+    }
+
+    isInRange(wormX, wormY, explosionX, explosionY) {
+        const dx = wormX - explosionX;
+        const dy = wormY - explosionY;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        return distance <= 32;
     }
 }
