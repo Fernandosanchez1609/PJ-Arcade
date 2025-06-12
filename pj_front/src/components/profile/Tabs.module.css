@@ -1,7 +1,9 @@
 /* src/components/profile/Tabs.module.css */
+
 .container {
-    margin: 2rem auto 0; /* mt-8 */
+    margin: 2rem auto 0;
     max-width: 90vw;
+    padding: 0 1rem;
 }
 
 .tabsList {
@@ -12,23 +14,29 @@
 
 .profileSection {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     justify-content: space-around;
     gap: 1rem;
     padding: 1rem;
     background-color: var(--header_footer);
 }
+
 .profileInfo {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
     align-items: center;
+    text-align: center;
 }
 
 .userDetails {
     display: flex;
+    flex-direction: row;
     align-items: center;
     gap: 0.5rem;
+    flex-wrap: wrap;
+    justify-content: center;
 }
 
 .personlInfo {
@@ -39,7 +47,8 @@
 }
 
 .email {
-    font-size: 1.5rem; /* text-lg */
+    font-size: 1.2rem;
+    word-break: break-word;
 }
 
 .changePassword {
@@ -47,25 +56,22 @@
     background-color: var(--principal_orange);
     color: white;
     border-radius: 0.375rem;
-    transition: var(--dark-orange) 0.2s;
-    -webkit-transition: var(--dark-orange) 0.2s;
-    -moz-transition: var(--dark-orange) 0.2s;
-    -ms-transition: var(--dark-orange) 0.2s;
-    -o-transition: var(--dark-orange) 0.2s;
+    transition: background-color 0.2s ease;
 }
 
 .changePassword:hover {
-    background-color: #2563eb; /* hover:bg-blue-600 */
+    background-color: #2563eb;
 }
 
 .userName {
-    font-size: 3rem; /* text-md */
-    font-weight: 500; /* font-medium */
+    font-size: 2.2rem;
+    font-weight: 500;
+    word-break: break-word;
 }
 
 .editButton {
     padding: 0.5rem;
-    border-radius: 9999px; /* rounded-full */
+    border-radius: 9999px;
     transition: background-color 0.2s;
 }
 
@@ -76,4 +82,46 @@
 
 .tabsTrigger {
     color: white;
+}
+
+/* Media queries para pantallas pequeñas */
+@media (max-width: 768px) {
+    .profileSection {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+
+    .userName {
+        font-size: 1.8rem;
+    }
+
+    .email {
+        font-size: 1rem;
+    }
+
+    .container {
+        padding: 0 0.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .userName {
+        font-size: 1.5rem;
+    }
+
+    .email {
+        font-size: 0.95rem;
+    }
+
+    .changePassword {
+        font-size: 0.875rem;
+        padding: 0.4rem 0.75rem;
+    }
+
+    .editIcon {
+        width: 1rem;
+        height: 1rem;
+    }
 }

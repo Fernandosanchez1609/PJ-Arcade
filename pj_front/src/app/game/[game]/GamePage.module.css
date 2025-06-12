@@ -10,7 +10,6 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: var(--gap);
 }
 
 .gameContainer {
@@ -33,4 +32,11 @@
 .vs {
   max-height: 80px;
   max-width: 80px;
+}
+
+.mobileWarning{
+  color: var(--principal_orange);
+  font-size: 3rem;
+  font-family: 'Jersey 10', sans-serif;
+  text-align: center;
 }

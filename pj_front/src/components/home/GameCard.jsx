@@ -58,7 +58,7 @@ export default function GameCart() {
               alt={game.name}
               className={styles.gameImage}
             />
-            <h3>{game.name}</h3>
+            <div className={styles.gameName}>{game.name}</div>
           </div>
         ))}
       </div>

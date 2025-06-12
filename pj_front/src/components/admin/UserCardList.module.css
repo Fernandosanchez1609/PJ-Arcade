@@ -1,13 +1,22 @@
+@font-face {
+  font-family: 'Jersey 10';
+  src: url('/fonts/Jersey10-Regular.ttf') format('truetype'),
+       url('/fonts/Jersey10-Bold.ttf')    format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
 .grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
-    gap: 1.5rem;
-    padding: 3rem;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* antes 500px */
+    gap: 4rem;
+    padding: 2rem 1rem; /* padding más pequeño en móviles */
+   
 }
 
 .card {
     display: flex;
-    align-items: space-between;
+    flex-direction: column; /* En móviles los elementos se apilan */
     justify-content: space-between;
     background-color: var(--header_footer);
     padding: 1.5rem;
@@ -22,10 +31,12 @@
     font-weight: bold;
     margin-bottom: 0.5rem;
     color: var(--principal_orange);
+     font-family: 'Jersey 10', sans-serif;
 }
 
 .email {
     margin-bottom: 0.25rem;
+    word-wrap: break-word;
 }
 
 .role {
@@ -37,49 +48,61 @@
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
+    margin-top: 1rem;
 }
 
-.toggleBtn {
+.toggleBtn,
+.deleteBtn,
+.banBtn {
     display: block;
     width: 100%;
-    padding: 0.2rem;
-    background-color: #2563eb;
+    padding: 0.4rem 0.6rem;
     color: white;
     border: none;
     border-radius: 8px;
     cursor: pointer;
     font-weight: bold;
+    font-size: 0.9rem;
+    text-align: center;
 }
 
+/* Botones individuales con sus colores */
+.toggleBtn {
+    background-color: #2563eb;
+}
 .toggleBtn:hover {
     background-color: #1d4ed8;
 }
+
 .banBtn {
     background-color: #f39c12;
-    color: white;
-    border: none;
-    border-radius: 0.4rem;
-    transition: background-color 0.3s ease;
-    padding: 0.2rem;
 }
-
 .banBtn:hover {
     background-color: #e67e22;
 }
 
-/* Estilos para el botón de eliminar */
 .deleteBtn {
-    display: block;
-    width: 100%;
-    padding: 0.2rem;
     background-color: #ef4444;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: bold;
 }
-
 .deleteBtn:hover {
     background-color: #dc2626;
+}
+
+/* Media Query para pantallas pequeñas */
+@media (max-width: 480px) {
+    .name {
+        font-size: 1.1rem;
+    }
+
+    .role {
+        font-size: 0.85rem;
+    }
+
+    .grid {
+        padding: 1rem 0.5rem;
+    }
+
+    .card {
+        padding: 1rem;
+    }
 }
