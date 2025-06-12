@@ -4,7 +4,7 @@ export const wormsConfig = {
     type: Phaser.AUTO,
     width: 800,
     height: 600,
-    scene: [Game],
+    scene: [Game, GameOver, Victory],
     physics: {
         default: "arcade",
         matter: {
