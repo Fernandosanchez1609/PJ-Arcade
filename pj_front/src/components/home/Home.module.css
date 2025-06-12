@@ -9,10 +9,6 @@
   font-style: normal;
 }
 
-/* 2. Variables CSS (opcional) */
-:root {
-  --gap: 1rem;
-}
 /* 4. Contenedor principal de Header y Footer */
 /* Mobile: columnas apiladas */
 .header,
@@ -33,7 +29,6 @@
   flex-wrap: wrap-reverse;
   justify-content: center;
   align-items: center;
-  gap: var(--gap);
   width: 100%;
 }
 
@@ -54,7 +49,10 @@
   font-size: clamp(2rem, 8vw, 6rem);
   font-family: 'Jersey 10', sans-serif;
   text-align: center;
-  padding: var(--gap);
+}
+
+.gameName {
+  color: var(--principal_orange);
 }
 
 /* 8. A partir de tablets (min-width: 768px) pasamos a filas */
@@ -107,8 +105,8 @@
 .gamesGrid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 20px;
-  padding: 20px;
+  gap: 3rem;
+  padding: 4rem;
   margin: 0 auto;
 }
 
@@ -124,7 +122,6 @@
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   cursor: pointer;
   height: 100%;
-  max-width: 200px;
 }
 
 .gameCard:hover {
@@ -140,9 +137,8 @@
   margin-bottom: 8px;
 }
 
-.gameCard h3 {
+.gameCard{
   font-size: 1.5rem;
-  font-weight: 500;
   color: var(--principal_orange);
   text-align: center;
   margin: 0;
