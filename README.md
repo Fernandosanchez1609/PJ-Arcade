@@ -1,5 +1,5 @@
 # PJ-Arcade
-PJ-Arcade es una página de minijuegos inspirada en aquelals que solíamos usar de niños, cuando jugábamos para pasar el rato sin más `preocupación que huir del aburrimiento.
+PJ-Arcade es una página de minijuegos inspirada en aquelals que solíamos usar de niños, cuando jugábamos para pasar el rato sin más preocupación que huir del aburrimiento.
 Puedes visitarla en [pj-arcade](pj-arcade.duckdns.org) y ver el diseño en [Figma](https://www.figma.com/design/OVTptRviuZcv1Pf3DqoPRD/PJ-ARCADE?m=auto&t=tl1EbQDWTLYvYMTD-1)
 
 ## Autores
