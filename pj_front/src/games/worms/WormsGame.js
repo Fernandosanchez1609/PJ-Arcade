@@ -2,14 +2,15 @@ import { sendMessage } from "@/lib/WsClient";
 import { store } from "@/store/store";
 import { Clouds } from "@/games/worms/WormsClouds";
 import { Collisions } from "@/games/worms/WormsCollisions.js";
-import { HandleGrenade } from "@/games/worms/Grenade.js";
 
 export class Game extends Phaser.Scene {
     constructor() {
         super({ key: "worms" });
         this.isMyTurn = false; // Variable para controlar el turno del jugador
-        this.hasExploded = false; // Variable para controlar si la granada ha explotado
+        this.hasExploded = true; // Variable para controlar si la granada ha explotado
         this.maxLife = 100;
+        this.rivalSocketId = store.getState().match.rivalSocketId;
+        this.fpsCounter = 0;
     }
 
     preload() {
@@ -54,7 +55,8 @@ export class Game extends Phaser.Scene {
             .setBounce(0) // Desactivamos rebote para hacerlo manual
             .setCollideWorldBounds(false)
             .disableBody(true, true)
-            .setDepth(0);
+            .setDepth(0)
+            .setOrigin(0.5);
         this.grenade.damage = 20;
         this.grenade.collideDown;
         this.grenade.collideLeft;
@@ -210,11 +212,10 @@ export class Game extends Phaser.Scene {
                 90
             );
 
-            const rivalSocketId = store.getState().match.rivalSocketId;
 
-            if (rivalSocketId) {
+            if (this.rivalSocketId) {
                 sendMessage("Atack", {
-                    socketId: rivalSocketId,
+                    socketId: this.rivalSocketId,
                     x: localX,
                     y: localY, // A4.  AQUI POR ALGUN MOTIVO NO HAY QUE SUMAR 50
                 });
@@ -223,20 +224,8 @@ export class Game extends Phaser.Scene {
 
         // Listener eventos de WebSocket
         window.addEventListener("rivalAttack", (event) => {
-            const { x, y } = event.detail;
-            this.terrain.erase("explosion", x - 23, y - 21.5); // A4.  AQUI POR ALGUN MOTIVO NO HAY QUE SUMAR 50
-            // this.terrain.erase.arc(x, y, 16, 0, Math.PI * 2);
-            this.terrainBitmap.context.clearRect(x - 23, y + 28.5, 46, 43); // A3. POR ESO AQUI SUMA 50 (-21.5 + 50 = 28.5)
-            this.collisions.updateCollisionMapArea(
-                this.collisionMap,
-                this.terrainBitmap,
-                this.terrainWidth,
-                this.terrainHeight,
-                x - 23,
-                y + 28.5,
-                46,
-                43
-            );
+            const { x, y, power, angle } = event.detail;
+            this.launchGrenade(x, y, power, angle); // Dispara la granada al punto donde el rival hizo click
         });
 
         window.addEventListener("changeActiveWorm", (event) => {
@@ -266,6 +255,13 @@ export class Game extends Phaser.Scene {
             }
         });
 
+        window.addEventListener("grenadePosition", (event) => {
+            const { grenadeX, grenadeY, velocityX, velocityY } = event.detail;
+            if (!this.grenade.active) return; // Solo actualiza si la granada está activa
+            this.grenade.setPosition(grenadeX, grenadeY);
+            this.grenade.body.setVelocity(velocityX, velocityY);
+        });
+
         // Crear instancia de Clouds y comenzar la creación de nubes
         this.clouds = new Clouds(this); // Pasa la escena al constructor de Clouds
         this.clouds.startClouds(); // Comienza la creación de las nubes
@@ -282,6 +278,10 @@ export class Game extends Phaser.Scene {
     }
 
     update() {
+        this.fpsCounter++;
+        if (this.fpsCounter % 60 === 0) {
+            this.fpsCounter = 0;
+        }
         const cursors = this.cursors;
         const worm1 = this.worms[this.currentWormIndex];
 
@@ -394,9 +394,8 @@ export class Game extends Phaser.Scene {
                 Phaser.Input.Keyboard.JustDown(this.cursors.left) ||
                 Phaser.Input.Keyboard.JustDown(this.cursors.right)
             ) {
-                const rivalSocketId = store.getState().match.rivalSocketId;
                 sendMessage("WormMove", {
-                    socketId: rivalSocketId,
+                    socketId: this.rivalSocketId,
                     x: worm.x,
                     y: worm.y,
                     velocityX: worm.body.velocity.x,
@@ -466,35 +465,6 @@ export class Game extends Phaser.Scene {
                 this.grenade.body.y >= 600
             ) {
                 this.removeGrenade();
-            } else if (!this.grenade.delayedCallStarted) {
-                this.grenade.delayedCallStarted = true;
-                this.time.delayedCall(
-                    3000,
-                    () => {
-                        this.worms.forEach((worm) => {
-                            const receivesDamage = this.isInRange(
-                                worm.body.center.x,
-                                worm.body.center.y,
-                                this.grenade.body.center.x,
-                                this.grenade.body.center.y
-                            );
-
-                            if (receivesDamage) {
-                                console.log(
-                                    "Gusano #" + worm.wormId + " recibe daño"
-                                );
-                                console.log("vida pre-explosion: " + worm.life);
-                                worm.life -= this.grenade.damage;
-                                console.log(
-                                    "vida post-explosion: " + worm.life
-                                );
-                            }
-                        });
-                        this.removeGrenade(true);
-                    },
-                    [],
-                    this
-                );
             }
         } else if (this.isMyTurn) {
             //  Allow them to set the angle, between -90 (straight up) and 0 (facing to the right)
@@ -527,9 +497,10 @@ export class Game extends Phaser.Scene {
                 );
 
                 this.launchGrenade(
-                    this.crosshair.x,
-                    this.crosshair.y - 15,
-                    firePower
+                    worm1.body.center.x,
+                    worm1.body.center.y,
+                    firePower,
+                    this.crosshair.angle
                 );
 
                 // Ocultar barra al disparar
@@ -579,6 +550,16 @@ export class Game extends Phaser.Scene {
                 Phaser.Display.Color.GetColor(color.r, color.g, color.b)
             );
         }
+
+        if (this.grenade.active && this.fpsCounter % 60 === 0) {
+            sendMessage("GrenadePosition", {
+                socketId: this.rivalSocketId,
+                grenadeX: this.grenade.body.center.x,
+                grenadeY: this.grenade.body.center.y,
+                velocityX: this.grenade.body.velocity.x,
+                velocityY: this.grenade.body.velocity.y,
+            });
+        }
     }
 
     removeGrenade() {
@@ -612,33 +593,12 @@ export class Game extends Phaser.Scene {
             43
         );
 
-        const rivalSocketId = store.getState().match.rivalSocketId;
-
-        if (rivalSocketId) {
-            sendMessage("Atack", {
-                socketId: rivalSocketId,
-                x: this.grenade.body.center.x,
-                y: this.grenade.body.center.y - 50,
-            });
-        }
-
         this.grenade.disableBody(true, true);
-        this.camera.stopFollow();
-        let delay = 1000;
-        if (this.hasExploded) delay = 1000;
-
-        this.cameraTween = this.tweens.add({
-            targets: this.camera,
-            scrollX: 0,
-            duration: 1000,
-            ease: "Quintic.Out",
-            delay: delay,
-        });
 
         this.currentWormIndex = (this.currentWormIndex + 1) % this.worms.length;
-        if (rivalSocketId) {
+        if (this.rivalSocketId) {
             sendMessage("ChangeActiveWorm", {
-                socketId: rivalSocketId,
+                socketId: this.rivalSocketId,
                 wormIndex: this.currentWormIndex,
             });
         }
@@ -651,10 +611,9 @@ export class Game extends Phaser.Scene {
         console.log("es mi turno?", this.isMyTurn);
     }
 
-    launchGrenade(x, y, power) {
+    launchGrenade(x, y, power, angle) {
         if (this.grenade.active) return;
         this.hasExploded = false;
-        this.grenade.delayedCallStarted = false;
         this.grenade
             .enableBody(true, x, y, true, true)
             .setVelocity(0)
@@ -663,11 +622,49 @@ export class Game extends Phaser.Scene {
             .setCollideWorldBounds(false);
 
         this.physics.velocityFromAngle(
-            this.crosshair.angle,
+            angle,
             power,
             this.grenade.body.velocity
         );
+
+        if (this.rivalSocketId && this.isMyTurn) {
+            sendMessage("Atack", {
+                socketId: this.rivalSocketId,
+                x: x,
+                y: y,
+                power: power,
+                angle: angle,
+            });
+        }
+        this.time.delayedCall(
+            3000,
+            () => {
+                this.worms.forEach((worm) => {
+                    const receivesDamage = this.isInRange(
+                        worm.body.center.x,
+                        worm.body.center.y,
+                        this.grenade.body.center.x,
+                        this.grenade.body.center.y
+                    );
+
+                    if (receivesDamage) {
+                        console.log(
+                            "Gusano #" + worm.wormId + " recibe daño"
+                        );
+                        console.log("vida pre-explosion: " + worm.life);
+                        worm.life -= this.grenade.damage;
+                        console.log(
+                            "vida post-explosion: " + worm.life
+                        );
+                    }
+                });
+                this.removeGrenade();
+            },
+            [],
+            this
+        );
     }
+
 
     invertGrenadeX(vx) {
         const bounceFactor = 0.75;

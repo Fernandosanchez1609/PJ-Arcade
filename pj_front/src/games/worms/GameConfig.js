@@ -9,7 +9,15 @@ export const wormsConfig = {
         default: "arcade",
         matter: {
             gravity: { y: 500 },
-            debug: true, // Activa para ver colisiones y cuerpos
+
+        },
+        arcade: {
+            useFixedStep: true,
+            fps: 60,
         },
     },
+    fps: {
+        target: 60,
+        forceSetTimeOut: true,
+    }
 };

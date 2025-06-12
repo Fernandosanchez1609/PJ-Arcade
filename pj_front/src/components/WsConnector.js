@@ -67,6 +67,10 @@ export default function WsConnector() {
         case "WormMove":
           window.dispatchEvent(new CustomEvent("wormMove", { detail: msg.Data }));
           break;
+        case "GrenadePosition":
+          const {grenadeX, grenadeY, velocityX, velocityY } = msg.Data;
+          window.dispatchEvent(new CustomEvent("grenadePosition", { detail: { grenadeX, grenadeY, velocityX, velocityY } }));
+          break;
         default:
           console.warn("[WS] Mensaje no manejado:", msg);
       }
