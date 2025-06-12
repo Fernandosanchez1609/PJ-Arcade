@@ -256,8 +256,8 @@ export class Game extends Phaser.Scene {
         });
 
         window.addEventListener("grenadePosition", (event) => {
+            console.log("Actualizando posición de la granada");
             const { grenadeX, grenadeY, velocityX, velocityY } = event.detail;
-            if (!this.grenade.active) return; // Solo actualiza si la granada está activa
             this.grenade.setPosition(grenadeX, grenadeY);
             this.grenade.body.setVelocity(velocityX, velocityY);
         });
@@ -551,7 +551,7 @@ export class Game extends Phaser.Scene {
             );
         }
 
-        if (this.grenade.active && this.fpsCounter % 60 === 0) {
+        if ( this.isMyTurn && this.grenade.active && this.fpsCounter % 60 === 0) {
             sendMessage("GrenadePosition", {
                 socketId: this.rivalSocketId,
                 grenadeX: this.grenade.body.center.x,
@@ -596,12 +596,7 @@ export class Game extends Phaser.Scene {
         this.grenade.disableBody(true, true);
 
         this.currentWormIndex = (this.currentWormIndex + 1) % this.worms.length;
-        if (this.rivalSocketId) {
-            sendMessage("ChangeActiveWorm", {
-                socketId: this.rivalSocketId,
-                wormIndex: this.currentWormIndex,
-            });
-        }
+        
         if (this.isMyTurn) {
             this.isMyTurn = false;
         } else {
