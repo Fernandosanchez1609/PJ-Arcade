@@ -52,7 +52,7 @@ export class Game extends Phaser.Scene {
         this.cameras.main.setBounds(0, 0, 800, 600);
         this.camera = this.cameras.main;
 
-        this.turnTime = 10; // duración del turno en segundos
+        this.turnTime = 20; // duración del turno en segundos
         this.turnTimerEvent = null;
         this.turnTimerText = null;
 
@@ -357,8 +357,8 @@ export class Game extends Phaser.Scene {
             }
 
             // Fuera de los límites
-            if (worm.y >= this.physics.world.bounds.height) {
-                worm.setY(this.physics.world.bounds.height);
+            if (worm.y >= 600) {
+                // worm.setY(this.physics.world.bounds.height);
                 worm.body.velocity.y = Math.min(0, worm.body.velocity.y);
                 if (worm.life > 0) {
                     worm.life = 0;
@@ -376,6 +376,7 @@ export class Game extends Phaser.Scene {
                             grave.setFrame(1); // último frame estático de la tumba
                         }
                     });
+                    this.ChangeLive();
                     this.ChangeTurn();
                 }
             }
@@ -807,7 +808,7 @@ export class Game extends Phaser.Scene {
 
     startTurnTimer() {
         // Reinicia valores
-        this.turnTime = 10;
+        this.turnTime = 20;
         this.turnTimerText.setText(`Tiempo: ${this.turnTime}`);
 
         // Cancela temporizador anterior si existe
