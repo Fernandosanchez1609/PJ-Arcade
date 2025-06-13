@@ -8,7 +8,7 @@ export class Game extends Phaser.Scene {
         super({ key: "worms" });
         this.isMyTurn = false; // Variable para controlar el turno del jugador
         this.hasExploded = true; // Variable para controlar si la granada ha explotado
-        this.maxLife = 20;
+        this.maxLife = 100;
         this.rivalSocketId = store.getState().match.rivalSocketId;
         this.fpsCounter = 0;
         this.playerLife = 300; // Vida del jugador
@@ -57,6 +57,8 @@ export class Game extends Phaser.Scene {
         } else {
             this.isMyTurn = false;
         }
+
+        this.canMove = true;
 
         // Grenade
         this.grenade = this.physics.add.sprite(0, 0, "grenade");
@@ -350,7 +352,7 @@ export class Game extends Phaser.Scene {
         });
 
         //movimiento del gusano activo
-        if (this.isMyTurn) {
+        if (this.isMyTurn && this.canMove) {
             const activeTag = document.activeElement.tagName;
             if (
                 activeTag === "INPUT" ||
@@ -606,13 +608,15 @@ export class Game extends Phaser.Scene {
         );
 
         this.grenade.disableBody(true, true);
-
+        this.canMove = true;
         this.ChangeTurn();
 
         console.log("es mi turno?", this.isMyTurn);
+
     }
 
     launchGrenade(x, y, power, angle) {
+        this.canMove = false;
         if (this.grenade.active) return;
         this.hasExploded = false;
         this.grenade
