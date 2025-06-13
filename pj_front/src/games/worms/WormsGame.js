@@ -101,17 +101,18 @@ export class Game extends Phaser.Scene {
         this.worms = [];
 
         const wormPositions = [
-            { x: 100, y: 200 },
-            { x: 300, y: 250 },
-            { x: 500, y: 180 },
-            { x: 700, y: 230 },
-            { x: 900, y: 210 },
-            { x: 1100, y: 240 }
+            { x: 100, y: 150 },
+            { x: 325, y: 250 },
+            { x: 500, y: 250 },
+            { x: 575, y: 80 },
+            { x: 615, y: 400 },
+            { x: 200, y: 400 }
         ];
 
 
         for (let i = 0; i < 6; i++) {
-            const worm = this.physics.add.sprite(50 + i * 80, 20, "wormWalk");
+            const pos = wormPositions[i];
+            const worm = this.physics.add.sprite(pos.x, pos.y, "wormWalk");
             worm.setCollideWorldBounds(false)
                 .setBounce(0)
                 .setDrag(250, 0)
