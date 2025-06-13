@@ -8,7 +8,7 @@ export class Game extends Phaser.Scene {
         super({ key: "worms" });
         this.isMyTurn = false; // Variable para controlar el turno del jugador
         this.hasExploded = true; // Variable para controlar si la granada ha explotado
-        this.maxLife = 20;
+        this.maxLife = 100;
         this.rivalSocketId = store.getState().match.rivalSocketId;
         this.fpsCounter = 0;
         this.playerLife = 300; // Vida del jugador
@@ -29,6 +29,11 @@ export class Game extends Phaser.Scene {
             frameWidth: 60,
             frameHeight: 60,
         });
+        this.load.spritesheet("grave", "/images/sprites/grave.png", {
+            frameWidth: 60,
+            frameHeight: 60,
+        });
+
         this.load.image("crosshair", "/images/crshairr.png");
         this.load.image("grenade", "/images/grenade-20-20.png");
         this.load.spritesheet("fuego", "/images/sprites/shothit.png", {
@@ -52,6 +57,8 @@ export class Game extends Phaser.Scene {
         } else {
             this.isMyTurn = false;
         }
+
+        this.canMove = true;
 
         // Grenade
         this.grenade = this.physics.add.sprite(0, 0, "grenade");
@@ -231,6 +238,15 @@ export class Game extends Phaser.Scene {
         this.jumpButton = this.input.keyboard.addKey(
             Phaser.Input.Keyboard.KeyCodes.SPACE
         );
+
+        this.anims.create({
+            key: 'grave_appear',
+            frames: this.anims.generateFrameNumbers('grave', { start: 0, end: 19 }), // ajusta según tus frames
+            frameRate: 20,
+            repeat: 1 // ✅ solo una vez
+        });
+
+
     }
 
     update() {
@@ -314,11 +330,29 @@ export class Game extends Phaser.Scene {
             if (worm.y >= this.physics.world.bounds.height) {
                 worm.setY(this.physics.world.bounds.height);
                 worm.body.velocity.y = Math.min(0, worm.body.velocity.y);
+                if (worm.life > 0) {
+                    worm.life = 0;
+                    worm.disableBody(true, true)
+
+                    // 1. Crear sprite de la tumba en la posición del gusano
+                    const grave = this.add.sprite(worm.x, worm.y + 15, 'grave');
+
+                    // 2. Reproducir la animación de aparición
+                    grave.play('grave_appear');
+
+                    // 3. Al terminar la animación, quedarte en el último frame (ej. frame 5)
+                    grave.on('animationcomplete', (anim) => {
+                        if (anim.key === 'grave_appear') {
+                            grave.setFrame(1); // último frame estático de la tumba
+                        }
+                    });
+                    this.ChangeTurn();
+                }
             }
         });
 
         //movimiento del gusano activo
-        if (this.isMyTurn) {
+        if (this.isMyTurn && this.canMove) {
             const activeTag = document.activeElement.tagName;
             if (
                 activeTag === "INPUT" ||
@@ -574,13 +608,15 @@ export class Game extends Phaser.Scene {
         );
 
         this.grenade.disableBody(true, true);
-
+        this.canMove = true;
         this.ChangeTurn();
 
         console.log("es mi turno?", this.isMyTurn);
+
     }
 
     launchGrenade(x, y, power, angle) {
+        this.canMove = false;
         if (this.grenade.active) return;
         this.hasExploded = false;
         this.grenade
@@ -628,7 +664,21 @@ export class Game extends Phaser.Scene {
                         if (worm.life <= 0) {
                             worm.disableBody(true, true)
                             worm.life = ""
-                            worm.wormId = ""
+
+                            // 1. Crear sprite de la tumba en la posición del gusano
+                            const grave = this.add.sprite(worm.x, worm.y + 15, 'grave');
+
+                            // 2. Reproducir la animación de aparición
+                            grave.play('grave_appear');
+
+                            // 3. Al terminar la animación, quedarte en el último frame (ej. frame 5)
+                            grave.on('animationcomplete', (anim) => {
+                                if (anim.key === 'grave_appear') {
+                                    grave.setFrame(1); // último frame estático de la tumba
+                                }
+                            });
+
+
                         }
                     }
                 });
@@ -717,6 +767,4 @@ export class Game extends Phaser.Scene {
         this.playerLife = newLife;
         this.rivalLife = newRivalLife;
     }
-
-
 }
