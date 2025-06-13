@@ -5,6 +5,8 @@ Puedes visitarla en [pj-arcade](https://pj-arcade.duckdns.org) y ver el diseño 
 
 Aquí hay un pequeño [tutorial](https://docs.google.com/document/d/1HojYCxpcM6z0iKsi2eBl9GeozNg-XFC3mCXLjYfTi8c/edit?usp=sharing)
 
+[Anteproyecto](https://docs.google.com/document/d/1jP6mOObz1BU4dw_G_sAb0c4gw0G6O55zT-HGFYY129s/edit?usp=sharing)
+
 ## Autores
 - Fernando Jafet Sanchez Lagos
 - Pablo Ruiz Domínguez
