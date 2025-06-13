@@ -11,7 +11,11 @@ export class Game extends Phaser.Scene {
         this.maxLife = 20;
         this.rivalSocketId = store.getState().match.rivalSocketId;
         this.fpsCounter = 0;
+        this.playerLife = 300; // Vida del jugador
+        this.rivalLife = 300; // Vida del rival
+        this.gameOver = false;
     }
+
 
     preload() {
         this.load.image("background", "/images/sky-background.png");
@@ -510,6 +514,16 @@ export class Game extends Phaser.Scene {
                 velocityY: this.grenade.body.velocity.y,
             });
         }
+
+        if (this.playerLife <= 0 && !this.gameOver) {
+            console.log("Game Over: Has perdido")
+            this.gameOver = true;
+            
+        }else if (this.rivalLife <= 0 && !this.gameOver) {
+            console.log("Game Over: Has ganado")
+            this.gameOver = true;
+        }
+
     }
 
     removeGrenade() {
@@ -598,6 +612,7 @@ export class Game extends Phaser.Scene {
                     }
                 });
                 this.removeGrenade();
+                this.ChangeLive();
             },
             [],
             this
@@ -643,7 +658,7 @@ export class Game extends Phaser.Scene {
 
                 attempts++;
             }
-        }else{
+        } else {
             while (!found && attempts < this.worms.length) {
                 this.currentWormIndex = (this.currentWormIndex + 1) % this.worms.length;
                 const currentWorm = this.worms[this.currentWormIndex];
@@ -661,6 +676,25 @@ export class Game extends Phaser.Scene {
 
 
         this.isMyTurn = !this.isMyTurn;
+    }
+
+    ChangeLive() {
+        const role = store.getState().match.playerRole;
+        const num = (role === "Player1") ? 1 : 0;
+        var newLife = 0;
+        var newRivalLife = 0;
+
+        for (let i = 0; i < this.worms.length; i++) {
+            const worm = this.worms[i];
+            if (worm.wormId % 2 === num) {
+                newLife += worm.life;
+            } else {
+                newRivalLife += worm.life;
+            }
+        }
+
+        this.playerLife = newLife;
+        this.rivalLife = newRivalLife;
     }
 
 
