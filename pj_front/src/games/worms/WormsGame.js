@@ -133,10 +133,13 @@ export class Game extends Phaser.Scene {
         this.wormLabels = [];
 
         for (let worm of this.worms) {
+            const isEven = worm.wormId % 2 === 0;
+            const color = isEven ? "#FF5805" : "#19101B";
+
             const nameLabel = this.add
                 .text(worm.x, worm.y - 40, `${worm.wormId}`, {
                     font: "16px Arial",
-                    fill: "#ffffff",
+                    fill: color,
                     stroke: "#000",
                     strokeThickness: 3,
                 })
