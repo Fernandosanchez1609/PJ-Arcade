@@ -29,6 +29,11 @@ export class Game extends Phaser.Scene {
             frameWidth: 60,
             frameHeight: 60,
         });
+        this.load.spritesheet("grave", "/images/sprites/grave.png", {
+            frameWidth: 60,
+            frameHeight: 60,
+        });
+
         this.load.image("crosshair", "/images/crshairr.png");
         this.load.image("grenade", "/images/grenade-20-20.png");
         this.load.spritesheet("fuego", "/images/sprites/shothit.png", {
@@ -231,6 +236,15 @@ export class Game extends Phaser.Scene {
         this.jumpButton = this.input.keyboard.addKey(
             Phaser.Input.Keyboard.KeyCodes.SPACE
         );
+
+        this.anims.create({
+            key: 'grave_appear',
+            frames: this.anims.generateFrameNumbers('grave', { start: 0, end: 19 }), // ajusta según tus frames
+            frameRate: 20,
+            repeat: 1 // ✅ solo una vez
+        });
+
+
     }
 
     update() {
@@ -618,7 +632,21 @@ export class Game extends Phaser.Scene {
                         if (worm.life <= 0) {
                             worm.disableBody(true, true)
                             worm.life = ""
-                            worm.wormId = ""
+
+                            // 1. Crear sprite de la tumba en la posición del gusano
+                            const grave = this.add.sprite(worm.x, worm.y+15, 'grave');
+
+                            // 2. Reproducir la animación de aparición
+                            grave.play('grave_appear');
+
+                            // 3. Al terminar la animación, quedarte en el último frame (ej. frame 5)
+                            grave.on('animationcomplete', (anim) => {
+                                if (anim.key === 'grave_appear') {
+                                    grave.setFrame(1); // último frame estático de la tumba
+                                }
+                            });
+
+
                         }
                     }
                 });
