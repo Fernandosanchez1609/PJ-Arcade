@@ -552,7 +552,7 @@ export class Game extends Phaser.Scene {
             );
         }
 
-        if (this.isMyTurn && this.grenade.active && this.fpsCounter % 60 === 0) {
+        if (this.isMyTurn && this.grenade.active && this.fpsCounter % 10 === 0) {
             sendMessage("GrenadePosition", {
                 socketId: this.rivalSocketId,
                 grenadeX: this.grenade.body.center.x,
