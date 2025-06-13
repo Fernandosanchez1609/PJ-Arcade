@@ -34,4 +34,5 @@ Para organizarnos hemos utilizado [Obsidian](https://obsidian.md/) y hemos sincr
 
 ## Bibliografía
 [Manual Phaser - desarrolloweb.com](https://phaser.io/tutorials/making-your-first-phaser-3-game-spanish)
+
 [Phaser tutorials](https://phaser.io/tutorials/making-your-first-phaser-3-game-spanish)
