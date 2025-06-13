@@ -713,7 +713,7 @@ export class Game extends Phaser.Scene {
         return distance <= 32;
     }
     ChangeTurn() {
-        const role = store.getState().match.playerRole; 
+        const role = store.getState().match.playerRole;
         const nextRole = this.isMyTurn
             ? (role === "Player1" ? "Player2" : "Player1")
             : role;
@@ -727,7 +727,6 @@ export class Game extends Phaser.Scene {
         let attempts = 0;
         const num = (nextRole === "Player1") ? 1 : 0;
         const targetParity = num;
-        const targetParity = this.isMyTurn ? inverseNum : num;
 
         while (!found && attempts < this.worms.length) {
             this.currentWormIndex = (this.currentWormIndex + 1) % this.worms.length;
@@ -739,8 +738,6 @@ export class Game extends Phaser.Scene {
             }
             attempts++;
         }
-        attempts = 0;
-
         this.isMyTurn = !this.isMyTurn;
     }
 
