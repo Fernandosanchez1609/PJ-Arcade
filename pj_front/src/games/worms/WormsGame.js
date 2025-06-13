@@ -714,37 +714,17 @@ export class Game extends Phaser.Scene {
         const role = store.getState().match.playerRole;
         const num = (role === "Player1") ? 1 : 0;
         const inverseNum = (num === 1) ? 0 : 1;
+        const targetParity = this.isMyTurn ? inverseNum : num;
 
-        if (this.isMyTurn) {
-            while (!found && attempts < this.worms.length) {
-                this.currentWormIndex = (this.currentWormIndex + 1) % this.worms.length;
-                const currentWorm = this.worms[this.currentWormIndex];
-
-                if (
-                    currentWorm.life > 0 &&
-                    currentWorm.wormId % 2 === inverseNum
-                ) {
-                    found = true;
-                }
-
-                attempts++;
+        while (!found && attempts < this.worms.length) {
+            this.currentWormIndex = (this.currentWormIndex + 1) % this.worms.length;
+            const currentWorm = this.worms[this.currentWormIndex];
+            if (currentWorm.life > 0 && currentWorm.wormId % 2 === targetParity) {
+                found = true;
             }
-        } else {
-            while (!found && attempts < this.worms.length) {
-                this.currentWormIndex = (this.currentWormIndex + 1) % this.worms.length;
-                const currentWorm = this.worms[this.currentWormIndex];
-
-                if (
-                    currentWorm.life > 0 &&
-                    currentWorm.wormId % 2 === num
-                ) {
-                    found = true;
-                }
-
-                attempts++;
-            }
+            attempts++;
         }
-
+        attempts = 0;
 
         this.isMyTurn = !this.isMyTurn;
     }
