@@ -4,6 +4,11 @@ import { Clouds } from "@/games/worms/WormsClouds";
 import { Collisions } from "@/games/worms/WormsCollisions.js";
 
 export class Game extends Phaser.Scene {
+    // lastWormIndexByPlayer keeps track of the last worm index for each player
+    lastWormIndexByPlayer = {
+        Player1: -1,
+        Player2: -1,
+    };
     constructor() {
         super({ key: "worms" });
         this.isMyTurn = false; // Variable para controlar el turno del jugador
@@ -707,45 +712,32 @@ export class Game extends Phaser.Scene {
         const distance = Math.sqrt(dx * dx + dy * dy);
         return distance <= 32;
     }
-
     ChangeTurn() {
+        const role = store.getState().match.playerRole; 
+        const nextRole = this.isMyTurn
+            ? (role === "Player1" ? "Player2" : "Player1")
+            : role;
+        let startIndex = this.lastWormIndexByPlayer[nextRole];
+        if (startIndex < 0 || startIndex >= this.worms.length) {
+            this.currentWormIndex = 0;
+        } else {
+            this.currentWormIndex = startIndex;
+        }
         let found = false;
         let attempts = 0;
-        const role = store.getState().match.playerRole;
-        const num = (role === "Player1") ? 1 : 0;
-        const inverseNum = (num === 1) ? 0 : 1;
+        const num = (nextRole === "Player1") ? 1 : 0;
+        const targetParity = num;
 
-        if (this.isMyTurn) {
-            while (!found && attempts < this.worms.length) {
-                this.currentWormIndex = (this.currentWormIndex + 1) % this.worms.length;
-                const currentWorm = this.worms[this.currentWormIndex];
+        while (!found && attempts < this.worms.length) {
+            this.currentWormIndex = (this.currentWormIndex + 1) % this.worms.length;
+            const currentWorm = this.worms[this.currentWormIndex];
 
-                if (
-                    currentWorm.life > 0 &&
-                    currentWorm.wormId % 2 === inverseNum
-                ) {
-                    found = true;
-                }
-
-                attempts++;
+            if (currentWorm.life > 0 && currentWorm.wormId % 2 === targetParity) {
+                found = true;
+                this.lastWormIndexByPlayer[nextRole] = this.currentWormIndex;
             }
-        } else {
-            while (!found && attempts < this.worms.length) {
-                this.currentWormIndex = (this.currentWormIndex + 1) % this.worms.length;
-                const currentWorm = this.worms[this.currentWormIndex];
-
-                if (
-                    currentWorm.life > 0 &&
-                    currentWorm.wormId % 2 === num
-                ) {
-                    found = true;
-                }
-
-                attempts++;
-            }
+            attempts++;
         }
-
-
         this.isMyTurn = !this.isMyTurn;
     }
 
