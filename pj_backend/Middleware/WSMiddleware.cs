@@ -64,11 +64,14 @@ public class WSMiddleware
                 else if (result.MessageType == WebSocketMessageType.Close)
                 {
                     await service.DisconnectSocketAsync(socketId);
+                    var matchmakingService = scope.ServiceProvider.GetRequiredService<MatchmakingService>();
+                    matchmakingService.RemovePlayer(socketId);
                     await _manager.BroadcastAsync(new WSMessage
                     {
                         Type = "onlineCount",
                         Data = _manager.OnlineCount
                     });
+
                 }
             });
 

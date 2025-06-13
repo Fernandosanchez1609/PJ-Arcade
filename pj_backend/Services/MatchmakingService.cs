@@ -1,11 +1,13 @@
 ﻿using pj_backend.WS;
-using System.Collections.Concurrent;
+using System.Collections.Generic;
+
 namespace pj_backend.Services;
 
 public class MatchmakingService
 {
     private readonly WSConnectionManager _manager;
-    private readonly ConcurrentQueue<string> _matches = new ConcurrentQueue<string>();
+    private readonly List<string> _waitingPlayers = new();
+    private readonly object _lock = new();
 
     public MatchmakingService(WSConnectionManager manager)
     {
@@ -14,18 +16,34 @@ public class MatchmakingService
 
     public async Task TryMatchmaking(string wsId)
     {
-       
-        _matches.Enqueue(wsId);
-        if (_matches.Count >= 2)
+        lock (_lock)
         {
-            if (_matches.TryDequeue(out var first) && _matches.TryDequeue(out var second))
+            if (!_waitingPlayers.Contains(wsId))
             {
-                await SendRivalInfo(first, second);
+                _waitingPlayers.Add(wsId);
+            }
+
+            if (_waitingPlayers.Count >= 2)
+            {
+                var first = _waitingPlayers[0];
+                var second = _waitingPlayers[1];
+                _waitingPlayers.RemoveRange(0, 2);
+
+                // Ejecutamos el emparejamiento fuera del lock
+                _ = SendRivalInfo(first, second);
             }
         }
     }
 
-    public async Task SendRivalInfo(string ws1 ,string ws2)
+    public void RemovePlayer(string wsId)
+    {
+        lock (_lock)
+        {
+            _waitingPlayers.Remove(wsId);
+        }
+    }
+
+    public async Task SendRivalInfo(string ws1, string ws2)
     {
         var wsMessage1 = new WSMessage
         {
@@ -47,7 +65,7 @@ public class MatchmakingService
             }
         };
 
-        await _manager.SendMessageAsync(ws1 ,wsMessage1);
-        await _manager.SendMessageAsync(ws2 ,wsMessage2);
+        await _manager.SendMessageAsync(ws1, wsMessage1);
+        await _manager.SendMessageAsync(ws2, wsMessage2);
     }
 }

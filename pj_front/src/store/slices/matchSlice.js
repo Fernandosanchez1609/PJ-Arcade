@@ -30,8 +30,15 @@ const matchSlice = createSlice({
     setPlayerRole(state, action) {
       state.playerRole = action.payload;
     },
+
+    resetMatch(state) {
+      state.rivalSocketId = null;
+      state.rivalUserId = null;
+      state.rivalName = null;
+      state.playerRole = null;
+    }
   },
 });
 
-export const { setRivalSocket, setRivalUser, resetRival, setPlayerRole } = matchSlice.actions;
+export const { setRivalSocket, setRivalUser, resetRival, setPlayerRole,  resetMatch } = matchSlice.actions;
 export default matchSlice.reducer;
