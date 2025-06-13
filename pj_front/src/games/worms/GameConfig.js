@@ -1,10 +1,12 @@
 import { Game } from "./WormsGame.js";
+import Victory from './Victory';
+import GameOver from './GameOver';
 
 export const wormsConfig = {
     type: Phaser.AUTO,
     width: 800,
     height: 600,
-    scene: [Game],
+    scene: [Game, Victory, GameOver],
     physics: {
         default: "arcade",
         matter: {

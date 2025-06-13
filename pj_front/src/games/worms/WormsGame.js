@@ -111,7 +111,7 @@ export class Game extends Phaser.Scene {
 
         for (let worm of this.worms) {
             const nameLabel = this.add
-                .text(worm.x, worm.y - 40, `#${worm.wormId}`, {
+                .text(worm.x, worm.y - 40, `${worm.wormId}`, {
                     font: "16px Arial",
                     fill: "#ffffff",
                     stroke: "#000",
@@ -246,9 +246,10 @@ export class Game extends Phaser.Scene {
             const worm = this.worms[index];
             if (!worm) return;
 
+            labels.lifeLabel.setText(`${worm.life}`); // la vida cambia dinámicamente
             labels.nameLabel.setPosition(worm.x, worm.y - 40);
             labels.lifeLabel.setPosition(worm.x, worm.y - 25);
-            labels.lifeLabel.setText(`${worm.life}`); // por si la vida cambia dinámicamente
+
         });
 
         // Colisiones gusanos
@@ -520,10 +521,12 @@ export class Game extends Phaser.Scene {
         if (this.playerLife <= 0 && !this.gameOver) {
             console.log("Game Over: Has perdido")
             this.gameOver = true;
+            this.scene.start('GameOver');
 
         } else if (this.rivalLife <= 0 && !this.gameOver) {
             console.log("Game Over: Has ganado")
             this.gameOver = true;
+            this.scene.start('Victory');
         }
 
     }
@@ -611,6 +614,11 @@ export class Game extends Phaser.Scene {
                         console.log(
                             "vida post-explosion: " + worm.life
                         );
+                        if (worm.life <= 0) {
+                            worm.disableBody(true, true)
+                            worm.life = ""
+                            worm.wormId = ""
+                        }
                     }
                 });
                 this.removeGrenade();

@@ -5,7 +5,11 @@ class GameOver extends Phaser.Scene {
         super({ key: 'GameOverScene' });
     }
 
+    preload() {
+        this.load.image("game-over", "/images/game-over.png");
+    }
+
     create() {
-        this.add.text(400, 300, 'GAME OVER', { fontSize: '48px', fill: '#ff0000', color: "#FF5805" }).setOrigin(0.5);
+        this.add.image(400, 300, "game-over")
     }
 }

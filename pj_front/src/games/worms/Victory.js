@@ -3,7 +3,11 @@ class Victory extends Phaser.Scene {
         super({ key: 'VictoryScene' });
     }
 
+    preload() {
+        this.load.image("you-win", "/images/you-win.png");
+    }
+
     create() {
-        this.add.text(400, 300, 'YOU WIN!', { fontSize: '48px', fill: '#00ff00', color: "#FF5805" }).setOrigin(0.5);
+        this.add.image(400, 300, "you-win")
     }
 }
