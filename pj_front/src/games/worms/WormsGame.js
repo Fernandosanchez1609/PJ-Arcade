@@ -8,7 +8,7 @@ export class Game extends Phaser.Scene {
         super({ key: "worms" });
         this.isMyTurn = false; // Variable para controlar el turno del jugador
         this.hasExploded = true; // Variable para controlar si la granada ha explotado
-        this.maxLife = 100;
+        this.maxLife = 20;
         this.rivalSocketId = store.getState().match.rivalSocketId;
         this.fpsCounter = 0;
     }
@@ -183,60 +183,10 @@ export class Game extends Phaser.Scene {
         this.chargeBar.setVisible(false);
         this.chargeBarBg.setVisible(false);
 
-        this.input.on("pointerdown", (pointer) => {
-            const localX =
-                pointer.x - (this.terrain.x - this.terrain.width / 2);
-            const localY =
-                pointer.y - (this.terrain.y - this.terrain.height / 2); // A3. POR ESO AQUI SUMA 50 (-21.5 + 50 = 28.5)
-
-            this.terrain.erase("explosion", localX - 23, localY - 21.5); // A4.  AQUI POR ALGUN MOTIVO NO HAY QUE SUMAR 50
-
-            // Corrige el clearRect → usa el tamaño de la explosión
-            this.terrainBitmap.context.clearRect(
-                localX - 23,
-                localY + 28.5, // A3. POR ESO AQUI SUMA 50 (-21.5 + 50 = 28.5)
-                46,
-                43
-            );
-            this.terrainBitmap.refresh();
-
-            // Actualizar mapa lógico en zona destruida
-            this.collisions.updateCollisionMapArea(
-                this.collisionMap,
-                this.terrainBitmap,
-                this.terrainWidth,
-                this.terrainHeight,
-                localX - 23,
-                localY + 28.5, // A3. POR ESO AQUI SUMA 50 (-21.5 + 50 = 28.5)
-                46,
-                90
-            );
-
-
-            if (this.rivalSocketId) {
-                sendMessage("Atack", {
-                    socketId: this.rivalSocketId,
-                    x: localX,
-                    y: localY, // A4.  AQUI POR ALGUN MOTIVO NO HAY QUE SUMAR 50
-                });
-            }
-        });
-
         // Listener eventos de WebSocket
         window.addEventListener("rivalAttack", (event) => {
             const { x, y, power, angle } = event.detail;
             this.launchGrenade(x, y, power, angle); // Dispara la granada al punto donde el rival hizo click
-        });
-
-        window.addEventListener("changeActiveWorm", (event) => {
-            const { wormIndex } = event.detail;
-            this.currentWormIndex = wormIndex;
-            if (this.isMyTurn) {
-                this.isMyTurn = false;
-            } else {
-                this.isMyTurn = true;
-            }
-            console.log("es mi turno?", this.isMyTurn);
         });
 
         window.addEventListener("wormMove", (event) => {
@@ -551,7 +501,7 @@ export class Game extends Phaser.Scene {
             );
         }
 
-        if ( this.isMyTurn && this.grenade.active && this.fpsCounter % 60 === 0) {
+        if (this.isMyTurn && this.grenade.active && this.fpsCounter % 60 === 0) {
             sendMessage("GrenadePosition", {
                 socketId: this.rivalSocketId,
                 grenadeX: this.grenade.body.center.x,
@@ -595,13 +545,7 @@ export class Game extends Phaser.Scene {
 
         this.grenade.disableBody(true, true);
 
-        this.currentWormIndex = (this.currentWormIndex + 1) % this.worms.length;
-        
-        if (this.isMyTurn) {
-            this.isMyTurn = false;
-        } else {
-            this.isMyTurn = true;
-        }
+        this.ChangeTurn();
 
         console.log("es mi turno?", this.isMyTurn);
     }
@@ -677,4 +621,47 @@ export class Game extends Phaser.Scene {
         const distance = Math.sqrt(dx * dx + dy * dy);
         return distance <= 32;
     }
+
+    ChangeTurn() {
+        let found = false;
+        let attempts = 0;
+        const role = store.getState().match.playerRole;
+        const num = (role === "Player1") ? 1 : 0;
+        const inverseNum = (num === 1) ? 0 : 1;
+
+        if (this.isMyTurn) {
+            while (!found && attempts < this.worms.length) {
+                this.currentWormIndex = (this.currentWormIndex + 1) % this.worms.length;
+                const currentWorm = this.worms[this.currentWormIndex];
+
+                if (
+                    currentWorm.life > 0 &&
+                    currentWorm.wormId % 2 === inverseNum
+                ) {
+                    found = true;
+                }
+
+                attempts++;
+            }
+        }else{
+            while (!found && attempts < this.worms.length) {
+                this.currentWormIndex = (this.currentWormIndex + 1) % this.worms.length;
+                const currentWorm = this.worms[this.currentWormIndex];
+
+                if (
+                    currentWorm.life > 0 &&
+                    currentWorm.wormId % 2 === num
+                ) {
+                    found = true;
+                }
+
+                attempts++;
+            }
+        }
+
+
+        this.isMyTurn = !this.isMyTurn;
+    }
+
+
 }
