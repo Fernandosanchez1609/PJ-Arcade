@@ -52,7 +52,7 @@ export class Game extends Phaser.Scene {
         this.cameras.main.setBounds(0, 0, 800, 600);
         this.camera = this.cameras.main;
 
-        this.turnTime = 10; // duración del turno en segundos
+        this.turnTime = 20; // duración del turno en segundos
         this.turnTimerEvent = null;
         this.turnTimerText = null;
 
@@ -60,16 +60,28 @@ export class Game extends Phaser.Scene {
         this.add.image(410, 250, "background").setDepth(-3);
         this.isActive = true;
 
-        this.player1Inactive = 0;
-        this.player2Inactive = 0;
+        this.playerInactive = 0;
+        this.rivalInactive = 0;
 
         this.currentWormIndex = 0;
         const role = store.getState().match.playerRole;
 
         if (role === "Player1") {
+
             this.isMyTurn = true;
+            this.isActive = false;
+            this.input.keyboard.on('keydown', () => {
+                this.isActive = true;
+            });
+            if (!this.isActive) this.player1Inactive++;
+
         } else {
             this.isMyTurn = false;
+            this.isActive = false;
+            this.input.keyboard.on('keydown', () => {
+                this.isActive = true;
+            });
+            if (!this.isActive) this.player1Inactive++;
         }
 
         this.canMove = true;
@@ -610,6 +622,12 @@ export class Game extends Phaser.Scene {
             this.scene.start("VictoryScene"); // Cambia a la escena de Victory
         }
 
+        if (this.player1Inactive === 3) {
+            // Matar todos los gusanos
+        } else if (this.player2Inactive === 3) {
+            // Matar todos los gusanos
+        }
+
     }
 
     removeGrenade() {
@@ -813,8 +831,9 @@ export class Game extends Phaser.Scene {
 
     startTurnTimer() {
         // Reinicia valores
-        this.turnTime = 10;
+        this.turnTime = 20;
         this.turnTimerText.setText(`Tiempo: ${this.turnTime}`);
+        console.log("Iniciando temporizador de turno");
 
         // Cancela temporizador anterior si existe
         if (this.turnTimerEvent) {
@@ -827,9 +846,28 @@ export class Game extends Phaser.Scene {
             repeat: 9,  // 30 segundos total
             callback: () => {
                 this.turnTime--;
+                console.log("Tick", this.turnTime);
                 this.turnTimerText.setText(`Tiempo: ${this.turnTime}`);
 
                 if (this.turnTime <= 0) {
+
+                    if (this.isMyTurn) {
+                        this.playerInactive++;
+                        console.log(this.playerInactive)
+                    } else if (!this.isMyTurn) {
+                        this.rivalInactive++;
+                        console.log(this.rivalInactive)
+                    }
+
+                    if (this.playerInactive >= 3) {
+                        this.playerLife = 0;
+                    }
+
+                    if (this.rivalInactive >= 3) {
+
+                        this.rivalLife = 0;
+                    }
+
                     this.ChangeTurn(); // Fin del turno
                 }
             }
