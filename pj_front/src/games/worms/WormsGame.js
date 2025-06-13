@@ -521,12 +521,13 @@ export class Game extends Phaser.Scene {
         if (this.playerLife <= 0 && !this.gameOver) {
             console.log("Game Over: Has perdido")
             this.gameOver = true;
-            this.scene.start('GameOver');
+            this.scene.start("GameOverScene"); // Cambia a la escena de Game Over
+
 
         } else if (this.rivalLife <= 0 && !this.gameOver) {
             console.log("Game Over: Has ganado")
             this.gameOver = true;
-            this.scene.start('Victory');
+            this.scene.start("VictoryScene"); // Cambia a la escena de Victory
         }
 
     }

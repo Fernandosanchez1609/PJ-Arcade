@@ -1,6 +1,6 @@
-class Victory extends Phaser.Scene {
+export class Victory extends Phaser.Scene {
     constructor() {
-        super({ key: 'VictoryScene' });
+        super('VictoryScene' );
     }
 
     preload() {

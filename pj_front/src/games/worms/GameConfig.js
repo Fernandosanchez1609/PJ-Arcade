@@ -1,6 +1,6 @@
 import { Game } from "./WormsGame.js";
-import Victory from './Victory';
-import GameOver from './GameOver';
+import {Victory} from './Victory.js';
+import {GameOver} from './GameOver.js';
 
 export const wormsConfig = {
     type: Phaser.AUTO,
