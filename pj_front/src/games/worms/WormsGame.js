@@ -100,11 +100,21 @@ export class Game extends Phaser.Scene {
 
         this.worms = [];
 
+        const wormPositions = [
+            { x: 100, y: 200 },
+            { x: 300, y: 250 },
+            { x: 500, y: 180 },
+            { x: 700, y: 230 },
+            { x: 900, y: 210 },
+            { x: 1100, y: 240 }
+        ];
+
+
         for (let i = 0; i < 6; i++) {
             const worm = this.physics.add.sprite(50 + i * 80, 20, "wormWalk");
             worm.setCollideWorldBounds(false)
                 .setBounce(0)
-                .setDrag(1000, 0)
+                .setDrag(250, 0)
                 .setMaxVelocity(150, 500)
                 .body.setSize(20, 45, true);
 
@@ -683,6 +693,25 @@ export class Game extends Phaser.Scene {
                                 }
                             });
 
+
+                        } else {
+                            const dx = worm.body.center.x - this.grenade.body.center.x;
+                            const dy = worm.body.center.y - this.grenade.body.center.y;
+                            const dist = Math.sqrt(dx * dx + dy * dy);
+
+                            // Fuerza inversamente proporcional a la distancia
+                            const force = Math.pow((32 - dist) / 32, 0.5); // raíz cuadrada para suavizar caída
+
+                            // Normalizamos dirección
+                            const directionX = dx / dist;
+                            const directionY = dy / dist;
+
+                            // Empujón
+                            const pushStrength = 300; // Puedes ajustar este valor
+                            worm.body.setVelocity(
+                                directionX * force * pushStrength,
+                                directionY * force * pushStrength
+                            );
 
                         }
                     }
