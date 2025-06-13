@@ -7,6 +7,8 @@ Aquí hay un pequeño [tutorial](https://docs.google.com/document/d/1HojYCxpcM6z
 
 [Anteproyecto](https://docs.google.com/document/d/1jP6mOObz1BU4dw_G_sAb0c4gw0G6O55zT-HGFYY129s/edit?usp=sharing)
 
+[Youtube](https://www.youtube.com/watch?v=XGkidz69PtQ)
+
 ## Autores
 - Fernando Jafet Sanchez Lagos
 - Pablo Ruiz Domínguez
