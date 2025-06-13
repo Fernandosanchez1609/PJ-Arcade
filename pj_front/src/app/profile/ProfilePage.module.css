@@ -1,0 +1,9 @@
+.container {
+    display: flex;
+    justify-content: space-between;
+    gap: 1.5rem;
+    padding: 3rem;
+    margin: 3rem;
+}
+
+.email{}

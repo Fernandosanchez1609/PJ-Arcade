@@ -1,20 +1,23 @@
-
-
 .chatContainer {
     display: flex;
     flex-direction: column;
-    max-width: 40vh;
+    width: 100%;
+    max-width: 360px;
+    height: 60vh;
     border: 1px solid var(--border);
-    border-radius: 8px;
-    background-color: var(--dark-orange);
-   
+    border-radius: 12px;
+    background-color: var(---background);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
 }
 
 .chatHeader {
     padding: 0.75rem 1rem;
     border-bottom: 1px solid var(--border);
-    background-color: var(--background-muted);
-    font-weight: 500;
+    background-color: var(--header_footer);
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: white;
 }
 
 .messageList {
@@ -24,13 +27,14 @@
     flex-direction: column;
     gap: 0.5rem;
     overflow-y: auto;
-    max-height: 40vh;
+    scroll-behavior: smooth;
 }
 
 .messageMe,
 .messageRival {
     display: flex;
     align-items: flex-end;
+    margin-bottom: 1rem;
 }
 
 .messageMe {
@@ -42,37 +46,37 @@
 }
 
 .bubble {
-    max-width: 70%;
-    padding: 0.5rem 0.75rem;
-    border-radius: 12px;
+    max-width: 75%;
+    padding: 0.6rem 1rem;
+    border-radius: 16px;
     word-wrap: break-word;
+    font-size: 0.95rem;
+    line-height: 1.4;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
 }
 
 .messageMe .bubble {
     background-color: var(--primary);
     color: white;
+    border-bottom-right-radius: 4px;
 }
 
 .messageRival .bubble {
     background-color: var(--primary);
     color: white;
+    border-bottom-left-radius: 4px;
 }
 
 .inputRow {
+    color: white;
     display: flex;
     align-items: center;
     padding: 0.75rem 1rem;
     border-top: 1px solid var(--border);
-    background-color: var(--dark-orange);
-    
+    gap: 0.5rem;
+    background-color: var(--header_footer);
 }
 
-.inputRow :global(.ui-input) {
-    flex: 1;
-    
-}
-
-.inputRow :global(.ui-button) {
-    margin-left: 0.5rem;
-    
+.inputRow input::placeholder {
+    color: white;
 }

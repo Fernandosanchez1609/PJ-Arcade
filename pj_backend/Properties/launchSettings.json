@@ -16,7 +16,8 @@
       "launchUrl": "swagger",
       "applicationUrl": "http://localhost:5052",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "JWT_KEY": "V9mB7!x2Fg$KpQe4Ns@RtZhY1uLwXc3d"
       }
     },
     "https": {
@@ -35,7 +36,9 @@
       "launchBrowser": true,
       "launchUrl": "swagger",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "JWT_KEY": "V9mB7!x2Fg$KpQe4Ns@RtZhY1uLwXc3d",
+        "DB_CONFIG": "Server=172.31.91.40;Port=3306;Database=pjArcade;User Id=admin;Password=PJarcade;"
       }
     }
   }

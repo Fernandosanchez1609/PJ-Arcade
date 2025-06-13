@@ -1,68 +1,108 @@
+@font-face {
+  font-family: 'Jersey 10';
+  src: url('/fonts/Jersey10-Regular.ttf') format('truetype'),
+       url('/fonts/Jersey10-Bold.ttf')    format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
 .grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1.5rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* antes 500px */
+    gap: 4rem;
+    padding: 2rem 1rem; /* padding más pequeño en móviles */
+   
 }
 
 .card {
-  background-color: white;
-  padding: 1.5rem;
-  border-radius: 16px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  transition: box-shadow 0.2s ease;
-}
-
-.card:hover {
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    display: flex;
+    flex-direction: column; /* En móviles los elementos se apilan */
+    justify-content: space-between;
+    background-color: var(--header_footer);
+    padding: 1.5rem;
+    border-radius: 16px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.2s ease;
+    color: white;
 }
 
 .name {
-  font-size: 1.25rem;
-  font-weight: bold;
-  margin-bottom: 0.5rem;
+    font-size: 1.25rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+    color: var(--principal_orange);
+     font-family: 'Jersey 10', sans-serif;
 }
 
 .email {
-  color: #555;
-  margin-bottom: 0.25rem;
+    margin-bottom: 0.25rem;
+    word-wrap: break-word;
 }
 
 .role {
-  color: #888;
-  font-size: 0.9rem;
-  margin-bottom: 0.75rem;
+    font-size: 0.9rem;
+    margin-bottom: 0.75rem;
 }
 
+.buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.toggleBtn,
+.deleteBtn,
+.banBtn {
+    display: block;
+    width: 100%;
+    padding: 0.4rem 0.6rem;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+/* Botones individuales con sus colores */
 .toggleBtn {
-  display: block;
-  width: 100%;
-  padding: 0.5rem 1rem;
-  background-color: #2563eb;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: bold;
-  margin-bottom: 0.5rem;
+    background-color: #2563eb;
 }
-
 .toggleBtn:hover {
-  background-color: #1d4ed8;
+    background-color: #1d4ed8;
 }
 
-/* Estilos para el botón de eliminar */
+.banBtn {
+    background-color: #f39c12;
+}
+.banBtn:hover {
+    background-color: #e67e22;
+}
+
 .deleteBtn {
-  display: block;
-  width: 100%;
-  padding: 0.5rem 1rem;
-  background-color: #ef4444;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: bold;
+    background-color: #ef4444;
+}
+.deleteBtn:hover {
+    background-color: #dc2626;
 }
 
-.deleteBtn:hover {
-  background-color: #dc2626;
+/* Media Query para pantallas pequeñas */
+@media (max-width: 480px) {
+    .name {
+        font-size: 1.1rem;
+    }
+
+    .role {
+        font-size: 0.85rem;
+    }
+
+    .grid {
+        padding: 1rem 0.5rem;
+    }
+
+    .card {
+        padding: 1rem;
+    }
 }

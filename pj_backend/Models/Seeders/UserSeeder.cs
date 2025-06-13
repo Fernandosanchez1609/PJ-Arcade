@@ -27,6 +27,42 @@ public class UserSeeder
            HashPassword = PasswordHelper.Hash("PJarcade"),
            Rol = "Admin",
         },
+
+        new User
+        {
+           UserId = 2,
+           Name = "menganito1",
+           Email = "menganito1@gmail.com",
+           HashPassword = PasswordHelper.Hash("menganito"),
+           Rol = "User",
+        },
+
+        new User
+        {
+           UserId = 3,
+           Name = "menganito2",
+           Email = "menganito2@gmail.com",
+           HashPassword = PasswordHelper.Hash("menganito"),
+           Rol = "User",
+        },
+
+        new User
+        {
+           UserId = 4,
+           Name = "menganito3",
+           Email = "menganito3@gmail.com",
+           HashPassword = PasswordHelper.Hash("menganito"),
+           Rol = "User",
+        },
+
+        new User
+        {
+           UserId = 5,
+           Name = "menganito4",
+           Email = "menganito4@gmail.com",
+           HashPassword = PasswordHelper.Hash("menganito"),
+           Rol = "User",
+        },
     };
 
     _context.Users.AddRange(users);

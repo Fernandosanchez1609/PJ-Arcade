@@ -71,10 +71,13 @@ namespace pj_backend
 
             //inyeccion de servicios
             builder.Services.AddScoped<UserService>();
-            builder.Services.AddSingleton<WSService>();
+            builder.Services.AddScoped<WSService>();
             builder.Services.AddScoped<GameRepository>();
             builder.Services.AddScoped<GameService>();
             builder.Services.AddSingleton<MatchmakingService>();
+            builder.Services.AddScoped<FriendshipRepository>();
+            builder.Services.AddScoped<FriendshipService>();
+
 
 
             //inyeccion de websocket
@@ -136,7 +139,7 @@ namespace pj_backend
             {
                 options.AddPolicy("AllowFrontend", policy =>
                 {
-                        policy.WithOrigins("http://localhost:3000")  // Aqu� agregas el origen de tu frontend
+                        policy.WithOrigins("https://pj-arcade.duckdns.org", "http://localhost:3000")  // Aqu� agregas el origen de tu frontend
                             .AllowAnyHeader()
                             .AllowAnyMethod();
                     });

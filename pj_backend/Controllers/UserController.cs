@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using pj_backend.Models.Database.Dtos;
+using pj_backend.Models.Database.Entities;
 using pj_backend.Models.Database.Repositories;
 using pj_backend.Services;
 using System.IdentityModel.Tokens.Jwt;
@@ -47,6 +48,7 @@ public class UserController : ControllerBase
         {
             { "id", newUser.UserId.ToString() },
             { "name", newUser.Name.ToString() },
+            { "email", newUser.Email.ToString() },
             { ClaimTypes.Role, newUser.Rol }
         },
 
@@ -75,24 +77,26 @@ public class UserController : ControllerBase
     {
         try
         {
-            var user = await _userService.AuthenticateAsync(request.Email, request.Password);
+            var (user, error) = await _userService.AuthenticateAsync(request.Email, request.Password);
+
             if (user == null)
             {
-                return Unauthorized("Correo o contraseña incorrectos. user null");
+                return Unauthorized(error); 
             }
 
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Claims = new Dictionary<string, object>
-      {
-        { "id", user.UserId.ToString() },
-        { "name", user.Name.ToString() },
-        { ClaimTypes.Role, user.Rol }
-      },
+            {
+                { "id", user.UserId.ToString() },
+                { "name", user.Name.ToString() },
+                { "email", user.Email.ToString() },
+                { ClaimTypes.Role, user.Rol }
+            },
                 Expires = DateTime.UtcNow.AddSeconds(3000),
                 SigningCredentials = new SigningCredentials(
-                _tokenParameters.IssuerSigningKey,
-                SecurityAlgorithms.HmacSha256Signature)
+                    _tokenParameters.IssuerSigningKey,
+                    SecurityAlgorithms.HmacSha256Signature)
             };
 
             var tokenHandler = new JwtSecurityTokenHandler();
@@ -142,4 +146,33 @@ public class UserController : ControllerBase
 
         return NoContent();
     }
+
+    [HttpPut("ban/{id}")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> BanOrUnbanUser(int id)
+    {
+        var result = await _userService.ToggleUserBanAsync(id);
+
+        if (!result.HasValue)
+            return NotFound("Usuario no encontrado.");
+
+        var mensaje = result.Value ? "Usuario baneado." : "Usuario desbaneado.";
+        return Ok(mensaje);
+    }
+
+    [HttpGet("profiles")]
+    [Authorize]
+    public async Task<ActionResult<IEnumerable<ProfileDto>>> GetAllUserProfiles()
+    {
+        try
+        {
+            var profiles = await _userService.GetAllUserProfilesAsync();
+            return Ok(profiles);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Error al obtener los perfiles: {ex.Message}");
+        }
+    }
+
 }

@@ -10,7 +10,17 @@ public static class UserMapper
             UserId = user.UserId,
             Name = user.Name,
             Email = user.Email,
-            Rol = user.Rol
+            Rol = user.Rol,
+            IsBanned = user.IsBanned
+        };
+    }
+
+    public static ProfileDto ToProfileDto(this User user)
+    {
+        return new ProfileDto
+        {
+            UserId = user.UserId,
+            Name = user.Name
         };
     }
 

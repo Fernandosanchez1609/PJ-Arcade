@@ -3,23 +3,23 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { sendMessage } from "@/lib/WsClient";
-import { useAuth }     from "@/hooks/useAuth";
-import { ScrollArea }  from "@/components/ui/scroll-area";
-import { Input }       from "@/components/ui/input";
-import { Button }      from "@/components/ui/button";
+import { useAuth } from "@/hooks/useAuth";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { addChatMessage } from "@/store/slices/chatSlice";
 import styles from "./ChatBox.module.css";
 
 export default function ChatBox() {
-  const { user }        = useAuth();
-  const rivalSocketId   = useSelector(s => s.match.rivalSocketId);
-  const rivalName       = useSelector(s => s.match.rivalName);
-  const messages        = useSelector(s => s.chat.messages);
-  const dispatch        = useDispatch();
+  const { user } = useAuth();
+  const rivalSocketId = useSelector(s => s.match.rivalSocketId);
+  const rivalName = useSelector(s => s.match.rivalName);
+  const messages = useSelector(s => s.chat.messages);
+  const dispatch = useDispatch();
 
   const [draft, setDraft] = useState("");
-  const scrollRef        = useRef(null);
+  const scrollRef = useRef(null);
   useEffect(() => {
     scrollRef.current?.scrollTo({
       top: scrollRef.current.scrollHeight,
@@ -32,7 +32,7 @@ export default function ChatBox() {
 
     sendMessage("PrivateMessage", {
       socketId: rivalSocketId,
-      text:     draft
+      text: draft
     });
 
     dispatch(addChatMessage({
@@ -54,8 +54,8 @@ export default function ChatBox() {
           <div
             key={i}
             className={
-              msg.from === "me" 
-                ? styles.messageMe 
+              msg.from === "me"
+                ? styles.messageMe
                 : styles.messageRival
             }
           >
@@ -87,12 +87,17 @@ export default function ChatBox() {
           placeholder="Escribe un mensaje…"
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && handleSend()}
+          onKeyDown={(e) => {
+            e.stopPropagation(); // bloquea todas
+            if (e.key === "Enter") handleSend();
+          }}
         />
-        <Button 
-          onClick={handleSend} 
-          disabled={!draft.trim()} 
-          className="ml-2"
+
+
+        <Button
+          onClick={handleSend}
+          disabled={!draft.trim()}
+          className="bg-[var(--principal_orange)] hover:bg-[var(--dark-orange)] text-white disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 active:translate-y-[2px]"
         >
           Enviar
         </Button>
