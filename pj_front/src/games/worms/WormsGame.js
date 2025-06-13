@@ -52,6 +52,11 @@ export class Game extends Phaser.Scene {
         this.cameras.main.setBounds(0, 0, 800, 600);
         this.camera = this.cameras.main;
 
+        this.turnTime = 10; // duración del turno en segundos
+        this.turnTimerEvent = null;
+        this.turnTimerText = null;
+
+
         this.add.image(410, 250, "background").setDepth(-3);
 
         this.currentWormIndex = 0;
@@ -79,12 +84,6 @@ export class Game extends Phaser.Scene {
         this.grenade.collideTop;
         this.grenade.collideRight;
 
-        if (role === "Player1") {
-            this.isMyTurn = true;
-        } else {
-            this.isMyTurn = false;
-        }
-
         // Para calcular la potencia del disparo
         this.chargeStartTime = null;
 
@@ -100,11 +99,22 @@ export class Game extends Phaser.Scene {
 
         this.worms = [];
 
+        const wormPositions = [
+            { x: 100, y: 150 },
+            { x: 325, y: 250 },
+            { x: 500, y: 250 },
+            { x: 575, y: 80 },
+            { x: 615, y: 400 },
+            { x: 200, y: 400 }
+        ];
+
+
         for (let i = 0; i < 6; i++) {
-            const worm = this.physics.add.sprite(50 + i * 80, 20, "wormWalk");
+            const pos = wormPositions[i];
+            const worm = this.physics.add.sprite(pos.x, pos.y, "wormWalk");
             worm.setCollideWorldBounds(false)
                 .setBounce(0)
-                .setDrag(1000, 0)
+                .setDrag(250, 0)
                 .setMaxVelocity(150, 500)
                 .body.setSize(20, 45, true);
 
@@ -122,15 +132,18 @@ export class Game extends Phaser.Scene {
         this.wormLabels = [];
 
         for (let worm of this.worms) {
+            const isEven = worm.wormId % 2 === 0;
+            const color = isEven ? "#FF5805" : "#19101B";
+
             const nameLabel = this.add
                 .text(worm.x, worm.y - 40, `${worm.wormId}`, {
                     font: "16px Arial",
-                    fill: "#ffffff",
+                    fill: color,
                     stroke: "#000",
                     strokeThickness: 3,
                 })
                 .setOrigin(0.5)
-                .setDepth(-1);
+                .setDepth(3);
 
             const lifeLabel = this.add
                 .text(worm.x, worm.y - 25, `${worm.life}`, {
@@ -140,7 +153,7 @@ export class Game extends Phaser.Scene {
                     strokeThickness: 3,
                 })
                 .setOrigin(0.5)
-                .setDepth(-1);
+                .setDepth(3);
 
             this.wormLabels.push({ nameLabel, lifeLabel });
         }
@@ -153,7 +166,7 @@ export class Game extends Phaser.Scene {
             )
             .setAngle(-90)
             .setOrigin(0, 0.5)
-            .setDepth(-1);
+            .setDepth(5);
 
         // Terreno
         this.terrain = this.add.renderTexture(400, 350, 800, 600).setDepth(0); // A1. AQUI SUMA 50 A LAS Y PARA QUE NO ESTÉ CENTRADO
@@ -251,6 +264,14 @@ export class Game extends Phaser.Scene {
             repeat: 1 // ✅ solo una vez
         });
 
+        this.turnTimerText = this.add.text(20, 20, `Tiempo: ${this.turnTime}`, {
+            font: "20px Arial",
+            fill: "#ffffff",
+            stroke: "#000000",
+            strokeThickness: 2,
+        });
+
+        this.startTurnTimer();
 
     }
 
@@ -684,6 +705,25 @@ export class Game extends Phaser.Scene {
                             });
 
 
+                        } else {
+                            const dx = worm.body.center.x - this.grenade.body.center.x;
+                            const dy = worm.body.center.y - this.grenade.body.center.y;
+                            const dist = Math.sqrt(dx * dx + dy * dy);
+
+                            // Fuerza inversamente proporcional a la distancia
+                            const force = Math.pow((32 - dist) / 32, 0.5); // raíz cuadrada para suavizar caída
+
+                            // Normalizamos dirección
+                            const directionX = dx / dist;
+                            const directionY = dy / dist;
+
+                            // Empujón
+                            const pushStrength = 300; // Puedes ajustar este valor
+                            worm.body.setVelocity(
+                                directionX * force * pushStrength,
+                                directionY * force * pushStrength
+                            );
+
                         }
                     }
                 });
@@ -713,7 +753,7 @@ export class Game extends Phaser.Scene {
         return distance <= 32;
     }
     ChangeTurn() {
-        const role = store.getState().match.playerRole; 
+        const role = store.getState().match.playerRole;
         const nextRole = this.isMyTurn
             ? (role === "Player1" ? "Player2" : "Player1")
             : role;
@@ -739,6 +779,7 @@ export class Game extends Phaser.Scene {
             attempts++;
         }
         this.isMyTurn = !this.isMyTurn;
+        this.startTurnTimer();
     }
 
     ChangeLive() {
@@ -759,4 +800,30 @@ export class Game extends Phaser.Scene {
         this.playerLife = newLife;
         this.rivalLife = newRivalLife;
     }
+
+    startTurnTimer() {
+        // Reinicia valores
+        this.turnTime = 10;
+        this.turnTimerText.setText(`Tiempo: ${this.turnTime}`);
+
+        // Cancela temporizador anterior si existe
+        if (this.turnTimerEvent) {
+            this.turnTimerEvent.remove(false);
+        }
+
+        // Crear nuevo evento cada segundo
+        this.turnTimerEvent = this.time.addEvent({
+            delay: 1000, // cada segundo
+            repeat: 9,  // 30 segundos total
+            callback: () => {
+                this.turnTime--;
+                this.turnTimerText.setText(`Tiempo: ${this.turnTime}`);
+
+                if (this.turnTime <= 0) {
+                    this.ChangeTurn(); // Fin del turno
+                }
+            }
+        });
+    }
+
 }
