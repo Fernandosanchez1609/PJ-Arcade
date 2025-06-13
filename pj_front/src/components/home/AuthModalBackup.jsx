@@ -6,12 +6,9 @@ import {
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "react-toastify";
-import { getAuth, GoogleAuthProvider, signInWithRedirect, getRedirectResult } from "firebase/auth";
-import { app } from "@/lib/Firebase"; // Asegúrate de exportar `app` desde tu config Firebase
-import axios from "axios"; // Asegúrate de tener axios instalado
 
 function AuthModal({ onClose }) {
     const [isLogin, setIsLogin] = useState(true);
@@ -24,39 +21,16 @@ function AuthModal({ onClose }) {
     const passwordRegex =
         /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#+\-_])[A-Za-z\d@$!%*?&#+\-_]{8,}$/;
 
-    useEffect(() => {
-        const auth = getAuth(app);
-        getRedirectResult(auth)
-            .then(async (result) => {
-                if (result) {
-                    const user = result.user;
-                    const { isNewUser } = result._tokenResponse || {};
-                    if (isNewUser) {
-                        await axios.post("/api/usuarios", {
-                            uid: user.uid,
-                            email: user.email,
-                            name: user.displayName,
-                            provider: "google",
-                        });
-                    }
-                    toast.success(`Bienvenido, ${user.displayName} 🎉`);
-                    // Cierra modal o actualiza estado de login aquí si quieres
-                }
-            })
-            .catch((error) => {
-                toast.error(
-                    error.message || "Error al iniciar sesión con Google"
-                );
-            });
-    }, []);
-
     const handleSubmit = async (e) => {
         e.preventDefault();
 
         try {
+            let data;
             if (isLogin) {
-                await login({ email, password });
-                toast.success("Bienvenido de nuevo 🎉");
+                // Llamamos al login del hook, que actualiza Redux y localStorage
+                data = await login({ email, password });
+
+                toast.success("bienvenido de nuevo 🎉");
             } else {
                 if (!passwordRegex.test(password)) {
                     toast.error(
@@ -70,7 +44,15 @@ function AuthModal({ onClose }) {
                     return;
                 }
 
-                await register({ name: username, email, password });
+                if (!passwordRegex.test(password)) {
+                    toast.error(
+                        "La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula, un número y un carácter especial."
+                    );
+                    return;
+                }
+
+                // Llamamos al register del hook
+                data = await register({ name: username, email, password });
                 toast.success("Registro exitoso 🎉");
             }
 
@@ -78,12 +60,6 @@ function AuthModal({ onClose }) {
         } catch (err) {
             toast.error(err.message || "Algo salió mal.");
         }
-    };
-
-    const handleGoogleLogin = () => {
-        const auth = getAuth(app);
-        const provider = new GoogleAuthProvider();
-        signInWithRedirect(auth, provider);
     };
 
     return (
@@ -114,6 +90,7 @@ function AuthModal({ onClose }) {
                         />
                     </div>
 
+                    {/* Nombre de usuario solo en registro */}
                     {!isLogin && (
                         <div>
                             <label
@@ -174,22 +151,13 @@ function AuthModal({ onClose }) {
                         </div>
                     )}
 
-                    <div className="mt-4 space-y-2">
+                    <div className="mt-4">
                         <button
                             type="submit"
                             className="w-full py-2 text-white rounded-md hover:bg-opacity-80"
                             style={{ backgroundColor: "var(--header_footer)" }}
                         >
                             {isLogin ? "Login" : "Registrarse"}
-                        </button>
-
-                        {/* Botón de Google */}
-                        <button
-                            type="button"
-                            onClick={handleGoogleLogin}
-                            className="w-full py-2 border border-gray-300 rounded-md text-[var(--principal_orange)] hover:bg-gray-100"
-                        >
-                            Iniciar sesión con Google
                         </button>
                     </div>
                 </form>

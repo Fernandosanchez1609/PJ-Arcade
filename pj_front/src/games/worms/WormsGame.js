@@ -172,16 +172,18 @@ export class Game extends Phaser.Scene {
             this.terrainHeight
         );
 
-        // Potencia máxima de carga (en ms)
-        this.maxCharge = 600;
+        this.maxCharge = 600; // Potencia máxima de carga (en ms)
+        this.maxBarLength = 80; // Longitud máxima barra carga disparo
+
+        this.chargeBarBg = this.add.rectangle(0, 0, 0, 8, 0x333333);
+        this.chargeBarBg.setOrigin(0, 0.5); // igual origen
+        this.chargeBarBg.setVisible(false);
 
         this.chargeBar = this.add.rectangle(0, 0, 0, 8, 0x00ff00);
-        this.chargeBar.setOrigin(1, 0.5); // nace desde el extremo derecho
+        this.chargeBar.setOrigin(0, 0.5); // nace desde el extremo derecho
         this.chargeBar.setVisible(false);
 
-        this.chargeBarBg = this.add.rectangle(0, 0, 200, 8, 0x333333);
-        this.chargeBarBg.setOrigin(1, 0.5); // igual origen
-        this.chargeBarBg.setVisible(false);
+
 
         // Oculta al inicio
         this.chargeBar.setVisible(false);
@@ -445,7 +447,7 @@ export class Game extends Phaser.Scene {
 
                 // Limita la potencia de disparo entre 100 y 600
                 const firePower = Phaser.Math.Clamp(
-                    chargeDuration,
+                    chargeDuration * 0.8,
                     20,
                     this.maxCharge
                 );
@@ -469,7 +471,7 @@ export class Game extends Phaser.Scene {
             const clamped = Phaser.Math.Clamp(elapsed, 0, this.maxCharge);
             const percentage = clamped / this.maxCharge;
 
-            const maxLength = 200;
+            const maxLength = 60;
             const currentLength = maxLength * percentage;
 
             // Coordenadas de origen y destino
@@ -482,14 +484,14 @@ export class Game extends Phaser.Scene {
             const angleRad = Phaser.Math.Angle.Between(fromX, fromY, toX, toY);
             const angleDeg = Phaser.Math.RadToDeg(angleRad);
 
-            // Posicionar la barra desde la cruceta apuntando hacia el gusano
-            this.chargeBar.setPosition(toX, toY);
-            this.chargeBar.setRotation(angleRad + Math.PI); // invertida para crecer hacia el gusano
+            // Posicionar la barra desde el gusano apuntando hacia la cruceta
+            this.chargeBar.setPosition(fromX, fromY);
+            this.chargeBar.setRotation(angleRad); // ya no se invierte
             this.chargeBar.width = currentLength;
 
-            // Barra de fondo igual, pero siempre del mismo largo
-            this.chargeBarBg.setPosition(toX, toY);
-            this.chargeBarBg.setRotation(angleRad + Math.PI);
+            // Barra de fondo con longitud máxima
+            this.chargeBarBg.setPosition(fromX, fromY);
+            this.chargeBarBg.setRotation(angleRad);
             this.chargeBarBg.width = maxLength;
 
             // Color interpolado
@@ -518,8 +520,8 @@ export class Game extends Phaser.Scene {
         if (this.playerLife <= 0 && !this.gameOver) {
             console.log("Game Over: Has perdido")
             this.gameOver = true;
-            
-        }else if (this.rivalLife <= 0 && !this.gameOver) {
+
+        } else if (this.rivalLife <= 0 && !this.gameOver) {
             console.log("Game Over: Has ganado")
             this.gameOver = true;
         }
@@ -621,12 +623,12 @@ export class Game extends Phaser.Scene {
 
 
     invertGrenadeX(vx) {
-        const bounceFactor = 0.75;
+        const bounceFactor = 0.5;
         this.grenade.setVelocityX(-vx * bounceFactor);
     }
 
     invertGrenadeY(vy) {
-        const bounceFactor = 0.75;
+        const bounceFactor = 0.5;
         this.grenade.setVelocityY(-vy * bounceFactor);
     }
 
