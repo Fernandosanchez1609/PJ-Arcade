@@ -15,6 +15,9 @@ Puedes visitarla en [pj-arcade](pj-arcade.duckdns.org) y ver el diseño en [Figm
 - C#
 - ASP.NET
 - AWS
+- 
+Checkpoint 04/06/2025
+https://drive.google.com/file/d/1T5jIrw_VU8pYCAlBXi4kwf2LOFW_wYui/view?usp=drive_link
 
 Checkpoint 30/4/2025
 https://drive.google.com/file/d/1SH6UXYcBbzh7t9pP62-XITGFTb5fq1Cn/view?usp=drive_link
