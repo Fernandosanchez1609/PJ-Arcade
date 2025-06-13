@@ -38,4 +38,7 @@ Para organizarnos hemos utilizado [Obsidian](https://obsidian.md/) y hemos sincr
 [Phaser tutorials](https://phaser.io/tutorials/making-your-first-phaser-3-game-spanish)
 
 ## Presentación
+
 [Canva](https://www.canva.com/design/DAGqRRG0ZBQ/PAARb2p9WXxMpHBdG51bYQ/view?utm_content=DAGqRRG0ZBQ&utm_campaign=designshare&utm_medium=link2&utm_source=uniquelinks&utlId=h1c71c459dc)
+
+[PDF](https://drive.google.com/file/d/11a8AYRL8vW7k-X-Mdt-ibgybEwiKNrV8/view?usp=drive_link)
