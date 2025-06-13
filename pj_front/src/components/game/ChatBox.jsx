@@ -87,8 +87,12 @@ export default function ChatBox() {
           placeholder="Escribe un mensaje…"
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && handleSend()}
+          onKeyDown={(e) => {
+            e.stopPropagation(); // bloquea todas
+            if (e.key === "Enter") handleSend();
+          }}
         />
+
 
         <Button
           onClick={handleSend}
@@ -97,10 +101,6 @@ export default function ChatBox() {
         >
           Enviar
         </Button>
-
-
-
-
       </div>
     </div>
   );

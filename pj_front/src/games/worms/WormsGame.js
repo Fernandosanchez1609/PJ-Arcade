@@ -319,6 +319,14 @@ export class Game extends Phaser.Scene {
 
         //movimiento del gusano activo
         if (this.isMyTurn) {
+            const activeTag = document.activeElement.tagName;
+            if (
+                activeTag === "INPUT" ||
+                activeTag === "TEXTAREA" ||
+                document.activeElement.contentEditable === "true"
+            ) {
+                return; // Ignorar controles si el jugador está escribiendo
+            }
             // Salto
             if (this.jumpButton.isDown && worm1.collisionFlags?.collideDown) {
                 worm1.setVelocityY(-300);
@@ -337,6 +345,49 @@ export class Game extends Phaser.Scene {
                 worm1.setVelocityX(0);
                 worm1.anims.stop();
             }
+
+
+            //  Allow them to set the angle, between -90 (straight up) and 0 (facing to the right)
+            if (this.cursors.up.isDown) {
+                this.crosshair.angle--;
+            } else if (this.cursors.down.isDown) {
+                this.crosshair.angle++;
+            }
+
+            if (Phaser.Input.Keyboard.JustDown(this.fireButton)) {
+                this.chargeStartTime = this.time.now;
+
+                // Mostrar la barra de carga
+                this.chargeBar.setVisible(true);
+                this.chargeBarBg.setVisible(true);
+            }
+
+            if (
+                Phaser.Input.Keyboard.JustUp(this.fireButton) &&
+                this.chargeStartTime !== null
+            ) {
+                const chargeDuration = this.time.now - this.chargeStartTime;
+                this.chargeStartTime = null;
+
+                // Limita la potencia de disparo entre 100 y 600
+                const firePower = Phaser.Math.Clamp(
+                    chargeDuration * 0.8,
+                    20,
+                    this.maxCharge
+                );
+
+                this.launchGrenade(
+                    worm1.body.center.x,
+                    worm1.body.center.y,
+                    firePower,
+                    this.crosshair.angle
+                );
+
+                // Ocultar barra al disparar
+                this.chargeBar.setVisible(false);
+                this.chargeBarBg.setVisible(false);
+            }
+
         }
 
         //movimiento websocket
@@ -422,47 +473,6 @@ export class Game extends Phaser.Scene {
                 this.grenade.body.y >= 600
             ) {
                 this.removeGrenade();
-            }
-        } else if (this.isMyTurn) {
-            //  Allow them to set the angle, between -90 (straight up) and 0 (facing to the right)
-            if (this.cursors.up.isDown) {
-                this.crosshair.angle--;
-            } else if (this.cursors.down.isDown) {
-                this.crosshair.angle++;
-            }
-
-            if (Phaser.Input.Keyboard.JustDown(this.fireButton)) {
-                this.chargeStartTime = this.time.now;
-
-                // Mostrar la barra de carga
-                this.chargeBar.setVisible(true);
-                this.chargeBarBg.setVisible(true);
-            }
-
-            if (
-                Phaser.Input.Keyboard.JustUp(this.fireButton) &&
-                this.chargeStartTime !== null
-            ) {
-                const chargeDuration = this.time.now - this.chargeStartTime;
-                this.chargeStartTime = null;
-
-                // Limita la potencia de disparo entre 100 y 600
-                const firePower = Phaser.Math.Clamp(
-                    chargeDuration * 0.8,
-                    20,
-                    this.maxCharge
-                );
-
-                this.launchGrenade(
-                    worm1.body.center.x,
-                    worm1.body.center.y,
-                    firePower,
-                    this.crosshair.angle
-                );
-
-                // Ocultar barra al disparar
-                this.chargeBar.setVisible(false);
-                this.chargeBarBg.setVisible(false);
             }
         }
 
