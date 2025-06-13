@@ -328,6 +328,24 @@ export class Game extends Phaser.Scene {
             if (worm.y >= this.physics.world.bounds.height) {
                 worm.setY(this.physics.world.bounds.height);
                 worm.body.velocity.y = Math.min(0, worm.body.velocity.y);
+                if (worm.life > 0) {
+                    worm.life = 0;
+                    worm.disableBody(true, true)
+
+                    // 1. Crear sprite de la tumba en la posición del gusano
+                    const grave = this.add.sprite(worm.x, worm.y + 15, 'grave');
+
+                    // 2. Reproducir la animación de aparición
+                    grave.play('grave_appear');
+
+                    // 3. Al terminar la animación, quedarte en el último frame (ej. frame 5)
+                    grave.on('animationcomplete', (anim) => {
+                        if (anim.key === 'grave_appear') {
+                            grave.setFrame(1); // último frame estático de la tumba
+                        }
+                    });
+                    this.ChangeTurn();
+                }
             }
         });
 
@@ -462,7 +480,7 @@ export class Game extends Phaser.Scene {
 
                 // Limita la potencia de disparo entre 100 y 600
                 const firePower = Phaser.Math.Clamp(
-                    chargeDuration * 0.8,
+                    chargeDuration * 0.9,
                     20,
                     this.maxCharge
                 );
@@ -634,7 +652,7 @@ export class Game extends Phaser.Scene {
                             worm.life = ""
 
                             // 1. Crear sprite de la tumba en la posición del gusano
-                            const grave = this.add.sprite(worm.x, worm.y+15, 'grave');
+                            const grave = this.add.sprite(worm.x, worm.y + 15, 'grave');
 
                             // 2. Reproducir la animación de aparición
                             grave.play('grave_appear');
@@ -735,6 +753,4 @@ export class Game extends Phaser.Scene {
         this.playerLife = newLife;
         this.rivalLife = newRivalLife;
     }
-
-
 }
